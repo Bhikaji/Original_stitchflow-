@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/kenerp/public_html/kend2c/test_stitchflow/
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp -R .[^.]* $DEPLOYPATH
