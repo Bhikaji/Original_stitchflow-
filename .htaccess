@@ -1,0 +1,12 @@
+# Deny direct web access to internal files
+<FilesMatch "^(config\.php|db\.sql)$">
+  Require all denied
+</FilesMatch>
+
+# Deny listing of includes directory contents directly (they're include-only)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^includes/ - [F,L]
+</IfModule>
+
+Options -Indexes

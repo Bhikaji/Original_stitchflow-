@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KEND2C — Garment Manufacturing ERP</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="globalbar">
+  <button class="gb-burger" id="navToggle" onclick="toggleNav()" aria-label="Toggle navigation" aria-expanded="true" title="Toggle menu (Ctrl+B)">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="gb-brand"><div class="gb-mark">🧵</div><span>KEND2C</span></div>
+  <div class="gb-search" id="gbSearchWrap">
+    <div class="gb-field" id="gbField">
+      <span id="gbChips"></span>
+      <input id="gbSearch" type="text" placeholder="Search" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="gbPop">
+      <kbd class="gb-kbd">Ctrl K</kbd>
+    </div>
+    <div class="gb-pop" id="gbPop" role="listbox"></div>
+  </div>
+  <div class="gb-right">
+    <button class="gb-btn" title="Notifications">🔔</button>
+    <button class="gb-avatar"><span class="av">KC</span><span>KEND2C</span></button>
+  </div>
+</div>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <div class="nav-scrim" id="navScrim" onclick="toggleNav(false)"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <div class="mark">🧵</div>
+        <div>
+          <h1>KEND2C</h1>
+        </div>
+      </div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="sidefoot"></div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="tb-title">Dashboard</h2>
+        <div class="sub" id="tb-sub">Production &amp; sales overview</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="actions" id="tb-actions"></div>
+    </div>
+    <div class="msgbox" id="msgBox">
+      <div class="js-err" id="jsErr"></div>
+      <div class="load-msg" id="loadMsg"><div class="spin"></div> Loading KEND2C…</div>
+    </div>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<div class="savebar" id="saveBar"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+<div class="overlay" id="appDialog"><div class="modal modal-sm" id="appDialogBox"></div></div>
+
+<script src="../assets/js/app-core.js"></script>
+<script src="../assets/server-sync.js"></script>
+</body>
+</html>
