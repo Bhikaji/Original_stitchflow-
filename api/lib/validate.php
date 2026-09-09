@@ -25,7 +25,7 @@
    front-end warns about dangling references) — so no referential
    delete blocks are enforced here, exactly like the source application.
    ===================================================================== */
-declare(strict_types=1);
+declare(strict_types=1); 
 
 require_once __DIR__ . '/../bootstrap.php';
 

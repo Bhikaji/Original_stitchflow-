@@ -329,3 +329,4 @@ function sf_run_auto_migrate(PDO $pdo, bool $verbose = false): array {
 
     return $log;
 }
+ 
