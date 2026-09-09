@@ -30,4 +30,8 @@ jobs:
             echo "Cleaning old files..."
             git clean -fd
 
+            echo "Running database schema migration..."
+            php migrate.php
+
             echo "Deployment completed."
+

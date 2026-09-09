@@ -21,15 +21,19 @@ function sf_ensure_schema(PDO $pdo): void {
     if ($checked) return;
     $checked = true;
     try {
-        $st = $pdo->query("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'purchase_order_items' AND COLUMN_NAME = 'item_id' LIMIT 1");
+        $st = $pdo->query("SHOW COLUMNS FROM `purchase_order_items` LIKE 'item_id'");
         if ($st && $st->fetch()) {
             return;
         }
     } catch (Throwable $e) {
-        return;
+        // Table may not exist yet or query failed; fall through to auto_migrate
     }
     require_once __DIR__ . '/lib/auto_migrate.php';
-    sf_run_auto_migrate($pdo);
+    try {
+        sf_run_auto_migrate($pdo);
+    } catch (Throwable $e) {
+        error_log('StitchFlow auto_migrate error: ' . $e->getMessage());
+    }
 }
 
 function sf_pdo(): PDO {

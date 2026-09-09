@@ -11,9 +11,12 @@ function sf_run_auto_migrate(PDO $pdo, bool $verbose = false): array {
     $log = [];
     $schemaCols = [];
     try {
-        $st = $pdo->query("SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE()");
-        while ($r = $st->fetch(PDO::FETCH_ASSOC)) {
-            $schemaCols[strtolower($r['TABLE_NAME'])][strtolower($r['COLUMN_NAME'])] = true;
+        $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+        foreach ($tables as $t) {
+            $cols = $pdo->query("SHOW COLUMNS FROM `{$t}`")->fetchAll(PDO::FETCH_COLUMN);
+            foreach ($cols as $c) {
+                $schemaCols[strtolower((string)$t)][strtolower((string)$c)] = true;
+            }
         }
     } catch (Throwable $e) {
         $schemaCols = [];
@@ -24,9 +27,8 @@ function sf_run_auto_migrate(PDO $pdo, bool $verbose = false): array {
         $c = strtolower($col);
         if (isset($schemaCols[$t][$c])) return true;
         try {
-            $st = $pdo->prepare("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
-            $st->execute([$tbl, $col]);
-            return (bool)$st->fetch();
+            $st = $pdo->query("SHOW COLUMNS FROM `{$tbl}` LIKE '{$col}'");
+            return (bool)($st && $st->fetch());
         } catch (Throwable $e) {
             return false;
         }
