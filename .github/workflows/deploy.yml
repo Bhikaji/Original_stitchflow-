@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
 
           script: |
-            cd /home/kenerp/public_html/kend2c/test_stitchflow
+            cd /home/kenerp/public_html/kend2c/stitchflow
 
             echo "Fetching latest code..."
             git fetch origin main
