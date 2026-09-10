@@ -4412,9 +4412,10 @@ function dashboardWipVendorRows() {
 }
 function renderDashboardInventoryWidget() {
   const el = $('dash-inventory-widget'); if (!el) return;
-  const trimsValue = trimStock().reduce(function(a,x) { return a + Math.max(0,x.balance) * sfGetItemRate(x.name,''); }, 0), wip = dashboardWipVendorRows().reduce(function(a,x) { return a + x.wip; }, 0), fg = (db.jobwork || []).reduce(function(a,j) { return a + jwTotalReceived(j); }, 0);
-  const rows = [['Fabric Stock','mtr',fmtNum(fabricStock().m),fmtNum(fabricValuation())],['Trims Stock','-', '-',fmtNum(trimsValue || trimsValuation())],['WIP','pcs',fmtNum(wip),'-'],['FG','pcs',fmtNum(fg),'-']];
-  const total = ['Total','-','-',fmtNum(rows.reduce(function(a,r) { return a + pf(r[3]); },0))];
+  const fabricValue = fabricValuation(), trimsValue = trimStock().reduce(function(a,x) { return a + Math.max(0,x.balance) * sfGetItemRate(x.name,''); }, 0) || trimsValuation();
+  const wip = dashboardWipVendorRows().reduce(function(a,x) { return a + x.wip; }, 0), fg = (db.jobwork || []).reduce(function(a,j) { return a + jwTotalReceived(j); }, 0);
+  const rows = [['Fabric Stock','mtr',fmtNum(fabricStock().m),fmtNum(fabricValue)],['Trims Stock','-', '-',fmtNum(trimsValue)],['WIP','pcs',fmtNum(wip),'-'],['FG','pcs',fmtNum(fg),'-']];
+  const total = ['Total','-','-',fmtNum(fabricValue + trimsValue)];
   el.innerHTML = '<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">Inventory</h3><p class="dash-summary-sub">Current material, work in progress and finished-goods balances</p></div></div>' + dashboardSimpleTable('Inventory',['Particulars','UOM','Qty','Value'],rows,total) + '</div>';
 }
 function renderDashboardWipWidget() {
