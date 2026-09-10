@@ -1240,9 +1240,16 @@
 .ob-title{display:flex;align-items:center;gap:9px}
 .ob-num{width:26px;height:26px;border-radius:7px;background:#e3e3e3;display:grid;place-items:center;font-size:11px;font-weight:750}
 .ob-help{color:#616161;font-size:12px;margin:4px 0 0 35px}
-.ob-mini{color:#616161;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:14px 0 8px}
-.ob-check{display:flex;gap:8px;flex-wrap:wrap}
-.ob-check label{display:inline-flex;align-items:center;gap:7px;border:1px solid #e3e3e3;border-radius:8px;padding:7px 10px;background:#fff;font-size:12px;font-weight:600}
+.ob-check{display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap}
+.ob-check label{display:inline-flex;align-items:center;gap:7px;border:1px solid #e3e3e3;border-radius:8px;padding:7px 10px;background:#fff;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;cursor:pointer}
+.ob-account-grid{display:flex!important;flex-wrap:wrap!important;gap:0 18px!important;align-items:flex-start!important}
+.ob-account-grid > .field{max-width:none}
+.ob-account-grid > .field:first-child,
+.ob-account-grid > .field:nth-child(2){width:240px;max-width:240px}
+#ob-biztype{min-width:max-content!important;flex-shrink:0!important}
+#ob-biztype .ob-check{display:flex!important;gap:8px!important;flex-wrap:nowrap!important;white-space:nowrap!important}
+#ob-biztype .ob-check label{white-space:nowrap!important;flex-shrink:0!important;cursor:pointer}
+#ob-pstatus{flex-shrink:0!important}
 .ob-repeat{border:1px solid #e3e3e3;border-radius:10px;padding:14px;margin-bottom:10px;background:#fff}
 .ob-repeat-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .ob-badge{background:#e3e3e3;color:#616161;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800}
@@ -1284,6 +1291,260 @@
 .gst-lock{margin-top:12px;padding:9px 11px;background:#fff2c2;color:#5e4200;border-radius:8px;font-size:11px}
 .gst-val{font-size:10.5px;min-height:15px;margin-top:4px;font-weight:600}
 .gst-val.ok{color:#0c5132}.gst-val.bad{color:#8e1f0b}.gst-val.warn{color:#8a6116}
+/* ================= EXCEL SUMMARY REPORT PROFESSIONAL STYLING ================= */
+.excel-title-ribbon {
+  background: #f8cbac; /* Exact soft peach/salmon banner from Excel sheet */
+  color: #1c1917;
+  font-weight: 800;
+  font-size: 14.5px;
+  text-align: center;
+  padding: 10px 18px;
+  border: 1px solid #777777;
+  border-bottom: none;
+  letter-spacing: 0.15px;
+  border-radius: 8px 8px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.summary-report-table.excel-style {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  background: #ffffff;
+}
+
+.summary-report-table.excel-style th {
+  background: #ffff00; /* Bright Excel yellow header */
+  color: #000000;
+  font-weight: 750;
+  border: 1px solid #777777;
+  text-align: center;
+  padding: 7px 10px;
+  vertical-align: middle;
+}
+
+.summary-report-table.excel-style thead tr.thead-top th.num,
+.summary-report-table.excel-style thead tr.thead-sub th.num {
+  text-align: right;
+}
+
+.summary-report-table.excel-style thead tr.thead-top th.th-date {
+  text-align: left;
+}
+
+.summary-report-table.excel-style .th-sublabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #27272a;
+  margin-top: 2px;
+  text-transform: none;
+}
+
+.summary-report-table.excel-style td {
+  border: 1px solid #d4d4d8;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.summary-report-table.excel-style tbody tr:hover td {
+  background: #fcfcfc;
+}
+
+.summary-report-table.excel-style tbody td.td-date {
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+}
+
+.summary-report-table.excel-style tbody td.num {
+  text-align: right;
+}
+
+.summary-report-table.excel-style tfoot tr.tot-row td,
+.summary-report-table.excel-style tfoot tr.avg-row td {
+  background: #ffff00 !important; /* Bright Excel yellow footer */
+  color: #000000 !important;
+  font-weight: 800;
+  border: 1px solid #000000;
+  padding: 7px 10px;
+}
+
+.summary-report-table.excel-style tfoot tr.tot-row td.td-tot,
+.summary-report-table.excel-style tfoot tr.avg-row td.td-avg {
+  text-align: left;
+  font-weight: 850;
+}
+
+/* Dashboard Separate Summary Panels */
+.dash-summary-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+}
+
+.dash-summary-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dash-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.5px;
+  color: #0f766e;
+  background: #f0fdfa;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid #ccfbf1;
+  margin-bottom: 6px;
+}
+
+.dash-summary-badge .badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0d9488;
+}
+
+.dash-panel-main-title {
+  font-size: 18px;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.2px;
+}
+
+.dash-summary-sub {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.dash-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dash-period-pills {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.dash-pill {
+  border: none;
+  background: transparent;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dash-pill:hover {
+  color: #0f172a;
+}
+
+.dash-pill.active {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 750;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.dash-date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
+.dash-dt-inp {
+  border: none !important;
+  padding: 3px 4px !important;
+  font-size: 12px !important;
+  color: #1e293b !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+.dash-dt-sep {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dash-kpi {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-kpi.highlight {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.dash-kpi-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dash-kpi-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-kpi-sub {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.dash-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #777777;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: #ffffff;
+}
+
 @media(max-width:1100px){.ob-layout,.gst-preview-b{grid-template-columns:1fr}.ob-side{position:static}.gst-col+.gst-col{border-left:0;border-top:1px solid #e3e3e3}}
 </style>
 
@@ -2092,8 +2353,8 @@ const DEFAULT_COMPANY_DETAILS = {
   reg2: 'Tal. Hatkanangale, Dist. Kolhapur, Maharashtra, India',
   works: 'Works: Gat No. 298 & 299, At Kondigre, Tal. Shirol, Dist. Kolhapur - 416102',
   contact: 'Tel: +91 230 2438538 | Email: office@kenindia.in',
-  gstNo: '',
-  pan: '',
+  gstNo: '27ABCCS7591Q1ZD',
+  pan: 'ABCCS7591Q',
   state: 'Maharashtra',
   stateCode: '27',
   jurisdiction: 'Ichalkaranji'
@@ -3290,6 +3551,8 @@ function render() {
     acts.innerHTML = '<button class="btn btn-primary" onclick="openUserPopup()">' + ic('plus',16) + 'Add User</button>';
   } else {
     acts.innerHTML = '<button class="btn btn-ghost" onclick="exportCSV(\'' + cur + '\')">' + ic('download',16) + 'Export</button>' +
+                     (cur === 'inward' ? '<button class="btn btn-ghost" onclick="printFirstInward()">' + ic('print',16) + 'Print GRN</button>' : '') +
+                     (cur === 'po' ? '<button class="btn btn-ghost" onclick="printFirstPO()">' + ic('print',16) + 'Print PO</button>' : '') +
                      (userCan(cur,'create') ? '<button class="btn btn-primary" onclick="openForm(\'' + cur + '\')">' + ic('plus',16) + 'Create ' + menuLabel(cur,M.label) + '</button>' : '');
   }
   if (cur === 'dashboard') renderDashboard();
@@ -3346,6 +3609,12 @@ function renderFormPage() {
     ((m === 'jobwork' || m === 'sample') && rec && rec.id
       ? '<button class="btn btn-ghost" onclick="openDCPrint(\'' + rec.id + '\',\'' + m + '\')">' + ic('print', 16) + 'Print DC</button>'
       : '') +
+    (m === 'inward' && rec && rec.id
+      ? '<button class="btn btn-ghost" onclick="printInward(\'' + rec.id + '\')">' + ic('print', 16) + 'Print GRN</button>'
+      : '') +
+    (m === 'po' && rec && rec.id
+      ? '<button class="btn btn-ghost" onclick="printPO(\'' + rec.id + '\')">' + ic('print', 16) + 'Print PO</button>'
+      : '') +
     (viewOnly ? '<span class="badge b-gray">Read only</span>' : closedDoc
       ? '<span class="badge b-gray">Closed</span>' +
         '<button class="btn btn-ghost" onclick="reopenRecord(\'' + m + '\',\'' + rec.id + '\')">' + ic('back', 16) + 'Reopen</button>'
@@ -3374,6 +3643,781 @@ function renderFormPage() {
   else if (m === 'costing') afterRenderCosting(rec);
   if(viewOnly){const ep=qs('.entry-page',$('content'));if(ep){ep.classList.add('view-only');qsa('input,select,textarea,button',ep).forEach(function(x){x.disabled=true;});}}
 }
+
+
+
+/* =====================================================================
+   FABRIC & TRIMS INWARD/OUTWARD SUMMARY REPORT ENGINE & DASHBOARD WIDGET
+   ===================================================================== */
+function sfGetItemRate(name, inwardNo) {
+  const clean = String(name || '').trim().toLowerCase();
+  if (inwardNo) {
+    const inw = inwardByNo(inwardNo);
+    if (inw) {
+      const it = (inw.items || []).find(x => String(x.name || '').trim().toLowerCase() === clean);
+      if (it) {
+        const r = pf(it.poRate != null ? it.poRate : it.rate);
+        if (r > 0) return r;
+      }
+    }
+  }
+  for (let i = 0; i < (db.inward || []).length; i++) {
+    const inw = db.inward[i];
+    const it = (inw.items || []).find(x => String(x.name || '').trim().toLowerCase() === clean);
+    if (it) {
+      const r = pf(it.poRate != null ? it.poRate : it.rate);
+      if (r > 0) return r;
+    }
+  }
+  const mi = (db.masters.items || []).find(x => String(x.name || '').trim().toLowerCase() === clean);
+  if (mi) {
+    const r = pf(mi.purchase_rate || mi.item_rate || 0);
+    if (r > 0) return r;
+  }
+  return 0;
+}
+
+function fabricValuation() {
+  let val = 0;
+  (db.inward || []).forEach(inw => {
+    if (inw.status && /cancel|reject/i.test(inw.status)) return;
+    (inw.items || []).forEach(i => {
+      if (isFabricItem(i.name) && pf(i.recQty) > 0) {
+        val += pf(i.recQty) * pf(i.poRate != null ? i.poRate : i.rate);
+      }
+    });
+  });
+  (db.jobwork || []).forEach(j => {
+    (j.issues || []).concat(j.extras || []).forEach(i => {
+      if (i.item && isFabricItem(i.item)) {
+        const r = sfGetItemRate(i.item, i.inwardNo);
+        val -= pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty) * r;
+      }
+    });
+  });
+  return Math.max(0, Math.round(val));
+}
+
+function trimsValuation() {
+  let val = 0;
+  (db.inward || []).forEach(inw => {
+    if (inw.status && /cancel|reject/i.test(inw.status)) return;
+    (inw.items || []).forEach(i => {
+      if (!isFabricItem(i.name) && pf(i.recQty) > 0) {
+        val += pf(i.recQty) * pf(i.poRate != null ? i.poRate : i.rate);
+      }
+    });
+  });
+  (db.jobwork || []).forEach(j => {
+    (j.issues || []).concat(j.extras || []).forEach(i => {
+      if (i.item && !isFabricItem(i.item)) {
+        const r = sfGetItemRate(i.item, i.inwardNo);
+        val -= pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty) * r;
+      }
+    });
+  });
+  return Math.max(0, Math.round(val));
+}
+
+function openReportType(type, from, to) {
+  repState.type = type;
+  if (from) repState.from = from;
+  if (to) repState.to = to;
+  repState.page = 1;
+  go('reports');
+}
+
+function buildSummaryInOutReport(type, from, to) {
+  const isFab = (type === 'fabric_inout_summary');
+  const title = isFab ? 'Fabric Inward and Outward Summary Report' : 'Trims Inward and Outward Summary Report';
+  
+  let header = [];
+  if (isFab) {
+    header = [
+      'Date',
+      'Opening Qty Meter',
+      'Opening Value Rs.',
+      'Inward Qty Meter',
+      'Inward Value Rs.',
+      'Outward Qty Meter',
+      'Outward Value Rs.',
+      'Closing Qty Meter',
+      'Closing Value Rs.'
+    ];
+  } else {
+    header = [
+      'Date',
+      'Opening Value Rs.',
+      'Inward Value Rs.',
+      'Outward Value Rs.',
+      'Closing Value Rs.'
+    ];
+  }
+
+  const fFrom = from || defaultFrom();
+  const fTo = to || today();
+  
+  let curOpenQty = 0;
+  let curOpenVal = 0;
+  const daily = {};
+
+  // 1. Inward
+  (db.inward || []).forEach(inw => {
+    if (inw.status && /cancel|reject/i.test(inw.status)) return;
+    const d = inw.date || '';
+    const isOpeningStock = (inw.entryType === 'Opening Stock');
+    (inw.items || []).forEach(it => {
+      const nm = it.name || '';
+      const isF = isFabricItem(nm);
+      if (isFab ? !isF : isF) return;
+      const q = pf(it.recQty);
+      if (q <= 0) return;
+      let r = pf(it.poRate != null ? it.poRate : it.rate);
+      if (r <= 0) r = sfGetItemRate(nm, inw.no);
+      const v = q * r;
+
+      if (d < fFrom || (isOpeningStock && d <= fFrom)) {
+        curOpenQty += q;
+        curOpenVal += v;
+      } else if (d >= fFrom && d <= fTo) {
+        if (!daily[d]) daily[d] = { inQty: 0, inVal: 0, outQty: 0, outVal: 0 };
+        daily[d].inQty += q;
+        daily[d].inVal += v;
+      }
+    });
+  });
+
+  // 2. Outward: Job Work (issues and extras)
+  (db.jobwork || []).forEach(jw => {
+    if (jw.status && /cancel/i.test(jw.status)) return;
+    const lines = (jw.issues || []).concat(jw.extras || []);
+    lines.forEach(l => {
+      const nm = l.item || '';
+      const isF = isFabricItem(nm);
+      if (isFab ? !isF : isF) return;
+      const q = pf(l.actualQty != null && l.actualQty !== '' ? l.actualQty : l.qty);
+      if (q <= 0) return;
+      const d = l.date || jw.date || '';
+      const r = sfGetItemRate(nm, l.inwardNo);
+      const v = q * r;
+
+      if (d < fFrom) {
+        curOpenQty -= q;
+        curOpenVal -= v;
+      } else if (d >= fFrom && d <= fTo) {
+        if (!daily[d]) daily[d] = { inQty: 0, inVal: 0, outQty: 0, outVal: 0 };
+        daily[d].outQty += q;
+        daily[d].outVal += v;
+      }
+    });
+  });
+
+  // 3. Outward: Purchase Returns
+  (db.purchasereturn || []).forEach(pr => {
+    if (pr.status && /cancel/i.test(pr.status)) return;
+    const d = pr.date || '';
+    (pr.items || []).forEach(it => {
+      const nm = it.name || '';
+      const isF = isFabricItem(nm);
+      if (isFab ? !isF : isF) return;
+      const q = pf(it.retQty);
+      if (q <= 0) return;
+      let r = pf(it.rate);
+      if (r <= 0) r = sfGetItemRate(nm, pr.poRef);
+      const v = q * r;
+
+      if (d < fFrom) {
+        curOpenQty -= q;
+        curOpenVal -= v;
+      } else if (d >= fFrom && d <= fTo) {
+        if (!daily[d]) daily[d] = { inQty: 0, inVal: 0, outQty: 0, outVal: 0 };
+        daily[d].outQty += q;
+        daily[d].outVal += v;
+      }
+    });
+  });
+
+  // 4. Outward: Sample (issues and extras)
+  (db.sample || []).forEach(sm => {
+    if (sm.status && /cancel/i.test(sm.status)) return;
+    const lines = (sm.issues || []).concat(sm.extras || []);
+    lines.forEach(l => {
+      const nm = l.item || '';
+      const isF = isFabricItem(nm);
+      if (isFab ? !isF : isF) return;
+      const q = pf(l.actualQty != null && l.actualQty !== '' ? l.actualQty : l.qty);
+      if (q <= 0) return;
+      const d = l.date || sm.date || '';
+      const r = sfGetItemRate(nm, l.inwardNo);
+      const v = q * r;
+
+      if (d < fFrom) {
+        curOpenQty -= q;
+        curOpenVal -= v;
+      } else if (d >= fFrom && d <= fTo) {
+        if (!daily[d]) daily[d] = { inQty: 0, inVal: 0, outQty: 0, outVal: 0 };
+        daily[d].outQty += q;
+        daily[d].outVal += v;
+      }
+    });
+  });
+
+  // Calendar day iteration from fFrom to fTo
+  const rows = [];
+  const rawRows = [];
+  const start = new Date(fFrom);
+  const end = new Date(fTo);
+  let totInQ = 0, totInV = 0, totOutQ = 0, totOutV = 0;
+  let dayCount = 0;
+
+  if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+    const cur = new Date(start);
+    while (cur <= end) {
+      const iso = dpISO(cur);
+      const dispDate = dpToDisplay(iso) || iso;
+      const act = daily[iso] || { inQty: 0, inVal: 0, outQty: 0, outVal: 0 };
+      const inQ = act.inQty, inV = act.inVal, outQ = act.outQty, outV = act.outVal;
+      const clsQ = curOpenQty + inQ - outQ;
+      const clsV = curOpenVal + inV - outV;
+
+      if (isFab) {
+        rows.push([
+          dispDate,
+          fmtNum(curOpenQty),
+          fmtNum(curOpenVal),
+          fmtNum(inQ),
+          fmtNum(inV),
+          fmtNum(outQ),
+          fmtNum(outV),
+          fmtNum(clsQ),
+          fmtNum(clsV)
+        ]);
+        rawRows.push({
+          date: dispDate, iso: iso,
+          openQ: curOpenQty, openV: curOpenVal,
+          inQ: inQ, inV: inV,
+          outQ: outQ, outV: outV,
+          clsQ: clsQ, clsV: clsV
+        });
+      } else {
+        rows.push([
+          dispDate,
+          fmtNum(curOpenVal),
+          fmtNum(inV),
+          fmtNum(outV),
+          fmtNum(clsV)
+        ]);
+        rawRows.push({
+          date: dispDate, iso: iso,
+          openV: curOpenVal,
+          inV: inV,
+          outV: outV,
+          clsV: clsV
+        });
+      }
+
+      totInQ += inQ;
+      totInV += inV;
+      totOutQ += outQ;
+      totOutV += outV;
+      curOpenQty = clsQ;
+      curOpenVal = clsV;
+      dayCount++;
+
+      cur.setDate(cur.getDate() + 1);
+    }
+  }
+
+  const avgInQ = dayCount > 0 ? Math.round(totInQ / dayCount) : 0;
+  const avgInV = dayCount > 0 ? Math.round(totInV / dayCount) : 0;
+  const avgOutQ = dayCount > 0 ? Math.round(totOutQ / dayCount) : 0;
+  const avgOutV = dayCount > 0 ? Math.round(totOutV / dayCount) : 0;
+
+  let footTotal = [];
+  let footAvg = [];
+  if (isFab) {
+    footTotal = [
+      'Total :',
+      '',
+      '',
+      fmtNum(totInQ),
+      fmtNum(totInV),
+      fmtNum(totOutQ),
+      fmtNum(totOutV),
+      fmtNum(curOpenQty),
+      fmtNum(curOpenVal)
+    ];
+    footAvg = [
+      'Average :',
+      '',
+      '',
+      fmtNum(avgInQ),
+      fmtNum(avgInV),
+      fmtNum(avgOutQ),
+      fmtNum(avgOutV),
+      '',
+      ''
+    ];
+  } else {
+    footTotal = [
+      'Total :',
+      '',
+      fmtNum(totInV),
+      fmtNum(totOutV),
+      fmtNum(curOpenVal)
+    ];
+    footAvg = [
+      'Average :',
+      '',
+      fmtNum(avgInV),
+      fmtNum(avgOutV),
+      ''
+    ];
+  }
+
+  return {
+    isSummary: true,
+    isFabric: isFab,
+    title: title,
+    header: header,
+    rows: rows,
+    rawRows: rawRows,
+    foot: footTotal,
+    footAvg: footAvg,
+    summary: {
+      from: fFrom, to: fTo, dayCount: dayCount,
+      totalInQty: totInQ, totalInVal: totInV,
+      totalOutQty: totOutQ, totalOutVal: totOutV,
+      closingQty: curOpenQty, closingVal: curOpenVal,
+      avgInQty: avgInQ, avgInVal: avgInV,
+      avgOutQty: avgOutQ, avgOutVal: avgOutV
+    }
+  };
+}
+
+function renderSummaryReportBody(el, rep, from, to) {
+  if (!el) return;
+  ensureSummaryReportStyles();
+  const s = rep.summary;
+  const dispFrom = dpToDisplay(from) || from;
+  const dispTo   = dpToDisplay(to) || to;
+  const isFab = !!rep.isFabric;
+  const ribbonTitle = esc(rep.title) + ' ' + dispFrom + ' and ' + dispTo;
+
+  let kpiHtml = '';
+  if (isFab) {
+    kpiHtml =
+      '<div class="dash-kpis summary-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
+        '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Qty</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtNum(s.totalInQty) + ' m</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalInVal) + '</span>' +
+        '</div>' +
+        '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Qty</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtNum(s.totalOutQty) + ' m</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalOutVal) + '</span>' +
+        '</div>' +
+        '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Balance</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12">' + fmtNum(s.closingQty) + ' m</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtNum(s.closingVal) + '</span>' +
+        '</div>' +
+        '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Daily Averages</span>' +
+          '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a">In: ' + fmtNum(s.avgInQty) + ' m · Out: ' + fmtNum(s.avgOutQty) + ' m</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Across ' + s.dayCount + ' continuous days</span>' +
+        '</div>' +
+      '</div>';
+  } else {
+    kpiHtml =
+      '<div class="dash-kpis summary-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
+        '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Value</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtNum(s.totalInVal) + '</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtNum(s.avgInVal) + '</span>' +
+        '</div>' +
+        '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Value</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtNum(s.totalOutVal) + '</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtNum(s.avgOutVal) + '</span>' +
+        '</div>' +
+        '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Valuation</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a">₹' + fmtNum(s.closingVal) + '</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims valuation</span>' +
+        '</div>' +
+        '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Timeframe</span>' +
+          '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a">' + dispFrom + ' → ' + dispTo + '</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
+        '</div>' +
+      '</div>';
+  }
+
+  const tableHtml = buildSummaryExcelTableHtml(rep);
+
+  el.innerHTML =
+    '<div class="sec-banner" style="padding:12px 16px;background:linear-gradient(to right, #fefce8, #ffffff);border:1px solid #fef08a;border-radius:8px;margin-bottom:14px">' +
+      '<div class="sec-title" style="font-size:15px;font-weight:700;color:#854d0e">' + ribbonTitle + '</div>' +
+      '<div class="sec-sub" style="font-size:12px;color:#a16207;margin-top:3px">Continuous daily opening balance, inward receipts, outward issues across Job Work, Purchase Returns &amp; Samples, and closing inventory valuation</div>' +
+    '</div>' +
+    kpiHtml +
+    '<div class="excel-title-ribbon" style="background:#f8cbac;color:#000;font-weight:800;font-size:13.5px;text-align:center;padding:9px 14px;border:1px solid #777;border-bottom:none;border-radius:6px 6px 0 0;box-sizing:border-box;letter-spacing:0.2px">' + ribbonTitle + '</div>' +
+    tableHtml;
+}
+
+function ensureSummaryReportStyles() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('sf-excel-summary-styles')) return;
+  const st = document.createElement('style');
+  st.id = 'sf-excel-summary-styles';
+  st.textContent =
+    '.dash-summary-panel{background:#fff!important;border:1px solid #d1d5db!important;border-radius:12px!important;padding:18px 20px!important;margin:18px 0 24px 0!important;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04)!important;box-sizing:border-box!important}' +
+    '.dash-summary-head{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;flex-wrap:wrap!important;gap:14px!important;margin-bottom:14px!important;border-bottom:1px solid #f1f5f9!important;padding-bottom:12px!important}' +
+    '.dash-summary-titles{flex:1 1 320px!important}' +
+    '.dash-summary-badge{display:inline-flex!important;align-items:center!important;gap:6px!important;font-size:11px!important;font-weight:750!important;letter-spacing:0.5px!important;color:#0f766e!important;background:#f0fdfa!important;padding:3px 9px!important;border-radius:20px!important;border:1px solid #ccfbf1!important;margin-bottom:5px!important}' +
+    '.dash-summary-badge.trims-badge{color:#1d4ed8!important;background:#eff6ff!important;border-color:#dbeafe!important}' +
+    '.dash-summary-badge .badge-dot{width:7px!important;height:7px!important;border-radius:50%!important;background:currentColor!important;display:inline-block!important}' +
+    '.dash-panel-main-title{font-size:16.5px!important;font-weight:750!important;color:#0f172a!important;margin:0 0 3px 0!important;letter-spacing:-0.2px!important}' +
+    '.dash-summary-sub{font-size:12px!important;color:#64748b!important;margin:0!important}' +
+    '.dash-summary-actions{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important}' +
+    '.dash-period-pills{display:inline-flex!important;background:#f1f5f9!important;border-radius:7px!important;padding:3px!important;gap:2px!important}' +
+    '.dash-pill{border:none!important;background:transparent!important;padding:5px 11px!important;font-size:12px!important;font-weight:600!important;color:#475569!important;border-radius:5px!important;cursor:pointer!important;transition:all 0.15s ease!important;line-height:1.2!important}' +
+    '.dash-pill:hover{color:#0f172a!important;background:rgba(255,255,255,0.6)!important}' +
+    '.dash-pill.active{background:#fff!important;color:#0f172a!important;font-weight:750!important;box-shadow:0 1px 3px rgba(0,0,0,0.1)!important}' +
+    '.dash-date-inputs{display:inline-flex!important;align-items:center!important;gap:5px!important;background:#fff!important;border:1px solid #cbd5e1!important;border-radius:7px!important;padding:2px 8px!important}' +
+    '.dash-dt-inp{border:none!important;padding:3px 4px!important;font-size:12px!important;color:#1e293b!important;background:transparent!important;outline:none!important;font-family:inherit!important}' +
+    '.dash-dt-sep{font-size:11px!important;font-weight:600!important;color:#94a3b8!important;text-transform:uppercase!important}' +
+    '.dash-kpis{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:12px!important;margin-bottom:14px!important}' +
+    '@media(max-width:900px){.dash-kpis{grid-template-columns:repeat(2,1fr)!important}}' +
+    '.dash-kpi{background:#f8fafc!important;border:1px solid #e2e8f0!important;border-radius:8px!important;padding:10px 14px!important;display:flex!important;flex-direction:column!important;gap:3px!important;box-sizing:border-box!important}' +
+    '.dash-kpi.highlight{background:#fefce8!important;border-color:#fde047!important}' +
+    '.dash-kpi-lbl{font-size:10.5px!important;font-weight:750!important;color:#64748b!important;text-transform:uppercase!important;letter-spacing:0.5px!important;display:block!important}' +
+    '.dash-kpi-val{font-size:17px!important;font-weight:800!important;color:#0f172a!important;font-variant-numeric:tabular-nums!important;line-height:1.2!important;display:block!important}' +
+    '.dash-kpi-sub{font-size:11.5px!important;color:#64748b!important;display:block!important}' +
+    '.excel-title-ribbon{background:#f8cbac!important;color:#000!important;font-weight:800!important;font-size:13.5px!important;text-align:center!important;padding:9px 14px!important;border:1px solid #777!important;border-bottom:none!important;letter-spacing:0.2px!important;border-radius:6px 6px 0 0!important;box-sizing:border-box!important}' +
+    '.dash-table-wrap{overflow-x:auto!important;border:1px solid #777!important;border-radius:0 0 6px 6px!important;background:#fff!important;box-sizing:border-box!important}' +
+    '.summary-report-table.excel-style{width:100%!important;border-collapse:collapse!important;font-size:12px!important;font-variant-numeric:tabular-nums!important;background:#fff!important;margin:0!important}' +
+    '.summary-report-table.excel-style th{background:#ffff00!important;color:#000!important;font-weight:750!important;border:1px solid #777!important;text-align:center!important;padding:6px 8px!important;vertical-align:middle!important;line-height:1.3!important}' +
+    '.summary-report-table.excel-style thead tr.thead-top th.num,.summary-report-table.excel-style thead tr.thead-sub th.num{text-align:right!important}' +
+    '.summary-report-table.excel-style thead tr.thead-top th.th-date{text-align:left!important}' +
+    '.summary-report-table.excel-style .th-sublabel{font-size:10.5px!important;font-weight:600!important;color:#333!important;margin-top:2px!important;text-transform:none!important}' +
+    '.summary-report-table.excel-style td{border:1px solid #777!important;padding:6px 8px!important;white-space:nowrap!important;color:#000!important;font-size:12px!important}' +
+    '.summary-report-table.excel-style tbody tr:hover td{background:#f8fafc!important}' +
+    '.summary-report-table.excel-style tbody td.td-date{font-weight:600!important;color:#0f172a!important;text-align:left!important;background:#fff!important}' +
+    '.summary-report-table.excel-style tbody td.num{text-align:right!important}' +
+    '.summary-report-table.excel-style tfoot tr.tot-row td,.summary-report-table.excel-style tfoot tr.avg-row td{background:#ffff00!important;color:#000!important;font-weight:800!important;border:1px solid #000!important;padding:6px 8px!important}' +
+    '.summary-report-table.excel-style tfoot tr.tot-row td.td-tot,.summary-report-table.excel-style tfoot tr.avg-row td.td-avg{text-align:left!important;font-weight:850!important}';
+  document.head.appendChild(st);
+}
+
+function buildSummaryExcelTableHtml(rep) {
+  const isFab = !!rep.isFabric;
+  let thead = '';
+  if (isFab) {
+    thead =
+      '<thead>' +
+        '<tr class="thead-top">' +
+          '<th rowspan="2" class="th-date" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:left;vertical-align:middle">Date</th>' +
+          '<th rowspan="2" class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Opening Qty Meter</th>' +
+          '<th rowspan="2" class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Opening Value Rs.</th>' +
+          '<th colspan="2" class="ctr th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Inward Qty Meter &amp; Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Inward</div></th>' +
+          '<th colspan="2" class="ctr th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Outward Qty Meter &amp; Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Job Work, Purchase Return, Sample</div></th>' +
+          '<th rowspan="2" class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Closing Qty Meter</th>' +
+          '<th rowspan="2" class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Closing Value Rs.</th>' +
+        '</tr>' +
+        '<tr class="thead-sub">' +
+          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Inward Qty Meter</th>' +
+          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Inward Value Rs.</th>' +
+          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Outward Qty Meter</th>' +
+          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Outward Value Rs.</th>' +
+        '</tr>' +
+      '</thead>';
+  } else {
+    thead =
+      '<thead>' +
+        '<tr class="thead-top">' +
+          '<th rowspan="2" class="th-date" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:left;vertical-align:middle">Date</th>' +
+          '<th rowspan="2" class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Opening Value Rs.</th>' +
+          '<th colspan="1" class="ctr th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Inward Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Inward</div></th>' +
+          '<th colspan="1" class="ctr th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Outward Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Job Work, Purchase Return, Sample</div></th>' +
+          '<th rowspan="2" class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Closing Value Rs.</th>' +
+        '</tr>' +
+        '<tr class="thead-sub">' +
+          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Inward Value Rs.</th>' +
+          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Outward Value Rs.</th>' +
+        '</tr>' +
+      '</thead>';
+  }
+
+  let tbody = '<tbody>';
+  if (!rep.rows.length) {
+    tbody += '<tr><td colspan="' + rep.header.length + '" style="text-align:center;color:#6b7280;padding:24px;border:1px solid #777">No transactions in selected date range</td></tr>';
+  } else {
+    rep.rows.forEach(r => {
+      tbody += '<tr>';
+      r.forEach((c, idx) => {
+        const isDate = (idx === 0);
+        const cellStyle = isDate
+          ? 'text-align:left;font-weight:600;color:#0f172a;background:#fff;border:1px solid #777;padding:6px 10px;white-space:nowrap'
+          : 'text-align:right;border:1px solid #777;padding:6px 10px;white-space:nowrap;font-variant-numeric:tabular-nums';
+        tbody += '<td class="' + (isDate ? 'td-date' : 'num') + '" style="' + cellStyle + '">' + esc(c) + '</td>';
+      });
+      tbody += '</tr>';
+    });
+  }
+  tbody += '</tbody>';
+
+  const tfoot =
+    '<tfoot>' +
+      '<tr class="tot-row" style="background:#ffff00!important;color:#000!important;font-weight:800;border:1px solid #000">' +
+        rep.foot.map((c, idx) => {
+          const isFirst = (idx === 0);
+          const cellStyle = isFirst
+            ? 'background:#ffff00!important;color:#000!important;font-weight:850;border:1px solid #000;padding:7px 10px;text-align:left'
+            : 'background:#ffff00!important;color:#000!important;font-weight:800;border:1px solid #000;padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums';
+          return '<td class="' + (isFirst ? 'td-tot' : 'num') + '" style="' + cellStyle + '"><b>' + (c ? esc(c) : '') + '</b></td>';
+        }).join('') +
+      '</tr>' +
+      '<tr class="avg-row" style="background:#ffff00!important;color:#000!important;font-weight:800;border:1px solid #000">' +
+        rep.footAvg.map((c, idx) => {
+          const isFirst = (idx === 0);
+          const cellStyle = isFirst
+            ? 'background:#ffff00!important;color:#000!important;font-weight:850;border:1px solid #000;padding:7px 10px;text-align:left'
+            : 'background:#ffff00!important;color:#000!important;font-weight:800;border:1px solid #000;padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums';
+          return '<td class="' + (isFirst ? 'td-avg' : 'num') + '" style="' + cellStyle + '"><b>' + (c ? esc(c) : '') + '</b></td>';
+        }).join('') +
+      '</tr>' +
+    '</tfoot>';
+
+  return '<div class="table-wrap dash-table-wrap" style="overflow-x:auto;border:1px solid #777;border-radius:0 0 6px 6px;background:#fff;box-sizing:border-box">' +
+           '<table class="summary-report-table excel-style" style="width:100%;border-collapse:collapse;font-size:12px;background:#fff;margin:0">' +
+             thead + tbody + tfoot +
+           '</table>' +
+         '</div>';
+}
+
+/* ---------------- DASHBOARD SEPARATE SUMMARY WIDGETS ---------------- */
+let dashFabricPreset = 10;
+let dashTrimsPreset = 10;
+let dashFabricRange = { from: '2026-09-01', to: '2026-09-10' };
+let dashTrimsRange  = { from: '2026-09-01', to: '2026-09-10' };
+
+function calcPresetRange(preset) {
+  const t = today();
+  if (preset === 'month') {
+    return { from: t.slice(0, 7) + '-01', to: t };
+  }
+  const n = parseInt(preset, 10) || 10;
+  const dt = dpParse(t) || new Date();
+  const dTo = dpISO(dt);
+  const dFromDt = new Date(dt);
+  dFromDt.setDate(dFromDt.getDate() - (n - 1));
+  return { from: dpISO(dFromDt), to: dTo };
+}
+
+function setDashFabricPeriod(p) {
+  dashFabricPreset = p;
+  dashFabricRange = calcPresetRange(p);
+  renderDashboardFabricWidget();
+}
+
+function setDashTrimsPeriod(p) {
+  dashTrimsPreset = p;
+  dashTrimsRange = calcPresetRange(p);
+  renderDashboardTrimsWidget();
+}
+
+function setDashFabricDates(from, to) {
+  dashFabricPreset = null;
+  dashFabricRange = { from, to };
+  renderDashboardFabricWidget();
+}
+
+function setDashTrimsDates(from, to) {
+  dashTrimsPreset = null;
+  dashTrimsRange = { from, to };
+  renderDashboardTrimsWidget();
+}
+
+function exportSummaryPanelCSV(kind) {
+  const isFab = (kind === 'fabric');
+  const range = isFab ? dashFabricRange : dashTrimsRange;
+  const type = isFab ? 'fabric_inout_summary' : 'trims_inout_summary';
+  const rep = buildSummaryInOutReport(type, range.from, range.to);
+  const from = range.from, to = range.to;
+  let csv = rep.title + ' ' + (dpToDisplay(from)||from) + ' and ' + (dpToDisplay(to)||to) + '\n';
+  if (isFab) {
+    csv += 'Date,Opening Qty Meter,Opening Value Rs.,Inward Qty Meter,Inward Value Rs.,Outward Qty Meter,Outward Value Rs.,Closing Qty Meter,Closing Value Rs.\n';
+    csv += ',,,Inward,Inward,"Job Work, Purchase Return, Sample","Job Work, Purchase Return, Sample",,\n';
+  } else {
+    csv += 'Date,Opening Value Rs.,Inward Value Rs.,Outward Value Rs.,Closing Value Rs.\n';
+    csv += ',,Inward,"Job Work, Purchase Return, Sample",\n';
+  }
+  csv += rep.rows.map(row => row.map(csvEsc).join(',')).join('\n') + '\n';
+  if (rep.foot) csv += rep.foot.map(csvEsc).join(',') + '\n';
+  if (rep.footAvg) csv += rep.footAvg.map(csvEsc).join(',') + '\n';
+
+  try {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (isFab ? 'Fabric_Summary_' : 'Trims_Summary_') + from + '_to_' + to + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    toast('Summary CSV exported', 'green');
+  } catch (e) { toast('Download blocked in preview'); }
+}
+
+function renderDashboardFabricWidget() {
+  ensureSummaryReportStyles();
+  const el = $('dash-fabric-summary-widget');
+  if (!el) return;
+  const range = dashFabricRange;
+  const rep = buildSummaryInOutReport('fabric_inout_summary', range.from, range.to);
+  const s = rep.summary;
+  const dispFrom = dpToDisplay(range.from) || range.from;
+  const dispTo   = dpToDisplay(range.to) || range.to;
+  const ribbonTitle = 'Fabric Inward and Outward Summary Report ' + dispFrom + ' and ' + dispTo;
+
+  const kpisHtml =
+    '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
+      '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Report Period</span>' +
+        '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a;line-height:1.2">' + dispFrom + ' → ' + dispTo + '</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
+      '</div>' +
+      '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">' + fmtNum(s.totalInQty) + ' m</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalInVal) + '</span>' +
+      '</div>' +
+      '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">' + fmtNum(s.totalOutQty) + ' m</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalOutVal) + '</span>' +
+      '</div>' +
+      '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Balance</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12;line-height:1.2">' + fmtNum(s.closingQty) + ' m</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtNum(s.closingVal) + '</span>' +
+      '</div>' +
+    '</div>';
+
+  const tableHtml = buildSummaryExcelTableHtml(rep);
+
+  el.innerHTML =
+    '<div class="dash-summary-panel" style="background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:18px 20px;margin:18px 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.05);box-sizing:border-box">' +
+      '<div class="dash-summary-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px;border-bottom:1px solid #f1f5f9;padding-bottom:12px">' +
+        '<div class="dash-summary-titles" style="flex:1 1 320px">' +
+          '<div class="dash-summary-badge" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:750;letter-spacing:0.5px;color:#0f766e;background:#f0fdfa;padding:3px 9px;border-radius:20px;border:1px solid #ccfbf1;margin-bottom:5px"><span class="badge-dot" style="width:7px;height:7px;border-radius:50%;background:#0d9488;display:inline-block"></span><span>🧵 FABRIC INVENTORY &amp; MOVEMENT</span></div>' +
+          '<h3 class="dash-panel-main-title" style="font-size:16.5px;font-weight:750;color:#0f172a;margin:0 0 3px 0;letter-spacing:-0.2px">Fabric Inventory &amp; Movement Summary</h3>' +
+          '<p class="dash-summary-sub" style="font-size:12px;color:#64748b;margin:0">Continuous daily flow of meters and valuation across receipts, job works, purchase returns and samples</p>' +
+        '</div>' +
+        '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+          '<div class="dash-period-pills" style="display:inline-flex;background:#f1f5f9;border-radius:7px;padding:3px;gap:2px">' +
+            '<button type="button" class="dash-pill ' + (dashFabricPreset === 10 ? 'active' : '') + '" onclick="setDashFabricPeriod(10)">10 Days</button>' +
+            '<button type="button" class="dash-pill ' + (dashFabricPreset === 7 ? 'active' : '') + '" onclick="setDashFabricPeriod(7)">7 Days</button>' +
+            '<button type="button" class="dash-pill ' + (dashFabricPreset === 'month' ? 'active' : '') + '" onclick="setDashFabricPeriod(\'month\')">This Month</button>' +
+          '</div>' +
+          '<div class="dash-date-inputs" style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:2px 8px">' +
+            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-fab-from" value="' + range.from + '" onchange="setDashFabricDates(this.value, $(\'dash-fab-to\').value)">' +
+            '<span class="dash-dt-sep" style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase">to</span>' +
+            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-fab-to" value="' + range.to + '" onchange="setDashFabricDates($(\'dash-fab-from\').value, this.value)">' +
+          '</div>' +
+          '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'fabric\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
+          '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'fabric_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
+        '</div>' +
+      '</div>' +
+      kpisHtml +
+      '<div class="excel-title-ribbon" style="background:#f8cbac;color:#000;font-weight:800;font-size:13.5px;text-align:center;padding:9px 14px;border:1px solid #777;border-bottom:none;border-radius:6px 6px 0 0;box-sizing:border-box;letter-spacing:0.2px">' + esc(ribbonTitle) + '</div>' +
+      tableHtml +
+    '</div>';
+}
+
+function renderDashboardTrimsWidget() {
+  ensureSummaryReportStyles();
+  const el = $('dash-trims-summary-widget');
+  if (!el) return;
+  const range = dashTrimsRange;
+  const rep = buildSummaryInOutReport('trims_inout_summary', range.from, range.to);
+  const s = rep.summary;
+  const dispFrom = dpToDisplay(range.from) || range.from;
+  const dispTo   = dpToDisplay(range.to) || range.to;
+  const ribbonTitle = 'Trims Inward and Outward Summary Report ' + dispFrom + ' and ' + dispTo;
+
+  const kpisHtml =
+    '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
+      '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Report Period</span>' +
+        '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a;line-height:1.2">' + dispFrom + ' → ' + dispTo + '</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
+      '</div>' +
+      '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Value</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">₹' + fmtNum(s.totalInVal) + '</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily Avg: ₹' + fmtNum(s.avgInVal) + '</span>' +
+      '</div>' +
+      '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Value</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">₹' + fmtNum(s.totalOutVal) + '</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily Avg: ₹' + fmtNum(s.avgOutVal) + '</span>' +
+      '</div>' +
+      '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Valuation</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a;line-height:1.2">₹' + fmtNum(s.closingVal) + '</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims in stock</span>' +
+      '</div>' +
+    '</div>';
+
+  const tableHtml = buildSummaryExcelTableHtml(rep);
+
+  el.innerHTML =
+    '<div class="dash-summary-panel" style="background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:18px 20px;margin:18px 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.05);box-sizing:border-box">' +
+      '<div class="dash-summary-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px;border-bottom:1px solid #f1f5f9;padding-bottom:12px">' +
+        '<div class="dash-summary-titles" style="flex:1 1 320px">' +
+          '<div class="dash-summary-badge trims-badge" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:750;letter-spacing:0.5px;color:#1d4ed8;background:#eff6ff;padding:3px 9px;border-radius:20px;border:1px solid #dbeafe;margin-bottom:5px"><span class="badge-dot" style="width:7px;height:7px;border-radius:50%;background:#2563eb;display:inline-block"></span><span>🧷 TRIMS &amp; ACCESSORIES VALUATION</span></div>' +
+          '<h3 class="dash-panel-main-title" style="font-size:16.5px;font-weight:750;color:#0f172a;margin:0 0 3px 0;letter-spacing:-0.2px">Trims Inventory &amp; Valuation Summary</h3>' +
+          '<p class="dash-summary-sub" style="font-size:12px;color:#64748b;margin:0">Continuous daily valuation across inward receipts, job work issues and sample issues</p>' +
+        '</div>' +
+        '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+          '<div class="dash-period-pills" style="display:inline-flex;background:#f1f5f9;border-radius:7px;padding:3px;gap:2px">' +
+            '<button type="button" class="dash-pill ' + (dashTrimsPreset === 10 ? 'active' : '') + '" onclick="setDashTrimsPeriod(10)">10 Days</button>' +
+            '<button type="button" class="dash-pill ' + (dashTrimsPreset === 7 ? 'active' : '') + '" onclick="setDashTrimsPeriod(7)">7 Days</button>' +
+            '<button type="button" class="dash-pill ' + (dashTrimsPreset === 'month' ? 'active' : '') + '" onclick="setDashTrimsPeriod(\'month\')">This Month</button>' +
+          '</div>' +
+          '<div class="dash-date-inputs" style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:2px 8px">' +
+            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-trm-from" value="' + range.from + '" onchange="setDashTrimsDates(this.value, $(\'dash-trm-to\').value)">' +
+            '<span class="dash-dt-sep" style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase">to</span>' +
+            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-trm-to" value="' + range.to + '" onchange="setDashTrimsDates($(\'dash-trm-from\').value, this.value)">' +
+          '</div>' +
+          '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'trims\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
+          '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'trims_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
+        '</div>' +
+      '</div>' +
+      kpisHtml +
+      '<div class="excel-title-ribbon" style="background:#f8cbac;color:#000;font-weight:800;font-size:13.5px;text-align:center;padding:9px 14px;border:1px solid #777;border-bottom:none;border-radius:6px 6px 0 0;box-sizing:border-box;letter-spacing:0.2px">' + esc(ribbonTitle) + '</div>' +
+      tableHtml +
+    '</div>';
+}
+
+function renderBothDashboardWidgets() {
+  renderDashboardFabricWidget();
+  renderDashboardTrimsWidget();
+}
+
+window.ensureSummaryReportStyles = ensureSummaryReportStyles;
+window.buildSummaryExcelTableHtml = buildSummaryExcelTableHtml;
+window.renderDashboardFabricWidget = renderDashboardFabricWidget;
+window.renderDashboardTrimsWidget = renderDashboardTrimsWidget;
+window.renderBothDashboardWidgets = renderBothDashboardWidgets;
+window.setDashFabricPeriod = setDashFabricPeriod;
+window.setDashTrimsPeriod = setDashTrimsPeriod;
+window.setDashFabricDates = setDashFabricDates;
+window.setDashTrimsDates = setDashTrimsDates;
+window.exportSummaryPanelCSV = exportSummaryPanelCSV;
+window.openReportType = openReportType;
 
 /* ---------------- Dashboard ---------------- */
 function renderDashboard() {
@@ -3423,15 +4467,19 @@ function renderDashboard() {
     (!useLS ? '<div class="warn"><b>Preview mode:</b> this in-app preview can\u2019t save to disk, so data resets on refresh. <b>Download the file and open it in your browser</b> — entries then save permanently on your device.</div>' : '') +
     '<div class="stats">' +
       statCard('order','Open PO value', fmtINR(poTotal), poOpen.length + ' of ' + db.po.length + ' POs still open', '', "go('po')") +
-      statCard('box','Fabric in stock', fmtNum(stock.m) + '<small> m</small>', fmtNum(stock.issuedM) + ' m issued to job work', 'green', "go('reports')") +
-      statCard('needle','Trims in stock', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', trimStock().filter(t => t.issued > 0).length + ' trim items issued', '', "go('reports')") +
+      statCard('box','Fabric in stock', fmtNum(stock.m) + '<small> m</small>', fmtNum(stock.issuedM) + ' m issued · ₹' + fmtNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
+      statCard('needle','Trims in stock', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', '₹' + fmtNum(trimsValuation()) + ' total valuation', 'blue', "openReportType('trims_inout_summary')") +
       statCard('chart','Job works active', jwActive, db.jobwork.length + ' total job works', '', "go('jobwork')") +
       statCard('check','FG received', fmtNum(fgRecv) + '<small> pcs</small>', fgStyles + ' styles across job works', 'green', "go('jobwork')") +
       statCard('cash','Sales revenue', fmtINR(saleAmt), saleDue + ' invoices unpaid', '', "go('sale')") +
     '</div>' +
+    '<div id="dash-fabric-summary-widget"></div>' +
+    '<div id="dash-trims-summary-widget"></div>' +
     '<div class="flow-card"><div class="t">Production pipeline</div><div class="s">Click a stage to open it — PO → Inward → Job Work → Sale</div><div class="flow">' + flow + '</div></div>' +
     '<div class="section-title">Recent activity <span class="c">' + recent.length + '</span></div>' + rh +
     '<details class="footnote"><summary>How this workflow fits together</summary><div class="fn-body"> Raise a <b>PO</b> for fabric &amp; trims → record <b>Inward</b> when they arrive (auto-updates PO status) → <b>Job Work</b>: add <b>multiple issue records</b> (fabric + trims to the job-worker vendor) and <b>styles with size-wise qty</b> — <b>Internal ID style no. is mandatory</b> (from Style Master) &amp; record finished goods received back with consumption → <b>Sale</b> entry (Myntra D2C), and use <b>Reports</b> for GRN / issues / WIP / FG received / stock. Set up <b>Style Master</b> (Internal + Portal ID) and <b>Size Master</b> in Masters. Every dropdown is searchable — just type to filter. Search, export &amp; print are available on every module.</div></details>';
+
+  renderBothDashboardWidgets();
 }
 function statCard(icon, lbl, val, extra, cls, onclick) {
   const clickable = onclick ? ' onclick="' + onclick + '" role="button" tabindex="0"' : '';
@@ -4803,6 +5851,12 @@ function amountWords(n) {
   if (n)  out += three(n);
   return out.replace(/\s+/g, ' ').trim() + ' RUPEES ONLY';
 }
+function toTitleCaseWords(str) {
+  return str.toLowerCase().split(/\s+/).map(function(w) {
+    if (w === 'and') return 'And';
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ').replace(/\s+Rupees\s+Only/i, ' Only').replace(/Thousand\b/g, 'Thousands');
+}
 /* toolbar Print → the PO currently at the top of the filtered list */
 function printFirstPO() {
   const rows = filtered('po');
@@ -4869,11 +5923,10 @@ function printPO(id) {
   const grand = Math.round(afterTax);
   const roundOff = grand - afterTax;
 
-  const supplierName = party ? (party.legalName || party.shortName) : (r.supplier || '—');
+  const supplierTradeName = (trade && (trade.tradeName || trade.name)) || r.supplierTrade || (party && (party.tradeName || party.shortName)) || (party ? (party.tradeName || party.shortName || party.legalName) : (r.supplier || '—'));
   const supplierAddr = trade ? [trade.address,trade.city,trade.state,trade.pin].filter(Boolean).join(', ')
     : (party ? [party.address,party.city,party.state,party.pin].filter(Boolean).join(', ') : '');
   const supplierGst = trade ? trade.gstNo : (party ? party.gstNo : '');
-  const supplierPan = trade ? trade.pan : (party ? party.pan : '');
   const supplierState = trade ? trade.state : (party ? party.state : '');
   const shipName = shipParty ? (shipParty.legalName || shipParty.shortName) : (r.shipTo || PRINT_CO.name);
   const shipAddr = shipParty ? [shipParty.address,shipParty.city,shipParty.state,shipParty.pin].filter(Boolean).join(', ')
@@ -4900,7 +5953,7 @@ function printPO(id) {
     '<header class="mast"><div class="company"><h1>' + esc(PRINT_CO.name) + '</h1><p>' + esc(PRINT_CO.reg) + '</p><p>' + esc(PRINT_CO.reg2) + '</p><p>' + esc(PRINT_CO.works) + '</p><p>' + esc(PRINT_CO.contact) + '</p><div class="gst">GSTIN: ' + esc(PRINT_CO.gstNo || 'Not configured') + ' &nbsp; | &nbsp; PAN: ' + esc(PRINT_CO.pan || '—') + ' &nbsp; | &nbsp; State: ' + esc(PRINT_CO.state || '') + ' (' + esc(PRINT_CO.stateCode || '') + ')</div></div>' +
     '<div class="pohead"><div class="eyebrow">Procurement Document</div><h2>PURCHASE ORDER</h2><div class="pono">' + esc(r.no || '') + '</div><div class="status">' + esc(r.status || 'Draft') + '</div></div></header>' +
     '<section class="meta"><div><span>PO Date</span><b>' + esc(dpToDisplay(r.date) || r.date || '—') + '</b></div><div><span>Delivery Date</span><b>' + esc(dpToDisplay(r.deliveryDate) || r.deliveryDate || '—') + '</b></div><div><span>Quotation / PI No.</span><b>' + esc(r.qtnNo || '—') + '</b></div><div><span>Quotation / PI Date</span><b>' + esc(dpToDisplay(r.qtnDate) || r.qtnDate || '—') + '</b></div></section>' +
-    '<section class="parties"><div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>Trade Name:</strong> ' + esc(r.supplierTrade || '—') + '<br><strong>GSTIN:</strong> ' + esc(supplierGst || '—') + '<br><strong>PAN:</strong> ' + esc(supplierPan || '—') + '<br><strong>State:</strong> ' + esc(supplierState || '—') + '</div></div></div>' +
+    '<section class="parties"><div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || '—') + '<br><strong>State:</strong> ' + esc(supplierState || '—') + '</div></div></div>' +
     '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(PRINT_CO.works.replace(/^Works:\s*/i, '')) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || '—') + '<br><strong>PAN:</strong> ' + esc(PRINT_CO.pan || '—') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || '—') + '</div></div></div>' +
     '<div class="card"><h3>Ship To / Delivery Address</h3><div class="body"><b>' + esc(shipName) + '</b><p>' + esc(shipAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(shipGst || '—') + '<br><strong>State:</strong> ' + esc(shipState || '—') + '</div></div></div></section>' +
     '<section class="commercial"><div class="term"><span class="label">Payment Terms</span><b>' + esc(r.payTerms || '—') + '</b></div><div class="term"><span class="label">Freight Charges</span><b>' + esc(r.freightCharges || '—') + '</b></div><div class="term"><span class="label">Transport Mode</span><b>' + esc(r.transportMode || '—') + '</b></div><div class="term"><span class="label">Raised For</span><b>' + esc(r.raisedFor || '—') + '</b></div><div class="term"><span class="label">Transit Insurance</span><b>' + esc(r.transitInsurance || '—') + '</b></div><div class="term"><span class="label">P &amp; F</span><b>' + esc((r.pnf === '' || r.pnf == null) ? 'Nil' : r.pnf) + '</b></div><div class="term"><span class="label">GST Type</span><b>' + esc(r.gstType || '—') + '</b></div><div class="term"><span class="label">Currency</span><b>INR (₹)</b></div></section>' +
@@ -4915,6 +5968,274 @@ function printPO(id) {
 
   const w = window.open('', '_blank');
   if (!w) return toast('Allow pop-ups to print the purchase order', 'red');
+  w.document.write(doc);
+  w.document.close();
+}
+
+/* =====================================================================
+   GOODS RECEIPT NOTE (GRN / INWARD) — printable document
+   ===================================================================== */
+function printFirstInward() {
+  const rows = filtered('inward');
+  if (!rows.length) return toast('No inward record to print', 'red');
+  printInward(rows[0].id);
+}
+
+function printInward(id) {
+  const r = (db.inward || []).find(function (x) { return x.id === id || x.no === id; });
+  if (!r) return toast('Inward record not found', 'red');
+
+  const po = r.poRef ? (db.po || []).find(function (p) { return p.no === r.poRef || p.id === r.poRef; }) : null;
+  const party = partyByName(r.supplier);
+  const trade = partyTradeByName(r.supplier, r.supplierTrade);
+  const supplierTradeName = (trade && (trade.tradeName || trade.name)) || r.supplierTrade || (party && (party.tradeName || party.shortName)) || (party ? (party.tradeName || party.shortName || party.legalName) : (r.supplier || '—'));
+  const supplierAddr = trade ? [trade.address, trade.city, trade.state, trade.pin].filter(Boolean).join(', ')
+    : (party ? [party.address, party.city, party.state, party.pin].filter(Boolean).join(', ') : '');
+  const supplierGst = trade ? (trade.gstNo || '') : (party ? (party.gstNo || '') : '');
+  const supplierPan = trade ? (trade.pan || '') : (party ? (party.pan || '') : '');
+  const supplierState = trade ? (trade.state || '') : (party ? (party.state || '') : '');
+
+  const buyerName = (po && (po.buyer || po.raisedFor)) || r.buyer || (r.items && r.items[0] && r.items[0].buyer) || '—';
+  const displayDocNo = r.grn ? (r.grn + (r.no && r.no !== r.grn ? ' (' + r.no + ')' : '')) : (r.no || '—');
+  const poNo = r.poRef || (r.jwRef ? ('JW: ' + r.jwRef) : '—');
+  const invoiceNo = r.invoiceNo || r.challan || '—';
+  const invoiceDate = dpToDisplay(r.invoiceDate) || r.invoiceDate || '—';
+  const inwardDate = dpToDisplay(r.date) || r.date || '—';
+
+  const coWorks = (PRINT_CO.works || '').replace(/^Works:\s*/i, '');
+  const shipParty = po ? partyByName(po.shipTo) : null;
+  const shipName = shipParty ? (shipParty.legalName || shipParty.shortName) : (r.warehouse ? (PRINT_CO.name + ' — ' + r.warehouse) : (po && po.shipTo ? po.shipTo : PRINT_CO.name));
+  const shipAddr = shipParty ? [shipParty.address, shipParty.city, shipParty.state, shipParty.pin].filter(Boolean).join(', ')
+    : (coWorks || PRINT_CO.reg);
+  const shipGst = shipParty ? (shipParty.gstNo || PRINT_CO.gstNo) : PRINT_CO.gstNo;
+  const shipState = shipParty ? (shipParty.state || PRINT_CO.state) : PRINT_CO.state;
+
+  const isInterState = supplierState && PRINT_CO.state && supplierState.toLowerCase().trim() !== PRINT_CO.state.toLowerCase().trim();
+
+  let totQty = 0, totAmt = 0, totC = 0, totS = 0, totI = 0;
+  const items = r.items || [];
+  const hsnMap = {};
+
+  const rows = items.map(function (it, idx) {
+    const poItem = (po && po.items) ? po.items.find(function(pi){ return pi.name === it.name || (it.code && pi.code === it.code); }) : null;
+    const im = itemByName(it.name);
+    const itemCode = it.code || (im && im.code) || (poItem && poItem.code) || it.item_id || '—';
+    const hsn = it.hsn || (im && im.hsn) || (poItem && poItem.hsn) || '—';
+    const specs = it.specs || (poItem && poItem.specs) || '';
+    const qty = pf(it.recQty != null ? it.recQty : it.qty);
+    const uom = it.unit || (im && im.unit) || (poItem && poItem.unit) || '—';
+    const rate = pf(it.poRate != null ? it.poRate : (it.rate != null ? it.rate : ((poItem && poItem.rate) || (im && im.purchaseRate) || 0)));
+    const amt = qty * rate;
+
+    let cRate = 0, sRate = 0, iRate = 0;
+    if (poItem && (pf(poItem.igstPct) > 0 || pf(poItem.cgstPct) > 0 || pf(poItem.sgstPct) > 0)) {
+      iRate = pf(poItem.igstPct);
+      cRate = pf(poItem.cgstPct);
+      sRate = pf(poItem.sgstPct);
+    } else {
+      const baseTax = pf(it.gst || (im && im.gst) || (poItem && poItem.gst) || 5);
+      if (isInterState) iRate = baseTax;
+      else { cRate = baseTax / 2; sRate = baseTax / 2; }
+    }
+
+    const camt = amt * (cRate / 100);
+    const samt = amt * (sRate / 100);
+    const iamt = amt * (iRate / 100);
+
+    totQty += qty; totAmt += amt; totC += camt; totS += samt; totI += iamt;
+
+    const k = hsn || '—';
+    if (!hsnMap[k]) hsnMap[k] = { taxable: 0, cRate: cRate, c: 0, sRate: sRate, s: 0, iRate: iRate, i: 0 };
+    hsnMap[k].taxable += amt;
+    hsnMap[k].c += camt;
+    hsnMap[k].s += samt;
+    hsnMap[k].i += iamt;
+
+    return '<tr>' +
+      '<td class="ctr">' + (idx + 1) + '</td>' +
+      '<td>' + esc(it.classification || (im && im.classification) || (poItem && poItem.classification) || '') + '</td>' +
+      '<td>' + esc(itemCode) + '</td>' +
+      '<td><b>' + esc(it.name || '') + '</b>' + (specs ? '<div class="sub">' + esc(specs) + '</div>' : '') + '</td>' +
+      '<td>' + esc(hsn) + '</td>' +
+      '<td class="rt">' + fmtNum(qty) + '</td>' +
+      '<td>' + esc(uom) + '</td>' +
+      '<td class="rt">' + fmtNum(rate.toFixed(2)) + '</td>' +
+      '<td class="rt">' + fmtNum(amt.toFixed(2)) + '</td>' +
+    '</tr>';
+  }).join('');
+
+  // Handle Freight if present
+  const freightVal = pf(r.freight);
+  const freightGstRate = pf(r.freightGst);
+  let freightC = 0, freightS = 0, freightI = 0;
+  if (freightVal > 0) {
+    if (isInterState) {
+      freightI = freightVal * (freightGstRate / 100);
+    } else {
+      freightC = freightVal * ((freightGstRate / 2) / 100);
+      freightS = freightVal * ((freightGstRate / 2) / 100);
+    }
+    const fk = r.freightHsn || '9965';
+    if (!hsnMap[fk]) hsnMap[fk] = { taxable: 0, cRate: isInterState ? 0 : freightGstRate/2, c: 0, sRate: isInterState ? 0 : freightGstRate/2, s: 0, iRate: isInterState ? freightGstRate : 0, i: 0 };
+    hsnMap[fk].taxable += freightVal;
+    hsnMap[fk].c += freightC;
+    hsnMap[fk].s += freightS;
+    hsnMap[fk].i += freightI;
+    totC += freightC;
+    totS += freightS;
+    totI += freightI;
+  }
+
+  const totTaxable = totAmt + freightVal;
+  const hsnRows = Object.keys(hsnMap).map(function (k) {
+    const x = hsnMap[k];
+    return '<tr><td>' + esc(k) + '</td><td class="rt">' + fmtNum(x.taxable.toFixed(2)) + '</td>' +
+      '<td class="rt">' + fmtNum(x.cRate.toFixed(2)) + ' %</td><td class="rt">' + fmtNum(x.c.toFixed(2)) + '</td>' +
+      '<td class="rt">' + fmtNum(x.sRate.toFixed(2)) + ' %</td><td class="rt">' + fmtNum(x.s.toFixed(2)) + '</td>' +
+      '<td class="rt">' + fmtNum(x.iRate.toFixed(2)) + ' %</td><td class="rt">' + fmtNum(x.i.toFixed(2)) + '</td>' +
+      '<td class="rt">' + fmtNum((x.c + x.s + x.i).toFixed(2)) + '</td></tr>';
+  }).join('');
+
+  const afterTax = totTaxable + totC + totS + totI;
+  const grand = Math.round(afterTax);
+  const roundOff = grand - afterTax;
+
+  let classification = '';
+  if (items && items.length) classification = items[0].classification || '';
+  if (!classification && r.warehouse) {
+    if (/trim/i.test(r.warehouse)) classification = 'Trims';
+    else if (/fabric/i.test(r.warehouse)) classification = 'Fabric';
+  }
+  const grnTitle = 'GOODS RECEIPT NOTE' + (classification ? ' - ' + classification.toUpperCase() : '');
+
+  const doc = '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+    '<title>' + esc(grnTitle) + ' ' + esc(r.no) + ' | ' + esc(PRINT_CO.name) + '</title>' +
+    '<style>' +
+    ':root{--ink:#172033;--muted:#667085;--line:#cfd6df;--soft:#f4f7fa;--brand:#173f67;--brand2:#eaf1f8}' +
+    '*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:var(--ink);margin:0;padding:14px;background:#e9edf2}' +
+    '.bar{display:flex;gap:8px;justify-content:flex-end;max-width:960px;margin:0 auto 10px;position:sticky;top:8px;z-index:2}' +
+    '.bar button{font:inherit;font-weight:700;padding:8px 17px;border:1px solid #b7c0cb;border-radius:6px;background:#fff;cursor:pointer}' +
+    '.bar .p{background:var(--brand);color:#fff;border-color:var(--brand)}' +
+    '.sheet{max-width:960px;margin:0 auto;background:#fff;box-shadow:0 3px 18px rgba(16,24,40,.14);border-top:7px solid var(--brand);padding:0 22px 16px}' +
+    '.mast{display:grid;grid-template-columns:1fr 280px;gap:22px;padding:17px 0 13px;border-bottom:2px solid var(--brand)}' +
+    '.company h1{font-size:18px;letter-spacing:.3px;margin:0 0 5px;color:var(--brand)}' +
+    '.company p{margin:1px 0;line-height:1.35;color:#344054}' +
+    '.company .gst{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:4px;background:var(--brand2);font-weight:700}' +
+    '.pohead{text-align:right}' +
+    '.pohead .eyebrow{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}' +
+    '.pohead h2{font-size:22px;letter-spacing:1px;margin:3px 0;color:var(--brand)}' +
+    '.pohead .pono{font-size:15px;font-weight:800}' +
+    '.status{display:inline-block;margin-top:5px;padding:3px 9px;border:1px solid #99a8b8;border-radius:12px;font-size:9px;font-weight:700;text-transform:uppercase}' +
+    '.meta{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:13px 0}' +
+    '.meta>div{padding:7px 9px;min-height:43px}' +
+    '.meta>div+div{border-left:1px solid var(--line)}' +
+    '.meta span,.label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.55px;color:var(--muted);margin-bottom:3px}' +
+    '.meta b{font-size:10.5px}' +
+    '.parties{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:8px;margin-bottom:12px}' +
+    '.card{border:1px solid var(--line);border-radius:6px;overflow:hidden}' +
+    '.card h3{font-size:8.5px;text-transform:uppercase;letter-spacing:.7px;margin:0;padding:5px 8px;background:var(--brand2);color:var(--brand)}' +
+    '.card .body{padding:7px 9px;min-height:88px}' +
+    '.card b{font-size:10.5px}' +
+    '.card p{margin:3px 0;line-height:1.35;color:#344054}' +
+    '.mini{margin-top:5px;font-size:8.8px;line-height:1.45}' +
+    '.mini strong{color:var(--muted);font-weight:600}' +
+    '.commercial{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}' +
+    '.term{border-left:3px solid #91a7bd;background:var(--soft);padding:6px 8px;min-height:42px}' +
+    '.term b{display:block;margin-top:2px}' +
+    'table{border-collapse:collapse;width:100%}' +
+    '.items{margin-bottom:10px}' +
+    '.items th{background:var(--brand);color:#fff;font-size:8.5px;letter-spacing:.25px;padding:6px 5px;text-align:left;border:1px solid var(--brand)}' +
+    '.items td{border:1px solid var(--line);padding:6px 5px;vertical-align:top}' +
+    '.items tbody tr:nth-child(even){background:#fafbfd}' +
+    '.items .rt,.rt{text-align:right}' +
+    '.items .ctr,.ctr{text-align:center}' +
+    '.items .sub{font-size:8.5px;color:var(--muted);margin-top:2px}' +
+    '.tot td{font-weight:800;background:var(--brand2);border-color:#aab9c8}' +
+    '.finance{display:grid;grid-template-columns:1.55fr .75fr;gap:10px;margin:10px 0}' +
+    '.taxbox,.totalbox{border:1px solid var(--line);border-radius:6px;overflow:hidden}' +
+    '.boxhead{padding:5px 8px;background:var(--soft);font-weight:800;text-transform:uppercase;font-size:8.5px;letter-spacing:.5px}' +
+    '.hsn th,.hsn td{border:1px solid var(--line);padding:4px;font-size:8.3px}' +
+    '.hsn th{background:#f8fafc}' +
+    '.sum td{padding:4px 8px}' +
+    '.sum .lbl{text-align:right;color:#475467}' +
+    '.sum .amt{text-align:right;width:95px;font-weight:700}' +
+    '.sum .grand td{background:var(--brand);color:#fff;font-size:12px;font-weight:800;padding:7px 8px}' +
+    '.words{border:1px solid #aab9c8;background:var(--brand2);padding:6px 9px;border-radius:5px;font-size:9px;font-weight:700;margin-bottom:8px}' +
+    '.remark{padding:6px 9px;border-left:3px solid #d5a021;background:#fff9e8;margin-bottom:8px}' +
+    '.terms{border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-top:8px}' +
+    '.terms h4,.terms h2,.terms h3{margin:0 0 5px;font-size:10px;color:var(--brand)}' +
+    '.terms ol,.terms ul{columns:2;column-gap:26px;margin:0;padding-left:16px}' +
+    '.terms li{break-inside:avoid;margin-bottom:3px;line-height:1.3;font-size:8.5px}' +
+    '.terms p{margin:0 0 4px;font-size:8.5px}' +
+    '.sign{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:12px;border:1px solid var(--line);border-radius:6px;overflow:hidden}' +
+    '.sign>div{min-height:76px;padding:7px 9px;text-align:center}' +
+    '.sign>div+div{border-left:1px solid var(--line)}' +
+    '.sign b{font-size:9px}' +
+    '.sign span{display:block;height:42px;border-bottom:1px solid #98a2b3;margin-bottom:4px}' +
+    '.foot{text-align:center;color:var(--muted);font-size:8px;margin-top:9px;letter-spacing:.35px}' +
+    '@page{size:A4 portrait;margin:7mm}' +
+    '@media print{body{padding:0;background:#fff}.bar{display:none}.sheet{max-width:none;box-shadow:none;padding:0 8mm 5mm;border-top-width:5px}.items tr,.finance,.sign,.card{break-inside:avoid}}' +
+    '</style></head><body>' +
+    '<div class="bar"><button class="p" onclick="window.print()">Print Goods Receipt Note</button><button onclick="window.close()">Close</button></div>' +
+    '<main class="sheet">' +
+    '<header class="mast">' +
+      '<div class="company">' +
+        '<h1>' + esc(PRINT_CO.name) + '</h1>' +
+        '<p>' + esc(PRINT_CO.reg) + '</p>' +
+        '<p>' + esc(PRINT_CO.reg2) + '</p>' +
+        '<p>' + esc(PRINT_CO.works) + '</p>' +
+        '<p>' + esc(PRINT_CO.contact) + '</p>' +
+        '<div class="gst">GSTIN: ' + esc(PRINT_CO.gstNo || 'Not configured') + ' &nbsp; | &nbsp; PAN: ' + esc(PRINT_CO.pan || '—') + ' &nbsp; | &nbsp; State: ' + esc(PRINT_CO.state || '') + ' (' + esc(PRINT_CO.stateCode || '') + ')</div>' +
+      '</div>' +
+      '<div class="pohead">' +
+        '<div class="eyebrow">Receipt Document</div>' +
+        '<h2>GOODS RECEIPT NOTE</h2>' +
+        '<div class="pono">' + esc(displayDocNo) + '</div>' +
+        '<div class="status">' + esc(r.status || 'Received') + '</div>' +
+      '</div>' +
+    '</header>' +
+    '<section class="meta">' +
+      '<div><span>Inward / GRN Date</span><b>' + esc(inwardDate) + '</b></div>' +
+      '<div><span>PO Number</span><b>' + esc(poNo) + '</b></div>' +
+      '<div><span>Invoice / Challan No.</span><b>' + esc(invoiceNo) + '</b></div>' +
+      '<div><span>Invoice / Challan Date</span><b>' + esc(invoiceDate) + '</b></div>' +
+    '</section>' +
+    '<section class="parties">' +
+      '<div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || '—') + '<br><strong>PAN:</strong> ' + esc(supplierPan || '—') + '<br><strong>State:</strong> ' + esc(supplierState || '—') + '</div></div></div>' +
+      '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(coWorks) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || '—') + '<br><strong>PAN:</strong> ' + esc(PRINT_CO.pan || '—') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || '—') + '</div></div></div>' +
+      '<div class="card"><h3>Ship To / Delivery Address</h3><div class="body"><b>' + esc(shipName) + '</b><p>' + esc(shipAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(shipGst || '—') + '<br><strong>State:</strong> ' + esc(shipState || '—') + '</div></div></div>' +
+    '</section>' +
+    '<section class="commercial">' +
+      '<div class="term"><span class="label">Warehouse / Store</span><b>' + esc(r.warehouse || '—') + '</b></div>' +
+      '<div class="term"><span class="label">Vehicle No.</span><b>' + esc(r.vehicle || '—') + '</b></div>' +
+      '<div class="term"><span class="label">Received By</span><b>' + esc(r.receivedBy || '—') + '</b></div>' +
+      '<div class="term"><span class="label">Entry Type</span><b>' + esc(r.entryType || '—') + '</b></div>' +
+      '<div class="term"><span class="label">Bin / Rack Location</span><b>' + esc(r.bin || '—') + '</b></div>' +
+      '<div class="term"><span class="label">Buyer / Style Ref</span><b>' + esc(buyerName) + '</b></div>' +
+      '<div class="term"><span class="label">GST Type</span><b>' + esc(r.gstType || (isInterState ? 'IGST' : 'CGST & SGST')) + '</b></div>' +
+      '<div class="term"><span class="label">Currency</span><b>INR (₹)</b></div>' +
+    '</section>' +
+    '<table class="items"><thead><tr><th class="ctr" style="width:32px">#</th><th>Classification</th><th>Item Code</th><th>Product / Specification</th><th>HSN</th><th class="rt">Qty</th><th>UOM</th><th class="rt">Rate (₹)</th><th class="rt">Amount (₹)</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr class="tot"><td colspan="5">Item Total</td><td class="rt">' + fmtNum(totQty) + '</td><td></td><td></td><td class="rt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr></tfoot></table>' +
+    '<section class="finance"><div class="taxbox"><div class="boxhead">HSN-wise Tax Summary</div><table class="hsn"><thead><tr><th rowspan="2">HSN</th><th rowspan="2">Taxable</th><th colspan="2">CGST</th><th colspan="2">SGST</th><th colspan="2">IGST</th><th rowspan="2">Tax</th></tr><tr><th>%</th><th>Amt</th><th>%</th><th>Amt</th><th>%</th><th>Amt</th></tr></thead><tbody>' + hsnRows + '</tbody><tfoot><tr class="tot"><td>Total</td><td class="rt">' + fmtNum(totTaxable.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totC.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totS.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totI.toFixed(2)) + '</td><td class="rt">' + fmtNum((totC+totS+totI).toFixed(2)) + '</td></tr></tfoot></table></div>' +
+    '<div class="totalbox"><div class="boxhead">Order Value</div><table class="sum"><tr><td class="lbl">Taxable Value</td><td class="amt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr>' + (freightVal ? '<tr><td class="lbl">Freight Charges</td><td class="amt">' + fmtNum(freightVal.toFixed(2)) + '</td></tr>' : '') + '<tr><td class="lbl">CGST</td><td class="amt">' + fmtNum(totC.toFixed(2)) + '</td></tr><tr><td class="lbl">SGST</td><td class="amt">' + fmtNum(totS.toFixed(2)) + '</td></tr><tr><td class="lbl">IGST</td><td class="amt">' + fmtNum(totI.toFixed(2)) + '</td></tr><tr><td class="lbl">Round Off</td><td class="amt">' + fmtNum(roundOff.toFixed(2)) + '</td></tr><tr class="grand"><td>Grand Total</td><td class="rt">₹' + fmtNum(grand.toFixed(2)) + '</td></tr></table></div></section>' +
+    '<div class="words">Amount in words: ' + esc(amountWords(grand)) + '</div>' +
+    (r.openingRemark || r.remarks || r.narration || r.notes ? '<div class="remark"><b>Remarks:</b> ' + esc(r.openingRemark || r.remarks || r.narration || r.notes) + '</div>' : '') +
+    '<section class="terms"><h4>AGREED TERMS &amp; CONDITIONS</h4><ol>' +
+      '<li>Goods which are rejected by our QC will be returned to the seller at their sole responsibility.</li>' +
+      '<li>We reserve the right to reject defective goods even at a later stage and recover the cost of material and losses, if any.</li>' +
+      '<li>Payment shall be made for the actual accepted quantity received by us and our records shall be final and conclusive on this point.</li>' +
+      '<li>We shall be entitled to deduct discount and debit notes for discrepancies as mentioned in the order.</li>' +
+      '<li>Any dispute arising with respect to this Goods Receipt Note shall be subject to ' + esc(PRINT_CO.jurisdiction) + ' jurisdiction.</li>' +
+    '</ol></section>' +
+    '<section class="sign">' +
+      '<div><b>Prepared / Checked By</b><span></span>Name &amp; Signature</div>' +
+      '<div><b>Store / Received By</b><span></span>Name &amp; Signature</div>' +
+      '<div><b>For ' + esc(PRINT_CO.name) + '</b><span></span>Authorized Signatory</div>' +
+    '</section>' +
+    '<div class="foot">SYSTEM-GENERATED GOODS RECEIPT NOTE · SUBJECT TO ' + esc(PRINT_CO.jurisdiction.toUpperCase()) + ' JURISDICTION</div></main></body></html>';
+
+  const w = window.open('', '_blank');
+  if (!w) return toast('Allow pop-ups to print the Goods Receipt Note', 'red');
   w.document.write(doc);
   w.document.close();
 }
@@ -6426,6 +7747,9 @@ function tableBodyHtml(m) {
     if (m === 'po') {
       extra += '<button class="btn-icon" title="Print purchase order" onclick="event.stopPropagation();printPO(\'' + r.id + '\')">' + ic('print',15) + '</button>';
     }
+    if (m === 'inward') {
+      extra += '<button class="btn-icon" title="Print Goods Receipt Note (GRN)" onclick="event.stopPropagation();printInward(\'' + r.id + '\')">' + ic('print',15) + '</button>';
+    }
     if (m === 'costing') {
       extra += '<button class="btn-icon" title="Repeat costing" onclick="event.stopPropagation();repeatCosting(\'' + r.id + '\')">' + ic('copy',15) + '</button>';
       extra += '<button class="btn-icon" title="Print costing" onclick="event.stopPropagation();printCosting(\'' + r.id + '\')">' + ic('print',15) + '</button>';
@@ -7072,7 +8396,11 @@ function onPoSupplierChange(supplier) {
 /* a trade carries its own GST registration, so its state drives the tax split */
 function onPoTradeChange(tradeName) {
   const t = partyTradeByName(cboxGet('po-supplier'), tradeName);
-  const gstType = (t && t.gstType) ? t.gstType : '';
+  const gstNo = String(t && (t.gstNo || t.gstin) || '').trim().toUpperCase();
+  const state = String(t && t.state || '').trim();
+  const stateCode = /^\d{2}$/.test(gstNo.slice(0, 2)) ? gstNo.slice(0, 2) :
+    (/^\d{2}$/.test(state) ? state : GST_STATE_CODE[state.toLowerCase()] || '');
+  const gstType = t && stateCode ? (stateCode === '27' ? 'CGST & SGST' : 'IGST') : '';
   const el = $('f-gsttype'); if (el) el.value = gstType;
   const hint = $('f-gsttype-hint');
   if (hint) {
@@ -10708,6 +12036,8 @@ function renderReportingBuilder(){
 
 /* ================= REPORTS ================= */
 const REPORT_TYPES = [
+  { k: 'fabric_inout_summary', l: 'Fabric Inward & Outward Summary' },
+  { k: 'trims_inout_summary',  l: 'Trims Inward & Outward Summary' },
   { k: 'fabric_grn',   l: 'Fabric Inward' },
   { k: 'trims_grn',    l: 'Trims Inward' },
   { k: 'fabric_po_grn', l: 'Fabric PO Outstanding' },
@@ -11261,6 +12591,7 @@ function renderReports() {
   rdpSyncRepState();
   const curT = REPORT_TYPES.find(function (t) { return t.k === r.type; }) || REPORT_TYPES[0];
   const groups = [
+    { name: 'Summary Reports', items: ['fabric_inout_summary','trims_inout_summary'] },
     { name: 'Inward', items: ['fabric_grn','trims_grn','fabric_po_grn','trims_po_grn'] },
     { name: 'Issues', items: ['fabric_issue','trims_issue','intransit_material'] },
     { name: 'Production', items: ['wip','fg_received'] },
@@ -11305,6 +12636,12 @@ function renderReportBody() {
   const r = repState;
   const from = r.from || defaultFrom(), to = r.to || today();
   const el = $('rep-body'); if (!el) return;
+  if (r.type === 'fabric_inout_summary' || r.type === 'trims_inout_summary') {
+    const rep = buildReport(r.type, from, to);
+    renderSummaryReportBody(el, rep, from, to);
+    if ($('rep-count')) $('rep-count').textContent = (rep.rows.length || 0) + ' days in range';
+    return;
+  }
   if (r.type === 'stock') {
     const secs = stockSections(from, to);
     el.innerHTML = secs.map(s =>
@@ -11382,6 +12719,7 @@ function numColumns(rows, colCount) {
 
 function buildReport(type, from, to) {
   const inR = (d) => inRange(d, from, to);
+  if (type === 'fabric_inout_summary' || type === 'trims_inout_summary') return buildSummaryInOutReport(type, from, to);
   if(type==='item_ledger')return buildItemLedger(from,to);
   if (type === 'fabric_grn' || type === 'trims_grn') {
     const fab = type === 'fabric_grn';
@@ -11622,10 +12960,29 @@ function exportReportCSV() {
   const r = repState;
   const from = r.from || defaultFrom(), to = r.to || today();
   let csv = '';
+  if (r.type === 'fabric_inout_summary' || r.type === 'trims_inout_summary') {
+    const rep = buildReport(r.type, from, to);
+    renderSummaryReportBody(el, rep, from, to);
+    if ($('rep-count')) $('rep-count').textContent = (rep.rows.length || 0) + ' days in range';
+    return;
+  }
   if (r.type === 'stock') {
     stockSections(from, to).forEach(s => {
       csv += '\n' + s.title.replace(/[^\w ]/g, '').trim() + '\n' + s.header.join(',') + '\n' + s.rows.map(row => row.map(csvEsc).join(',')).join('\n') + '\n';
     });
+  } else if (r.type === 'fabric_inout_summary' || r.type === 'trims_inout_summary') {
+    const rep = buildReport(r.type, from, to);
+    csv = rep.title + ' ' + (dpToDisplay(from)||from) + ' and ' + (dpToDisplay(to)||to) + '\n';
+    if (rep.isFabric) {
+      csv += 'Date,Opening Qty Meter,Opening Value Rs.,Inward Qty Meter,Inward Value Rs.,Outward Qty Meter,Outward Value Rs.,Closing Qty Meter,Closing Value Rs.\n';
+      csv += ',,,Inward,Inward,"Job Work, Purchase Return, Sample","Job Work, Purchase Return, Sample",,\n';
+    } else {
+      csv += 'Date,Opening Value Rs.,Inward Value Rs.,Outward Value Rs.,Closing Value Rs.\n';
+      csv += ',,Inward,"Job Work, Purchase Return, Sample",\n';
+    }
+    csv += rep.rows.map(row => row.map(csvEsc).join(',')).join('\n') + '\n';
+    if (rep.foot) csv += rep.foot.map(csvEsc).join(',') + '\n';
+    if (rep.footAvg) csv += rep.footAvg.map(csvEsc).join(',') + '\n';
   } else {
     const rep = buildReport(r.type, from, to);
     csv = rep.header.join(',') + '\n' + rep.rows.map(row => row.map(csvEsc).join(',')).join('\n');
@@ -13410,6 +14767,7 @@ try {
   buildReport=function(type,from,to){
     const sourceModule=/po_grn/.test(type)?'po':(/grn|stock|item_ledger/.test(type)?'inward':(/issue|wip|fg_received/.test(type)?'jobwork':''));
     if(sourceModule&&!userCan(sourceModule,'view'))return {title:'Restricted report',header:['Access'],rows:[],foot:null};
+    if (type === 'fabric_inout_summary' || type === 'trims_inout_summary') return buildSummaryInOutReport(type, from, to);
     let rep=qaBuildReport(type,from,to);
     if(type==='fabric_grn'||type==='trims_grn')rep.rows=rep.rows.filter(r=>!/rejected|cancelled/i.test(String(r[11]||'')));
     if(type==='fabric_issue'||type==='trims_issue'){
@@ -14079,7 +15437,12 @@ function renderPartnerOnboarding(){
   $('tb-title').textContent='Partner onboarding';
   $('tb-sub').textContent='Onboard buyer and vendor accounts with GSTIN auto-fetch';
   const rows=list.slice().reverse().map(function(p){
-    const roles=(p.roles||[]).join(', ')||'—';
+    const roles=(p.roles||[]).map(function(r){
+      if(r==='JOB_WORKER'||r==='SUPPLIER') return 'Supplier';
+      if(r==='VENDOR') return 'Vendor';
+      if(r==='BUYER') return 'Buyer';
+      return r;
+    }).join(', ')||'—';
     const gst=((p.registrations||[])[0]||{}).gstin||'—';
     return '<tr><td><b>'+esc(p.code||'')+'</b></td><td>'+esc(p.displayName||'')+'</td><td>'+esc(roles)+'</td><td>'+esc(gst)+'</td><td>'+esc(p.status||'Draft')+'</td>'+
       '<td class="actions-cell no-print" onclick="event.stopPropagation()">'+
@@ -14172,11 +15535,14 @@ function renderPartnerForm(rec){
   const contacts=rec.contacts&&rec.contacts.length?rec.contacts:[{}];
   $('content').innerHTML='<div class="ob-wrap"><div>'+
     '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">01</span><h3 style="margin:0">Partner account</h3></div><p class="ob-help">One commercial account even if the partner has several brands or GSTINs.</p></div></div>'+
-    '<div class="grid-fixed">'+field('Account / group name *','<input class="inp" id="ob-name" value="'+esc(rec.displayName||'')+'" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()">')+field('Short name *','<input class="inp" id="ob-short" value="'+esc(rec.shortName||'')+'" placeholder="e.g. ABC Retail">')+
-    '<div class="field" id="ob-biztype" style="max-width:none"><label class="lbl">Business Type *</label><div class="ob-check">'+
-      [['BUYER','Buyer'],['VENDOR','Vendor'],['JOB_WORKER','Job worker']].map(function(r){return '<label><input type="checkbox" data-ob-role="'+r[0]+'"'+(roles.indexOf(r[0])>-1?' checked':'')+' onchange="obUpdateSummary()"> '+r[1]+'</label>';}).join('')+
+    '<div class="grid-fixed ob-account-grid" style="display:flex;flex-wrap:wrap;gap:0 18px;align-items:flex-start">'+field('Account / group name *','<input class="inp" id="ob-name" value="'+esc(rec.displayName||'')+'" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()">','ob-account-field')+field('Short name *','<input class="inp" id="ob-short" value="'+esc(rec.shortName||'')+'" placeholder="e.g. ABC Retail">','ob-account-field')+
+    '<div class="field" id="ob-biztype" style="max-width:none;min-width:max-content;flex-shrink:0"><label class="lbl">Business Type *</label><div class="ob-check" style="display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap">'+
+      [['BUYER','Buyer'],['VENDOR','Vendor'],['SUPPLIER','Supplier']].map(function(r){
+        const checked = roles.indexOf(r[0])>-1 || (r[0]==='SUPPLIER' && roles.indexOf('JOB_WORKER')>-1);
+        return '<label style="white-space:nowrap;flex-shrink:0"><input type="checkbox" data-ob-role="'+r[0]+'"'+(checked?' checked':'')+' onchange="obUpdateSummary()"> '+r[1]+'</label>';
+      }).join('')+
     '</div></div>'+
-    '<div class="field" id="ob-pstatus"><label class="lbl">Vendor / Buyer Status *</label>'+
+    '<div class="field" id="ob-pstatus" style="flex-shrink:0"><label class="lbl">Vendor / Buyer Status *</label>'+
       '<input type="hidden" id="ob-status" value="'+esc((rec.status==='Inactive'||rec.status==='INACTIVE')?'Inactive':'Active')+'">'+
       '<button type="button" class="gst-sw'+((rec.status==='Inactive'||rec.status==='INACTIVE')?'':' on')+'" title="Active / Inactive" onclick="obTogglePartnerStatus(this)"><span></span></button>'+
       '<div class="fhint" id="ob-status-lbl">'+((rec.status==='Inactive'||rec.status==='INACTIVE')?'Inactive':'Active')+'</div></div></div>'+
@@ -14339,13 +15705,30 @@ function obSyncToPartyMaster(rec){
   if(!db.masters) db.masters={}; if(!db.masters.parties) db.masters.parties=[];
   const g=(rec.registrations||[])[0]||{};
   const legal=g.legalName||rec.displayName;
-  const short=rec.shortName||g.tradeName||rec.displayName;
+  const trade=g.tradeName||rec.displayName||rec.shortName;
+  const short=g.tradeName||rec.shortName||rec.displayName;
   const types=[];
-  if(rec.roles.indexOf('VENDOR')>-1||rec.roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
+  if(rec.roles.indexOf('VENDOR')>-1||rec.roles.indexOf('SUPPLIER')>-1||rec.roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
   if(rec.roles.indexOf('BUYER')>-1||rec.roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
   if(!types.length) types.push('Supplier');
   let p=db.masters.parties.find(function(x){return x.partnerId===rec.id || String(x.gstNo||'').toUpperCase()===String(g.gstin||'').toUpperCase();});
-  const data={ partnerId:rec.id, legalName:legal, shortName:short, gstNo:g.gstin||'', pan:g.pan||'', address:g.principalAddress||'', city:g.city||'', district:g.district||'', state:g.placeState||g.state||'', pin:g.pincode||'', businessType:types, status:'Active' };
+  const billTos = (rec.registrations || []).map(function(r, i){
+    const tName = String(r.tradeName || r.legalName || rec.displayName || ('Trade ' + (i + 1))).trim();
+    return {
+      name: tName,
+      tradeName: tName,
+      legalName: String(r.legalName || '').trim(),
+      gstNo: String(r.gstin || '').trim(),
+      city: String(r.city || '').trim(),
+      district: String(r.district || '').trim(),
+      state: String(r.placeState || r.state || '').trim(),
+      pin: String(r.pincode || '').trim(),
+      address: String(r.principalAddress || '').trim(),
+      gstType: String(r.gstType || '').trim(),
+      active: true
+    };
+  });
+  const data={ partnerId:rec.id, legalName:legal, tradeName:trade, shortName:short, registrations:rec.registrations, billTos:billTos, gstNo:g.gstin||'', pan:g.pan||'', address:g.principalAddress||'', city:g.city||'', district:g.district||'', state:g.placeState||g.state||'', pin:g.pincode||'', businessType:types, status:'Active' };
   if(p) Object.assign(p,data);
   else db.masters.parties.push(Object.assign({ id:uid(), code:rec.code }, data));
 }
