@@ -2860,10 +2860,10 @@ function buildSummaryExcelTableHtml(rep) {
 }
 
 /* ---------------- DASHBOARD SEPARATE SUMMARY WIDGETS ---------------- */
-let dashFabricPreset = 10;
-let dashTrimsPreset = 10;
-let dashFabricRange = { from: '2026-09-01', to: '2026-09-10' };
-let dashTrimsRange  = { from: '2026-09-01', to: '2026-09-10' };
+let dashFabricPreset = 30;
+let dashTrimsPreset = 30;
+let dashFabricRange = calcPresetRange(30);
+let dashTrimsRange  = calcPresetRange(30);
 
 function calcPresetRange(preset) {
   const t = today();
@@ -2977,16 +2977,7 @@ function renderDashboardFabricWidget() {
           '<p class="dash-summary-sub" style="font-size:12px;color:#64748b;margin:0">Continuous daily flow of meters and valuation across receipts, job works, purchase returns and samples</p>' +
         '</div>' +
         '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-          '<div class="dash-period-pills" style="display:inline-flex;background:#f1f5f9;border-radius:7px;padding:3px;gap:2px">' +
-            '<button type="button" class="dash-pill ' + (dashFabricPreset === 10 ? 'active' : '') + '" onclick="setDashFabricPeriod(10)">10 Days</button>' +
-            '<button type="button" class="dash-pill ' + (dashFabricPreset === 7 ? 'active' : '') + '" onclick="setDashFabricPeriod(7)">7 Days</button>' +
-            '<button type="button" class="dash-pill ' + (dashFabricPreset === 'month' ? 'active' : '') + '" onclick="setDashFabricPeriod(\'month\')">This Month</button>' +
-          '</div>' +
-          '<div class="dash-date-inputs" style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:2px 8px">' +
-            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-fab-from" value="' + range.from + '" onchange="setDashFabricDates(this.value, $(\'dash-fab-to\').value)">' +
-            '<span class="dash-dt-sep" style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase">to</span>' +
-            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-fab-to" value="' + range.to + '" onchange="setDashFabricDates($(\'dash-fab-from\').value, this.value)">' +
-          '</div>' +
+          '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'fabric\', event)" title="Choose report date range">Last 30 days</button>' +
           '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'fabric\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
           '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'fabric_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
         '</div>' +
@@ -3043,16 +3034,7 @@ function renderDashboardTrimsWidget() {
           '<p class="dash-summary-sub" style="font-size:12px;color:#64748b;margin:0">Continuous daily valuation across inward receipts, job work issues and sample issues</p>' +
         '</div>' +
         '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-          '<div class="dash-period-pills" style="display:inline-flex;background:#f1f5f9;border-radius:7px;padding:3px;gap:2px">' +
-            '<button type="button" class="dash-pill ' + (dashTrimsPreset === 10 ? 'active' : '') + '" onclick="setDashTrimsPeriod(10)">10 Days</button>' +
-            '<button type="button" class="dash-pill ' + (dashTrimsPreset === 7 ? 'active' : '') + '" onclick="setDashTrimsPeriod(7)">7 Days</button>' +
-            '<button type="button" class="dash-pill ' + (dashTrimsPreset === 'month' ? 'active' : '') + '" onclick="setDashTrimsPeriod(\'month\')">This Month</button>' +
-          '</div>' +
-          '<div class="dash-date-inputs" style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:2px 8px">' +
-            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-trm-from" value="' + range.from + '" onchange="setDashTrimsDates(this.value, $(\'dash-trm-to\').value)">' +
-            '<span class="dash-dt-sep" style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase">to</span>' +
-            '<input type="date" class="inp inp-sm dash-dt-inp" id="dash-trm-to" value="' + range.to + '" onchange="setDashTrimsDates($(\'dash-trm-from\').value, this.value)">' +
-          '</div>' +
+          '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'trims\', event)" title="Choose report date range">Last 30 days</button>' +
           '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'trims\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
           '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'trims_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
         '</div>' +
@@ -3715,17 +3697,23 @@ function partyByName(name) {
 }
 /* every onboarded party, for Ship To */
 function partyOptions() {
-  return db.masters.parties
-    .filter(function (x) { return x.status !== 'Inactive'; })
-    .sort(function (a, b) { return String(a.legalName).localeCompare(String(b.legalName)); })
-    .map(function (x) {
-      const nm = x.shortName || x.legalName;
-      const mid = x.code || x.id || '';
-      const code = mid ? '[' + mid + '] ' : '';
-      const city = x.city ? ' · ' + x.city : '';
-      const types = partyTypes(x).join(', ');
-      return { v: nm, l: code + nm + city + (types ? ' (' + types + ')' : ''), mid: mid };
+  const seen={};
+  const out=[];
+  function add(nm,label,mid){
+    nm=String(nm||'').trim();
+    if(!nm||seen[nm.toLowerCase()])return;
+    seen[nm.toLowerCase()]=true; out.push({v:nm,l:label||nm,mid:mid||''});
+  }
+  (db.masters.parties||[]).filter(function(x){return x.status!=='Inactive';}).forEach(function(x){
+    const mid=x.code||x.id||'', prefix=mid?'['+mid+'] ':'', types=partyTypes(x).join(', ');
+    const main=x.shortName||x.legalName;
+    add(main,prefix+main+(x.city?' · '+x.city:'')+(types?' ('+types+')':''),mid);
+    (x.billTos||[]).forEach(function(b){
+      const name=b.name||b.tradeName||b.legalName;
+      add(name,prefix+name+(b.city?' · '+b.city:'')+(types?' ('+types+')':''),mid);
     });
+  });
+  return out.sort(function(a,b){return String(a.l).localeCompare(String(b.l));});
 }
 function supplierPartyOptions() {
   const seen = {};
@@ -11191,7 +11179,7 @@ const RDP_NAV = [
   { k:'quarters', l:'Quarters' },
   { k:'custom', l:'Custom range' }
 ];
-let RDP = { open:false, el:null, nav:'last', draft:null, view:null, pick:null };
+let RDP = { open:false, el:null, nav:'last', draft:null, view:null, pick:null, target:null };
 
 function rdpNavOf(preset) {
   if (preset === 'today' || preset === 'yesterday' || preset === 'last' || preset === 'thisMonth' || preset === 'lastMonth' || preset === 'custom') return preset;
@@ -11219,6 +11207,7 @@ function rdpToggle(e) {
   rdpOpen();
 }
 function rdpOpen() {
+  RDP.target = null;
   rdpSyncRepState();
   const r = repState;
   RDP.draft = {
@@ -11244,6 +11233,27 @@ function rdpOpen() {
     if (top + 420 > window.innerHeight) top = Math.max(8, box.top - 6 - Math.min(el.offsetHeight || 400, window.innerHeight - 16));
     el.style.left = Math.round(left) + 'px';
     el.style.top = Math.round(top) + 'px';
+  }
+}
+function dashboardDateFilter(kind, e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  if (RDP.open) { rdpHide(); return; }
+  const range = kind === 'fabric' ? dashFabricRange : dashTrimsRange;
+  RDP.target = kind;
+  RDP.draft = { from: range.from, to: range.to, preset: 'last', lastN: 30, lastUnit: 'days', includeToday: true };
+  RDP.nav = 'last';
+  const end = dpParse(range.to) || new Date();
+  RDP.view = new Date(end.getFullYear(), end.getMonth(), 1);
+  RDP.pick = null;
+  RDP.open = true;
+  rdpPaint();
+  const el = rdpEnsure(), anchor = e && e.currentTarget;
+  el.classList.add('show');
+  if (anchor) {
+    const box = anchor.getBoundingClientRect();
+    const w = Math.min(el.offsetWidth || 760, window.innerWidth - 16);
+    el.style.left = Math.round(Math.max(8, Math.min(box.left, window.innerWidth - 8 - w))) + 'px';
+    el.style.top = Math.round(Math.min(box.bottom + 6, window.innerHeight - (el.offsetHeight || 400) - 8)) + 'px';
   }
 }
 function rdpApplyPreset(nav, preset) {
@@ -11438,6 +11448,14 @@ function rdpApply() {
   if (toInp) rdpCommitTyped('to', toInp.value, true);
   const d = RDP.draft; if (!d || !d.from || !d.to) return;
   if (d.from > d.to) { const t = d.from; d.from = d.to; d.to = t; }
+  if (RDP.target === 'fabric' || RDP.target === 'trims') {
+    const range = { from: d.from, to: d.to };
+    if (RDP.target === 'fabric') { dashFabricPreset = null; dashFabricRange = range; renderDashboardFabricWidget(); }
+    else { dashTrimsPreset = null; dashTrimsRange = range; renderDashboardTrimsWidget(); }
+    RDP.target = null;
+    rdpHide();
+    return;
+  }
   repState.from = d.from;
   repState.to = d.to;
   repState.preset = d.preset;
@@ -14396,8 +14414,11 @@ async function gstFetchProfile(gstin){
 var obEditId = (typeof obEditId !== 'undefined') ? obEditId : null;
 function partnersDb(){ if(!db.partners) db.partners=[]; return db.partners; }
 function nextPartnerCode(){
-  const n=(partnersDb().length||0)+1;
-  return 'PRT-'+String(n).padStart(4,'0');
+  const used={};
+  partnersDb().forEach(function(x){ used[String(x.code||'').trim().toUpperCase()]=true; });
+  let n=1, code='';
+  do { code='PRT-'+String(n++).padStart(4,'0'); } while (used[code]);
+  return code;
 }
 function obField(root,f){ const el=qs('[data-ob="'+f+'"]',root||document); return el?(el.type==='checkbox'?el.checked:el.value):''; }
 function obSet(root,f,v){ const el=qs('[data-ob="'+f+'"]',root||document); if(!el)return; if(el.type==='checkbox') el.checked=!!v; else el.value=v==null?'':v; }
