@@ -4390,15 +4390,53 @@ function renderDashboardTrimsWidget() {
     '</div>';
 }
 
+function dashboardSimpleTable(title, header, rows, foot) {
+  const head = header.map(function(h, i) { return '<th class="' + (i ? 'num' : '') + '">' + esc(h) + '</th>'; }).join('');
+  const body = rows.length ? rows.map(function(row) { return '<tr>' + row.map(function(c, i) { return '<td class="' + (i ? 'num' : '') + '">' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') : '<tr><td colspan="' + header.length + '" style="text-align:center;color:var(--muted)">No data available</td></tr>';
+  const total = foot ? '<tfoot><tr>' + foot.map(function(c, i) { return '<td class="' + (i ? 'num' : '') + '"><b>' + esc(c) + '</b></td>'; }).join('') + '</tr></tfoot>' : '';
+  return '<div class="table-wrap dash-table-wrap"><table class="summary-report-table excel-style"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>' + total + '</table></div>';
+}
+function dashboardWipVendorRows() {
+  const grouped = {};
+  (db.jobwork || []).forEach(function(j) {
+    if (j.status === 'Cancelled' || j.status === 'Closed') return;
+    const orderQty = jwTotalOrder(j), fabricIssue = (j.issues || []).concat(j.extras || []).filter(function(x) { return x.item && isFabricItem(x.item); }).reduce(function(a, x) { return a + issueLineQty(x); }, 0);
+    const fabricReturn = jwFabricReturned(j), actualIssue = Math.max(0, fabricIssue - fabricReturn), consumption = orderQty > 0 ? fabricIssue / orderQty : 0, garmentExpected = consumption > 0 ? Math.round(actualIssue / consumption) : 0;
+    let inwardPass = 0, inwardReject = 0; const receipts = jwReceipts(j);
+    if (receipts.length) receipts.forEach(function(r) { if (/reject|fail/i.test(String(r.qc || 'Pass'))) inwardReject += pf(r.qty); else inwardPass += pf(r.qty); }); else inwardPass = jwTotalReceived(j);
+    const wip = Math.max(0, garmentExpected - inwardPass - inwardReject); if (!wip) return;
+    const key = String(j.vendor || '—').trim() || '—', g = grouped[key] || (grouped[key] = { vendor:key, issue:0, ret:0, actual:0, expected:0, pass:0, reject:0, wip:0, cons:0 });
+    g.issue += fabricIssue; g.ret += fabricReturn; g.actual += actualIssue; g.expected += garmentExpected; g.pass += inwardPass; g.reject += inwardReject; g.wip += wip; g.cons += consumption;
+  });
+  return Object.keys(grouped).map(function(k) { return grouped[k]; }).sort(function(a,b) { return a.vendor.localeCompare(b.vendor); });
+}
+function renderDashboardInventoryWidget() {
+  const el = $('dash-inventory-widget'); if (!el) return;
+  const trimsValue = trimStock().reduce(function(a,x) { return a + Math.max(0,x.balance) * sfGetItemRate(x.name,''); }, 0), wip = dashboardWipVendorRows().reduce(function(a,x) { return a + x.wip; }, 0), fg = (db.jobwork || []).reduce(function(a,j) { return a + jwTotalReceived(j); }, 0);
+  const rows = [['Fabric Stock','mtr',fmtNum(fabricStock().m),fmtNum(fabricValuation())],['Trims Stock','-', '-',fmtNum(trimsValue || trimsValuation())],['WIP','pcs',fmtNum(wip),'-'],['FG','pcs',fmtNum(fg),'-']];
+  const total = ['Total','-','-',fmtNum(rows.reduce(function(a,r) { return a + pf(r[3]); },0))];
+  el.innerHTML = '<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">Inventory</h3><p class="dash-summary-sub">Current material, work in progress and finished-goods balances</p></div></div>' + dashboardSimpleTable('Inventory',['Particulars','UOM','Qty','Value'],rows,total) + '</div>';
+}
+function renderDashboardWipWidget() {
+  const el = $('dash-wip-widget'); if (!el) return;
+  const data = dashboardWipVendorRows(), rows = data.map(function(x) { return [x.vendor,fmtNum(x.issue),fmtNum(x.ret),fmtNum(x.actual),x.cons.toFixed(2),fmtNum(x.expected),fmtNum(x.pass),fmtNum(x.reject),fmtNum(x.wip),'-']; });
+  const t = data.reduce(function(a,x) { a.issue+=x.issue;a.ret+=x.ret;a.actual+=x.actual;a.expected+=x.expected;a.pass+=x.pass;a.reject+=x.reject;a.wip+=x.wip;return a; },{issue:0,ret:0,actual:0,expected:0,pass:0,reject:0,wip:0});
+  const foot=['Total',fmtNum(t.issue),fmtNum(t.ret),fmtNum(t.actual),'',fmtNum(t.expected),fmtNum(t.pass),fmtNum(t.reject),fmtNum(t.wip),'-'];
+  el.innerHTML='<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">WIP Vendor-wise</h3><p class="dash-summary-sub">Work in progress grouped by job-work vendor</p></div></div>'+dashboardSimpleTable('WIP Vendor-wise',['Vendor Name','Fabric Issue','Fabric Return','Actual Issue','Cons.','Garment Expected','Garment Inward','Rejection','WIP','WIP mtr'],rows,foot)+'</div>';
+}
 function renderBothDashboardWidgets() {
   renderDashboardFabricWidget();
   renderDashboardTrimsWidget();
+  renderDashboardInventoryWidget();
+  renderDashboardWipWidget();
 }
 
 window.ensureSummaryReportStyles = ensureSummaryReportStyles;
 window.buildSummaryExcelTableHtml = buildSummaryExcelTableHtml;
 window.renderDashboardFabricWidget = renderDashboardFabricWidget;
 window.renderDashboardTrimsWidget = renderDashboardTrimsWidget;
+window.renderDashboardInventoryWidget = renderDashboardInventoryWidget;
+window.renderDashboardWipWidget = renderDashboardWipWidget;
 window.renderBothDashboardWidgets = renderBothDashboardWidgets;
 window.setDashFabricPeriod = setDashFabricPeriod;
 window.setDashTrimsPeriod = setDashTrimsPeriod;
@@ -4463,6 +4501,8 @@ function renderDashboard() {
     '</div>' +
     '<div id="dash-fabric-summary-widget"></div>' +
     '<div id="dash-trims-summary-widget"></div>' +
+    '<div id="dash-inventory-widget"></div>' +
+    '<div id="dash-wip-widget"></div>' +
     '<div class="flow-card"><div class="t">Production pipeline</div><div class="s">Click a stage to open it — PO → Inward → Job Work → Sale</div><div class="flow">' + flow + '</div></div>' +
     '<div class="section-title">Recent activity <span class="c">' + recent.length + '</span></div>' + rh +
     '<details class="footnote"><summary>How this workflow fits together</summary><div class="fn-body"> Raise a <b>PO</b> for fabric &amp; trims → record <b>Inward</b> when they arrive (auto-updates PO status) → <b>Job Work</b>: add <b>multiple issue records</b> (fabric + trims to the job-worker vendor) and <b>styles with size-wise qty</b> — <b>Internal ID style no. is mandatory</b> (from Style Master) &amp; record finished goods received back with consumption → <b>Sale</b> entry (Myntra D2C), and use <b>Reports</b> for GRN / issues / WIP / FG received / stock. Set up <b>Style Master</b> (Internal + Portal ID) and <b>Size Master</b> in Masters. Every dropdown is searchable — just type to filter. Search, export &amp; print are available on every module.</div></details>';
