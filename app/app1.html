@@ -4099,7 +4099,7 @@ function ensureSummaryReportStyles() {
     '.excel-title-ribbon{background:#f8cbac!important;color:#000!important;font-weight:800!important;font-size:13.5px!important;text-align:center!important;padding:9px 14px!important;border:1px solid #777!important;border-bottom:none!important;letter-spacing:0.2px!important;border-radius:6px 6px 0 0!important;box-sizing:border-box!important}' +
     '.dash-table-wrap{overflow-x:auto!important;border:1px solid #777!important;border-radius:0 0 6px 6px!important;background:#fff!important;box-sizing:border-box!important}' +
     '.summary-report-table.excel-style{width:100%!important;border-collapse:collapse!important;font-size:12px!important;font-variant-numeric:tabular-nums!important;background:#fff!important;margin:0!important}' +
-    '.summary-report-table.excel-style th{background:#ffff00!important;color:#000!important;font-weight:750!important;border:1px solid #777!important;text-align:center!important;padding:6px 8px!important;vertical-align:middle!important;line-height:1.3!important}' +
+    '.summary-report-table.excel-style th{background:#f1f5f9!important;color:#000!important;font-weight:750!important;border:1px solid #777!important;text-align:center!important;padding:6px 8px!important;vertical-align:middle!important;line-height:1.3!important}' +
     '.summary-report-table.excel-style thead tr.thead-top th.num,.summary-report-table.excel-style thead tr.thead-sub th.num{text-align:right!important}' +
     '.summary-report-table.excel-style thead tr.thead-top th.th-date{text-align:left!important}' +
     '.summary-report-table.excel-style .th-sublabel{font-size:10.5px!important;font-weight:600!important;color:#333!important;margin-top:2px!important;text-transform:none!important}' +
@@ -4107,7 +4107,7 @@ function ensureSummaryReportStyles() {
     '.summary-report-table.excel-style tbody tr:hover td{background:#f8fafc!important}' +
     '.summary-report-table.excel-style tbody td.td-date{font-weight:600!important;color:#0f172a!important;text-align:left!important;background:#fff!important}' +
     '.summary-report-table.excel-style tbody td.num{text-align:right!important}' +
-    '.summary-report-table.excel-style tfoot tr.tot-row td,.summary-report-table.excel-style tfoot tr.avg-row td{background:#ffff00!important;color:#000!important;font-weight:800!important;border:1px solid #000!important;padding:6px 8px!important}' +
+    '.summary-report-table.excel-style tfoot tr.tot-row td,.summary-report-table.excel-style tfoot tr.avg-row td{background:#e2e8f0!important;color:#000!important;font-weight:800!important;border:1px solid #000!important;padding:6px 8px!important}' +
     '.summary-report-table.excel-style tfoot tr.tot-row td.td-tot,.summary-report-table.excel-style tfoot tr.avg-row td.td-avg{text-align:left!important;font-weight:850!important}';
   document.head.appendChild(st);
 }
@@ -4151,6 +4151,10 @@ function buildSummaryExcelTableHtml(rep) {
       '</thead>';
   }
 
+  thead = '<thead><tr>' + rep.header.map((label, idx) =>
+    '<th class="' + (idx === 0 ? 'th-date' : 'num') + '" style="background:#f1f5f9;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:' + (idx === 0 ? 'left' : 'right') + ';vertical-align:middle">' + esc(label) + '</th>'
+  ).join('') + '</tr></thead>';
+
   let tbody = '<tbody>';
   if (!rep.rows.length) {
     tbody += '<tr><td colspan="' + rep.header.length + '" style="text-align:center;color:#6b7280;padding:24px;border:1px solid #777">No transactions in selected date range</td></tr>';
@@ -4190,10 +4194,12 @@ function buildSummaryExcelTableHtml(rep) {
         }).join('') +
       '</tr>' +
     '</tfoot>';
+  thead = thead.replace(/#ffff00/g, '#f1f5f9');
+  const neutralTfoot = tfoot.replace(/#ffff00/g, '#e2e8f0');
 
   return '<div class="table-wrap dash-table-wrap" style="overflow-x:auto;border:1px solid #777;border-radius:0 0 6px 6px;background:#fff;box-sizing:border-box">' +
            '<table class="summary-report-table excel-style" style="width:100%;border-collapse:collapse;font-size:12px;background:#fff;margin:0">' +
-             thead + tbody + tfoot +
+           thead + tbody + neutralTfoot +
            '</table>' +
          '</div>';
 }
