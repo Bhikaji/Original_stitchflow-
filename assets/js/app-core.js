@@ -2677,7 +2677,7 @@ function renderSummaryReportBody(el, rep, from, to) {
         '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">CLOSING</span>' +
           '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
-          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Value: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Daily Averages</span>' +
@@ -2968,7 +2968,7 @@ function renderDashboardFabricWidget() {
       '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
         '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">CLOSING</span>' +
         '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12;line-height:1.2">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
-        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Value: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
       '</div>' +
     '</div>';
 
