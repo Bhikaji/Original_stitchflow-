@@ -33,6 +33,7 @@ window.addEventListener('unhandledrejection', function (e) { showErr('Promise er
 const $  = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtNum = (n) => (Number(n) || 0).toLocaleString('en-IN', {maximumFractionDigits: 2});
+const fmtInventoryNum = (n) => Math.round(Number(n) || 0).toLocaleString('en-IN');
 const fmtINR = (n) => '₹' + fmtNum(n);
 const pf = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
@@ -2538,14 +2539,14 @@ function buildSummaryInOutReport(type, from, to) {
       if (isFab) {
         rows.push([
           dispDate,
-          fmtNum(curOpenQty),
-          fmtNum(curOpenVal),
-          fmtNum(inQ),
-          fmtNum(inV),
-          fmtNum(outQ),
-          fmtNum(outV),
-          fmtNum(clsQ),
-          fmtNum(clsV)
+          fmtInventoryNum(curOpenQty),
+          fmtInventoryNum(curOpenVal),
+          fmtInventoryNum(inQ),
+          fmtInventoryNum(inV),
+          fmtInventoryNum(outQ),
+          fmtInventoryNum(outV),
+          fmtInventoryNum(clsQ),
+          fmtInventoryNum(clsV)
         ]);
         rawRows.push({
           date: dispDate, iso: iso,
@@ -2557,10 +2558,10 @@ function buildSummaryInOutReport(type, from, to) {
       } else {
         rows.push([
           dispDate,
-          fmtNum(curOpenVal),
-          fmtNum(inV),
-          fmtNum(outV),
-          fmtNum(clsV)
+          fmtInventoryNum(curOpenVal),
+          fmtInventoryNum(inV),
+          fmtInventoryNum(outV),
+          fmtInventoryNum(clsV)
         ]);
         rawRows.push({
           date: dispDate, iso: iso,
@@ -2595,21 +2596,21 @@ function buildSummaryInOutReport(type, from, to) {
       'Total :',
       '',
       '',
-      fmtNum(totInQ),
-      fmtNum(totInV),
-      fmtNum(totOutQ),
-      fmtNum(totOutV),
-      fmtNum(curOpenQty),
-      fmtNum(curOpenVal)
+      fmtInventoryNum(totInQ),
+      fmtInventoryNum(totInV),
+      fmtInventoryNum(totOutQ),
+      fmtInventoryNum(totOutV),
+      fmtInventoryNum(curOpenQty),
+      fmtInventoryNum(curOpenVal)
     ];
     footAvg = [
       'Average :',
       '',
       '',
-      fmtNum(avgInQ),
-      fmtNum(avgInV),
-      fmtNum(avgOutQ),
-      fmtNum(avgOutV),
+      fmtInventoryNum(avgInQ),
+      fmtInventoryNum(avgInV),
+      fmtInventoryNum(avgOutQ),
+      fmtInventoryNum(avgOutV),
       '',
       ''
     ];
@@ -2617,15 +2618,15 @@ function buildSummaryInOutReport(type, from, to) {
     footTotal = [
       'Total :',
       '',
-      fmtNum(totInV),
-      fmtNum(totOutV),
-      fmtNum(curOpenVal)
+      fmtInventoryNum(totInV),
+      fmtInventoryNum(totOutV),
+      fmtInventoryNum(curOpenVal)
     ];
     footAvg = [
       'Average :',
       '',
-      fmtNum(avgInV),
-      fmtNum(avgOutV),
+      fmtInventoryNum(avgInV),
+      fmtInventoryNum(avgOutV),
       ''
     ];
   }
@@ -2665,22 +2666,22 @@ function renderSummaryReportBody(el, rep, from, to) {
       '<div class="dash-kpis summary-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Qty</span>' +
-          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtNum(s.totalInQty) + ' m</span>' +
-          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalInVal) + '</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtInventoryNum(s.totalInQty) + ' m</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtInventoryNum(s.totalInVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Qty</span>' +
-          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtNum(s.totalOutQty) + ' m</span>' +
-          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalOutVal) + '</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtInventoryNum(s.totalOutQty) + ' m</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Balance</span>' +
-          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12">' + fmtNum(s.closingQty) + ' m</span>' +
-          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtNum(s.closingVal) + '</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12">' + fmtInventoryNum(s.closingQty) + ' m</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Daily Averages</span>' +
-          '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a">In: ' + fmtNum(s.avgInQty) + ' m · Out: ' + fmtNum(s.avgOutQty) + ' m</span>' +
+          '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a">In: ' + fmtInventoryNum(s.avgInQty) + ' m · Out: ' + fmtInventoryNum(s.avgOutQty) + ' m</span>' +
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Across ' + s.dayCount + ' continuous days</span>' +
         '</div>' +
       '</div>';
@@ -2689,17 +2690,17 @@ function renderSummaryReportBody(el, rep, from, to) {
       '<div class="dash-kpis summary-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Value</span>' +
-          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtNum(s.totalInVal) + '</span>' +
-          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtNum(s.avgInVal) + '</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtInventoryNum(s.totalInVal) + '</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtInventoryNum(s.avgInVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Value</span>' +
-          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtNum(s.totalOutVal) + '</span>' +
-          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtNum(s.avgOutVal) + '</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
+          '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtInventoryNum(s.avgOutVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Valuation</span>' +
-          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a">₹' + fmtNum(s.closingVal) + '</span>' +
+          '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a">₹' + fmtInventoryNum(s.closingVal) + '</span>' +
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims valuation</span>' +
         '</div>' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
@@ -2775,18 +2776,20 @@ function buildSummaryExcelTableHtml(rep) {
       '<thead>' +
         '<tr class="thead-top">' +
           '<th rowspan="2" class="th-date" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:left;vertical-align:middle">Date</th>' +
-          '<th rowspan="2" class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Opening Qty Meter</th>' +
-          '<th rowspan="2" class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Opening Value Rs.</th>' +
-          '<th colspan="2" class="ctr th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Inward Qty Meter &amp; Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Inward</div></th>' +
-          '<th colspan="2" class="ctr th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Outward Qty Meter &amp; Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Job Work, Purchase Return, Sample</div></th>' +
-          '<th rowspan="2" class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Closing Qty Meter</th>' +
-          '<th rowspan="2" class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Closing Value Rs.</th>' +
+          '<th colspan="2" class="ctr th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Opening</th>' +
+          '<th colspan="2" class="ctr th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Inward</th>' +
+          '<th colspan="2" class="ctr th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Outward</th>' +
+          '<th colspan="2" class="ctr th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Closing</th>' +
         '</tr>' +
         '<tr class="thead-sub">' +
-          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Inward Qty Meter</th>' +
-          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Inward Value Rs.</th>' +
-          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Outward Qty Meter</th>' +
-          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Outward Value Rs.</th>' +
+          '<th class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Meter</th>' +
+          '<th class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
+          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Meter</th>' +
+          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
+          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Meter</th>' +
+          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
+          '<th class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Meter</th>' +
+          '<th class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
         '</tr>' +
       '</thead>';
   } else {
@@ -2794,21 +2797,19 @@ function buildSummaryExcelTableHtml(rep) {
       '<thead>' +
         '<tr class="thead-top">' +
           '<th rowspan="2" class="th-date" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:left;vertical-align:middle">Date</th>' +
-          '<th rowspan="2" class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Opening Value Rs.</th>' +
-          '<th colspan="1" class="ctr th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Inward Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Inward</div></th>' +
-          '<th colspan="1" class="ctr th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Outward Value Rs.<div class="th-sublabel" style="font-size:10.5px;font-weight:600;color:#333;margin-top:2px">Job Work, Purchase Return, Sample</div></th>' +
-          '<th rowspan="2" class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:right;vertical-align:middle">Closing Value Rs.</th>' +
+          '<th class="ctr th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Opening</th>' +
+          '<th class="ctr th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Inward</th>' +
+          '<th class="ctr th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Outward</th>' +
+          '<th class="ctr th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:center">Closing</th>' +
         '</tr>' +
         '<tr class="thead-sub">' +
-          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Inward Value Rs.</th>' +
-          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Outward Value Rs.</th>' +
+          '<th class="num th-open" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
+          '<th class="num th-inward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
+          '<th class="num th-outward" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
+          '<th class="num th-close" style="background:#ffff00;color:#000;font-weight:750;border:1px solid #777;padding:5px 10px;text-align:right">Value (INR)</th>' +
         '</tr>' +
       '</thead>';
   }
-
-  thead = '<thead><tr>' + rep.header.map((label, idx) =>
-    '<th class="' + (idx === 0 ? 'th-date' : 'num') + '" style="background:#f1f5f9;color:#000;font-weight:750;border:1px solid #777;padding:6px 10px;text-align:' + (idx === 0 ? 'left' : 'right') + ';vertical-align:middle">' + esc(label) + '</th>'
-  ).join('') + '</tr></thead>';
 
   let tbody = '<tbody>';
   if (!rep.rows.length) {
@@ -2860,10 +2861,10 @@ function buildSummaryExcelTableHtml(rep) {
 }
 
 /* ---------------- DASHBOARD SEPARATE SUMMARY WIDGETS ---------------- */
-let dashFabricPreset = 30;
-let dashTrimsPreset = 30;
-let dashFabricRange = calcPresetRange(30);
-let dashTrimsRange  = calcPresetRange(30);
+let dashFabricPreset = 'month';
+let dashTrimsPreset = 'month';
+let dashFabricRange = calcPresetRange('month');
+let dashTrimsRange  = calcPresetRange('month');
 
 function calcPresetRange(preset) {
   const t = today();
@@ -2940,7 +2941,6 @@ function renderDashboardFabricWidget() {
   const s = rep.summary;
   const dispFrom = dpToDisplay(range.from) || range.from;
   const dispTo   = dpToDisplay(range.to) || range.to;
-  const ribbonTitle = 'Fabric Inward and Outward Summary Report ' + dispFrom + ' and ' + dispTo;
 
   const kpisHtml =
     '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
@@ -2972,18 +2972,15 @@ function renderDashboardFabricWidget() {
     '<div class="dash-summary-panel" style="background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:18px 20px;margin:18px 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.05);box-sizing:border-box">' +
       '<div class="dash-summary-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px;border-bottom:1px solid #f1f5f9;padding-bottom:12px">' +
         '<div class="dash-summary-titles" style="flex:1 1 320px">' +
-          '<div class="dash-summary-badge" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:750;letter-spacing:0.5px;color:#0f766e;background:#f0fdfa;padding:3px 9px;border-radius:20px;border:1px solid #ccfbf1;margin-bottom:5px"><span class="badge-dot" style="width:7px;height:7px;border-radius:50%;background:#0d9488;display:inline-block"></span><span>🧵 FABRIC INVENTORY &amp; MOVEMENT</span></div>' +
-          '<h3 class="dash-panel-main-title" style="font-size:16.5px;font-weight:750;color:#0f172a;margin:0 0 3px 0;letter-spacing:-0.2px">Fabric Inventory &amp; Movement Summary</h3>' +
-          '<p class="dash-summary-sub" style="font-size:12px;color:#64748b;margin:0">Continuous daily flow of meters and valuation across receipts, job works, purchase returns and samples</p>' +
+          '<h3 class="dash-panel-main-title" style="font-size:16.5px;font-weight:750;color:#0f172a;margin:0 0 3px 0;letter-spacing:-0.2px">Fabric Inventory</h3>' +
         '</div>' +
         '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-          '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'fabric\', event)" title="Choose report date range">Last 30 days</button>' +
+          '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'fabric\', event)" title="Choose report date range">This month</button>' +
           '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'fabric\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
           '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'fabric_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
         '</div>' +
       '</div>' +
       kpisHtml +
-      '<div class="excel-title-ribbon" style="background:#f8cbac;color:#000;font-weight:800;font-size:13.5px;text-align:center;padding:9px 14px;border:1px solid #777;border-bottom:none;border-radius:6px 6px 0 0;box-sizing:border-box;letter-spacing:0.2px">' + esc(ribbonTitle) + '</div>' +
       tableHtml +
     '</div>';
 }
@@ -2997,7 +2994,6 @@ function renderDashboardTrimsWidget() {
   const s = rep.summary;
   const dispFrom = dpToDisplay(range.from) || range.from;
   const dispTo   = dpToDisplay(range.to) || range.to;
-  const ribbonTitle = 'Trims Inward and Outward Summary Report ' + dispFrom + ' and ' + dispTo;
 
   const kpisHtml =
     '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
@@ -3029,18 +3025,15 @@ function renderDashboardTrimsWidget() {
     '<div class="dash-summary-panel" style="background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:18px 20px;margin:18px 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.05);box-sizing:border-box">' +
       '<div class="dash-summary-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px;border-bottom:1px solid #f1f5f9;padding-bottom:12px">' +
         '<div class="dash-summary-titles" style="flex:1 1 320px">' +
-          '<div class="dash-summary-badge trims-badge" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:750;letter-spacing:0.5px;color:#1d4ed8;background:#eff6ff;padding:3px 9px;border-radius:20px;border:1px solid #dbeafe;margin-bottom:5px"><span class="badge-dot" style="width:7px;height:7px;border-radius:50%;background:#2563eb;display:inline-block"></span><span>🧷 TRIMS &amp; ACCESSORIES VALUATION</span></div>' +
-          '<h3 class="dash-panel-main-title" style="font-size:16.5px;font-weight:750;color:#0f172a;margin:0 0 3px 0;letter-spacing:-0.2px">Trims Inventory &amp; Valuation Summary</h3>' +
-          '<p class="dash-summary-sub" style="font-size:12px;color:#64748b;margin:0">Continuous daily valuation across inward receipts, job work issues and sample issues</p>' +
+          '<h3 class="dash-panel-main-title" style="font-size:16.5px;font-weight:750;color:#0f172a;margin:0 0 3px 0;letter-spacing:-0.2px">Trims Inventory</h3>' +
         '</div>' +
         '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-          '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'trims\', event)" title="Choose report date range">Last 30 days</button>' +
+          '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'trims\', event)" title="Choose report date range">This month</button>' +
           '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'trims\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
           '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'trims_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
         '</div>' +
       '</div>' +
       kpisHtml +
-      '<div class="excel-title-ribbon" style="background:#f8cbac;color:#000;font-weight:800;font-size:13.5px;text-align:center;padding:9px 14px;border:1px solid #777;border-bottom:none;border-radius:6px 6px 0 0;box-sizing:border-box;letter-spacing:0.2px">' + esc(ribbonTitle) + '</div>' +
       tableHtml +
     '</div>';
 }
@@ -3069,15 +3062,15 @@ function renderDashboardInventoryWidget() {
   const el = $('dash-inventory-widget'); if (!el) return;
   const fabricValue = fabricValuation(), trimsValue = trimStock().reduce(function(a,x) { return a + Math.max(0,x.balance) * sfGetItemRate(x.name,''); }, 0) || trimsValuation();
   const wip = dashboardWipVendorRows().reduce(function(a,x) { return a + x.wip; }, 0), fg = (db.jobwork || []).reduce(function(a,j) { return a + jwTotalReceived(j); }, 0);
-  const rows = [['Fabric Stock','mtr',fmtNum(fabricStock().m),fmtNum(fabricValue)],['Trims Stock','-', '-',fmtNum(trimsValue)],['WIP','pcs',fmtNum(wip),'-'],['FG','pcs',fmtNum(fg),'-']];
-  const total = ['Total','-','-',fmtNum(fabricValue + trimsValue)];
+  const rows = [['Fabric Stock','mtr',fmtInventoryNum(fabricStock().m),fmtInventoryNum(fabricValue)],['Trims Stock','-', '-',fmtInventoryNum(trimsValue)],['WIP','pcs',fmtInventoryNum(wip),'-'],['FG','pcs',fmtInventoryNum(fg),'-']];
+  const total = ['Total','-','-',fmtInventoryNum(fabricValue + trimsValue)];
   el.innerHTML = '<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">Inventory</h3><p class="dash-summary-sub">Current material, work in progress and finished-goods balances</p></div></div>' + dashboardSimpleTable('Inventory',['Particulars','UOM','Qty','Value'],rows,total) + '</div>';
 }
 function renderDashboardWipWidget() {
   const el = $('dash-wip-widget'); if (!el) return;
-  const data = dashboardWipVendorRows(), rows = data.map(function(x) { return [x.vendor,fmtNum(x.issue),fmtNum(x.ret),fmtNum(x.actual),x.cons.toFixed(2),fmtNum(x.expected),fmtNum(x.pass),fmtNum(x.reject),fmtNum(x.wip),'-']; });
+  const data = dashboardWipVendorRows(), rows = data.map(function(x) { return [x.vendor,fmtInventoryNum(x.issue),fmtInventoryNum(x.ret),fmtInventoryNum(x.actual),fmtInventoryNum(x.cons),fmtInventoryNum(x.expected),fmtInventoryNum(x.pass),fmtInventoryNum(x.reject),fmtInventoryNum(x.wip),'-']; });
   const t = data.reduce(function(a,x) { a.issue+=x.issue;a.ret+=x.ret;a.actual+=x.actual;a.expected+=x.expected;a.pass+=x.pass;a.reject+=x.reject;a.wip+=x.wip;return a; },{issue:0,ret:0,actual:0,expected:0,pass:0,reject:0,wip:0});
-  const foot=['Total',fmtNum(t.issue),fmtNum(t.ret),fmtNum(t.actual),'',fmtNum(t.expected),fmtNum(t.pass),fmtNum(t.reject),fmtNum(t.wip),'-'];
+  const foot=['Total',fmtInventoryNum(t.issue),fmtInventoryNum(t.ret),fmtInventoryNum(t.actual),'',fmtInventoryNum(t.expected),fmtInventoryNum(t.pass),fmtInventoryNum(t.reject),fmtInventoryNum(t.wip),'-'];
   el.innerHTML='<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">WIP Vendor-wise</h3><p class="dash-summary-sub">Work in progress grouped by job-work vendor</p></div></div>'+dashboardSimpleTable('WIP Vendor-wise',['Vendor Name','Fabric Issue','Fabric Return','Actual Issue','Cons.','Garment Expected','Garment Inward','Rejection','WIP','WIP mtr'],rows,foot)+'</div>';
 }
 function renderBothDashboardWidgets() {
@@ -3149,8 +3142,8 @@ function renderDashboard() {
     (!useLS ? '<div class="warn"><b>Preview mode:</b> this in-app preview can\u2019t save to disk, so data resets on refresh. <b>Download the file and open it in your browser</b> — entries then save permanently on your device.</div>' : '') +
     '<div class="stats">' +
       statCard('order','Open PO value', fmtINR(poTotal), poOpen.length + ' of ' + db.po.length + ' POs still open', '', "go('po')") +
-      statCard('box','Fabric in stock', fmtNum(stock.m) + '<small> m</small>', fmtNum(stock.issuedM) + ' m issued · ₹' + fmtNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
-      statCard('needle','Trims in stock', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', '₹' + fmtNum(trimsValuation()) + ' total valuation', 'blue', "openReportType('trims_inout_summary')") +
+      statCard('box','Fabric in stock', fmtInventoryNum(stock.m) + '<small> m</small>', fmtInventoryNum(stock.issuedM) + ' m issued · ₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
+      statCard('needle','Trims in stock', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', '₹' + fmtInventoryNum(trimsValuation()) + ' total valuation', 'blue', "openReportType('trims_inout_summary')") +
       statCard('chart','Job works active', jwActive, db.jobwork.length + ' total job works', '', "go('jobwork')") +
       statCard('check','FG received', fmtNum(fgRecv) + '<small> pcs</small>', fgStyles + ' styles across job works', 'green', "go('jobwork')") +
       statCard('cash','Sales revenue', fmtINR(saleAmt), saleDue + ' invoices unpaid', '', "go('sale')") +
@@ -3159,8 +3152,6 @@ function renderDashboard() {
     '<div id="dash-trims-summary-widget"></div>' +
     '<div id="dash-inventory-widget"></div>' +
     '<div id="dash-wip-widget"></div>' +
-    '<div class="flow-card"><div class="t">Production pipeline</div><div class="s">Click a stage to open it — PO → Inward → Job Work → Sale</div><div class="flow">' + flow + '</div></div>' +
-    '<div class="section-title">Recent activity <span class="c">' + recent.length + '</span></div>' + rh +
     '<details class="footnote"><summary>How this workflow fits together</summary><div class="fn-body"> Raise a <b>PO</b> for fabric &amp; trims → record <b>Inward</b> when they arrive (auto-updates PO status) → <b>Job Work</b>: add <b>multiple issue records</b> (fabric + trims to the job-worker vendor) and <b>styles with size-wise qty</b> — <b>Internal ID style no. is mandatory</b> (from Style Master) &amp; record finished goods received back with consumption → <b>Sale</b> entry (Myntra D2C), and use <b>Reports</b> for GRN / issues / WIP / FG received / stock. Set up <b>Style Master</b> (Internal + Portal ID) and <b>Size Master</b> in Masters. Every dropdown is searchable — just type to filter. Search, export &amp; print are available on every module.</div></details>';
 
   renderBothDashboardWidgets();
@@ -3242,7 +3233,12 @@ function jwTrimSummary(j) {
 }
 function fabricStock() {
   let received = 0, issued = 0;
-  db.inward.forEach(inw => (inw.items || []).forEach(i => { if (i.unit === 'm' && pf(i.recQty) > 0) received += pf(i.recQty); }));
+  db.inward.forEach(inw => {
+    if (inw.status && /cancel|reject/i.test(inw.status)) return;
+    (inw.items || []).forEach(i => {
+      if (isFabricItem(i.name) && /^(m|meter|metre|mtr)$/i.test(String(i.unit || '').trim()) && pf(i.recQty) > 0) received += pf(i.recQty);
+    });
+  });
   db.jobwork.forEach(j => { issued += jwFabricTotal(j); });
   return { m: Math.max(0, received - issued), receivedM: received, issuedM: issued };
 }
@@ -3259,7 +3255,7 @@ function trimStock() {
 function trimsChipHtml() {
   const list = trimStock().filter(x => x.issued > 0 || x.balance > 0);
   if (!list.length) return '🧷 Trims stock: <span style="opacity:.6">—</span>';
-  return '🧷 Trims stock: ' + list.slice(0, 4).map(x => '<b>' + esc(x.name) + ': ' + fmtNum(x.balance) + '</b>').join(' &nbsp;·&nbsp; ') +
+  return '🧷 Trims stock: ' + list.slice(0, 4).map(x => '<b>' + esc(x.name) + ': ' + fmtInventoryNum(x.balance) + '</b>').join(' &nbsp;·&nbsp; ') +
          (list.length > 4 ? ' <span style="opacity:.7">+' + (list.length - 4) + ' more</span>' : '');
 }
 
@@ -11281,8 +11277,8 @@ function dashboardDateFilter(kind, e) {
   if (RDP.open) { rdpHide(); return; }
   const range = kind === 'fabric' ? dashFabricRange : dashTrimsRange;
   RDP.target = kind;
-  RDP.draft = { from: range.from, to: range.to, preset: 'last', lastN: 30, lastUnit: 'days', includeToday: true };
-  RDP.nav = 'last';
+  RDP.draft = { from: range.from, to: range.to, preset: 'thisMonth', lastN: 30, lastUnit: 'days', includeToday: true };
+  RDP.nav = 'thisMonth';
   const end = dpParse(range.to) || new Date();
   RDP.view = new Date(end.getFullYear(), end.getMonth(), 1);
   RDP.pick = null;
