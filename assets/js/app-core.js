@@ -2338,14 +2338,14 @@ function fabricValuation() {
   (db.inward || []).forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
     (inw.items || []).forEach(i => {
-      if (isFabricItem(i.name, i.category) && pf(i.recQty) > 0) {
+      if (isFabricItem(i.name, i.category, i.classification) && pf(i.recQty) > 0) {
         val += pf(i.recQty) * pf(i.poRate != null ? i.poRate : i.rate);
       }
     });
   });
   (db.jobwork || []).forEach(j => {
     (j.issues || []).concat(j.extras || []).forEach(i => {
-      if (i.item && isFabricItem(i.item, i.category)) {
+      if (i.item && isFabricItem(i.item, i.category, i.classification)) {
         const r = sfGetItemRate(i.item, i.inwardNo);
         val -= pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty) * r;
       }
@@ -2359,14 +2359,14 @@ function trimsValuation() {
   (db.inward || []).forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
     (inw.items || []).forEach(i => {
-      if (!isFabricItem(i.name, i.category) && pf(i.recQty) > 0) {
+      if (!isFabricItem(i.name, i.category, i.classification) && pf(i.recQty) > 0) {
         val += pf(i.recQty) * pf(i.poRate != null ? i.poRate : i.rate);
       }
     });
   });
   (db.jobwork || []).forEach(j => {
     (j.issues || []).concat(j.extras || []).forEach(i => {
-      if (i.item && !isFabricItem(i.item, i.category)) {
+      if (i.item && !isFabricItem(i.item, i.category, i.classification)) {
         const r = sfGetItemRate(i.item, i.inwardNo);
         val -= pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty) * r;
       }
@@ -2424,7 +2424,7 @@ function buildSummaryInOutReport(type, from, to) {
     const isOpeningStock = (inw.entryType === 'Opening Stock');
     (inw.items || []).forEach(it => {
       const nm = it.name || '';
-      const isF = isFabricItem(nm, it.category);
+      const isF = isFabricItem(nm, it.category, it.classification);
       if (isFab ? !isF : isF) return;
       const q = pf(it.recQty);
       if (q <= 0) return;
@@ -2449,7 +2449,7 @@ function buildSummaryInOutReport(type, from, to) {
     const lines = (jw.issues || []).concat(jw.extras || []);
     lines.forEach(l => {
       const nm = l.item || '';
-      const isF = isFabricItem(nm, l.category);
+      const isF = isFabricItem(nm, l.category, l.classification);
       if (isFab ? !isF : isF) return;
       const q = pf(l.actualQty != null && l.actualQty !== '' ? l.actualQty : l.qty);
       if (q <= 0) return;
@@ -2474,7 +2474,7 @@ function buildSummaryInOutReport(type, from, to) {
     const d = pr.date || '';
     (pr.items || []).forEach(it => {
       const nm = it.name || '';
-      const isF = isFabricItem(nm, it.category);
+      const isF = isFabricItem(nm, it.category, it.classification);
       if (isFab ? !isF : isF) return;
       const q = pf(it.retQty);
       if (q <= 0) return;
@@ -2499,7 +2499,7 @@ function buildSummaryInOutReport(type, from, to) {
     const lines = (sm.issues || []).concat(sm.extras || []);
     lines.forEach(l => {
       const nm = l.item || '';
-      const isF = isFabricItem(nm, l.category);
+      const isF = isFabricItem(nm, l.category, l.classification);
       if (isFab ? !isF : isF) return;
       const q = pf(l.actualQty != null && l.actualQty !== '' ? l.actualQty : l.qty);
       if (q <= 0) return;
@@ -3176,12 +3176,19 @@ function sparkBar(pct, tone) {
   const w = Math.max(0, Math.min(100, pct));
   return '<div class="prog ' + (tone || '') + '"><span style="width:' + w + '%"></span></div>';
 }
-function isFabricItem(name, category) {
+function isFabricItem(name, category, classification) {
+  const lineCategory = String(category || '').trim().toLowerCase();
+  if (lineCategory) return lineCategory === 'fabric';
+  const cleanClassification = String(classification || '').trim();
+  if (cleanClassification) {
+    const parent = typeof parentOf === 'function' ? parentOf('classifications', cleanClassification) : '';
+    const classificationCategory = String(parent || cleanClassification).trim().toLowerCase();
+    if (classificationCategory === 'fabric') return true;
+    if (classificationCategory === 'trims' || classificationCategory === 'packaging' || classificationCategory === 'other') return false;
+  }
   const cleanName = String(bareItemName(name) || '').trim().toLowerCase();
   const it = db.masters.items.find(x => String(x.name || '').trim().toLowerCase() === cleanName);
   if (it) return String(it.category || '').trim().toLowerCase() === 'fabric';
-  const lineCategory = String(category || '').trim().toLowerCase();
-  if (lineCategory) return lineCategory === 'fabric';
   return /fabric/i.test(String(name));
 }
 function jwFabricTotal(j) {
@@ -3247,7 +3254,7 @@ function fabricStock() {
   db.inward.forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
     (inw.items || []).forEach(i => {
-      if (isFabricItem(i.name, i.category) && /^(m|meter|metre|mtr)$/i.test(String(i.unit || '').trim()) && pf(i.recQty) > 0) received += pf(i.recQty);
+      if (isFabricItem(i.name, i.category, i.classification) && /^(m|meter|metre|mtr)$/i.test(String(i.unit || '').trim()) && pf(i.recQty) > 0) received += pf(i.recQty);
     });
   });
   db.jobwork.forEach(j => { issued += jwFabricTotal(j); });
@@ -3259,13 +3266,13 @@ function trimStock() {
   db.inward.forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
     (inw.items || []).forEach(i => {
-    if (i.name && !isFabricItem(i.name, i.category) && pf(i.recQty) > 0) recv[i.name] = (recv[i.name] || 0) + pf(i.recQty);
+    if (i.name && !isFabricItem(i.name, i.category, i.classification) && pf(i.recQty) > 0) recv[i.name] = (recv[i.name] || 0) + pf(i.recQty);
     });
   });
   db.jobwork.forEach(j => {
     if (j.status && /cancel/i.test(j.status)) return;
     (j.issues || []).concat(j.extras || []).forEach(i => {
-      if (i.item && !isFabricItem(i.item, i.category)) issue[i.item] = (issue[i.item] || 0) + issueLineQty(i);
+      if (i.item && !isFabricItem(i.item, i.category, i.classification)) issue[i.item] = (issue[i.item] || 0) + issueLineQty(i);
     });
   });
   const names = Array.from(new Set(Object.keys(recv).concat(Object.keys(issue))));
