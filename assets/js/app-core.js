@@ -11785,22 +11785,34 @@ function buildReport(type, from, to) {
         if (!nm) return;
         const isF = isFabricItem(nm, it.category, it.classification);
         if (fab ? !isF : isF) return;
-        const key = nm.toLowerCase();
         const ordered = pf(it.qty);
+        const itemMatches = function (left, leftCodeValue, right, rightCodeValue) {
+          const leftText = String(left || '').trim();
+          const rightText = String(right || '').trim();
+          const leftCode = /^\s*[\[(]([A-Za-z]{2,}-\d+)[\])]/.exec(leftText);
+          const rightCode = /^\s*[\[(]([A-Za-z]{2,}-\d+)[\])]/.exec(rightText);
+          const leftId = String(leftCodeValue || (leftCode && leftCode[1]) || '').trim().toLowerCase();
+          const rightId = String(rightCodeValue || (rightCode && rightCode[1]) || '').trim().toLowerCase();
+          if (leftId && rightId) return leftId === rightId;
+          const clean = function (value) {
+            return bareItemName(value).replace(/^\s*[\[(][A-Za-z]{2,}-\d+[\])]/, '').trim().toLowerCase();
+          };
+          return clean(left) === clean(right);
+        };
         /* everything received against THIS po for THIS item */
         let recd = 0;
         db.inward.forEach(function (inw) {
-          if (inw.poRef !== p.no) return;
+          if (inw.poRef !== p.no && inw.poRef !== p.id) return;
           (inw.items || []).forEach(function (x) {
-            if (String(x.name || '').trim().toLowerCase() === key) recd += pf(x.recQty);
+            if (itemMatches(nm, it.code || it.item_id, x.name, x.code || x.item_id)) recd += pf(x.recQty);
           });
         });
         /* material sent back to the supplier against this PO */
         let retd = 0;
         db.purchasereturn.forEach(function (r) {
-          if (r.poRef !== p.no) return;
+          if (r.poRef !== p.no && r.poRef !== p.id) return;
           (r.items || []).forEach(function (x) {
-            if (String(x.name || '').trim().toLowerCase() === key) retd += pf(x.retQty);
+            if (itemMatches(nm, it.code || it.item_id, x.name, x.code || x.item_id)) retd += pf(x.retQty);
           });
         });
         const net = recd - retd;
