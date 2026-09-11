@@ -2424,7 +2424,7 @@ function buildSummaryInOutReport(type, from, to) {
     const isOpeningStock = (inw.entryType === 'Opening Stock');
     (inw.items || []).forEach(it => {
       const nm = it.name || '';
-      const isF = isFabricItem(nm);
+      const isF = isFabricItem(nm, it.category);
       if (isFab ? !isF : isF) return;
       const q = pf(it.recQty);
       if (q <= 0) return;
@@ -2449,7 +2449,7 @@ function buildSummaryInOutReport(type, from, to) {
     const lines = (jw.issues || []).concat(jw.extras || []);
     lines.forEach(l => {
       const nm = l.item || '';
-      const isF = isFabricItem(nm);
+      const isF = isFabricItem(nm, l.category);
       if (isFab ? !isF : isF) return;
       const q = pf(l.actualQty != null && l.actualQty !== '' ? l.actualQty : l.qty);
       if (q <= 0) return;
@@ -2474,7 +2474,7 @@ function buildSummaryInOutReport(type, from, to) {
     const d = pr.date || '';
     (pr.items || []).forEach(it => {
       const nm = it.name || '';
-      const isF = isFabricItem(nm);
+      const isF = isFabricItem(nm, it.category);
       if (isFab ? !isF : isF) return;
       const q = pf(it.retQty);
       if (q <= 0) return;
@@ -2499,7 +2499,7 @@ function buildSummaryInOutReport(type, from, to) {
     const lines = (sm.issues || []).concat(sm.extras || []);
     lines.forEach(l => {
       const nm = l.item || '';
-      const isF = isFabricItem(nm);
+      const isF = isFabricItem(nm, l.category);
       if (isFab ? !isF : isF) return;
       const q = pf(l.actualQty != null && l.actualQty !== '' ? l.actualQty : l.qty);
       if (q <= 0) return;
@@ -2675,7 +2675,7 @@ function renderSummaryReportBody(el, rep, from, to) {
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
-          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">CLOSING</span>' +
           '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
         '</div>' +
@@ -2966,7 +2966,7 @@ function renderDashboardFabricWidget() {
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalOutVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
-        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">CLOSING</span>' +
         '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12;line-height:1.2">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
       '</div>' +
@@ -3073,14 +3073,14 @@ function renderDashboardInventoryWidget() {
   const wip = dashboardWipVendorRows().reduce(function(a,x) { return a + x.wip; }, 0), fg = (db.jobwork || []).reduce(function(a,j) { return a + jwTotalReceived(j); }, 0);
   const rows = [['Fabric Stock','mtr',fmtInventoryNum(fabricStock().m),fmtInventoryNum(fabricValue)],['Trims Stock','-', '-',fmtInventoryNum(trimsValue)],['WIP','pcs',fmtInventoryNum(wip),'-'],['FG','pcs',fmtInventoryNum(fg),'-']];
   const total = ['Total','-',fmtInventoryNum(fabricStock().m + wip + fg),fmtInventoryNum(fabricValue + trimsValue)];
-  el.innerHTML = '<div class="dash-summary-panel dash-inventory-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">Inventory</h3><p class="dash-summary-sub">Current material, work in progress and finished-goods balances</p></div></div>' + dashboardSimpleTable('Inventory',['Particulars','UOM','Qty','Value'],rows,total) + '</div>';
+  el.innerHTML = '<div class="dash-summary-panel dash-inventory-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">Inventory</h3></div></div>' + dashboardSimpleTable('Inventory',['Particulars','UOM','Qty','Value'],rows,total) + '</div>';
 }
 function renderDashboardWipWidget() {
   const el = $('dash-wip-widget'); if (!el) return;
   const data = dashboardWipVendorRows(), rows = data.map(function(x) { return [x.vendor,fmtInventoryNum(x.issue),fmtInventoryNum(x.ret),fmtInventoryNum(x.actual),fmtInventoryNum(x.cons),fmtInventoryNum(x.expected),fmtInventoryNum(x.pass),fmtInventoryNum(x.reject),fmtInventoryNum(x.wip),'-']; });
   const t = data.reduce(function(a,x) { a.issue+=x.issue;a.ret+=x.ret;a.actual+=x.actual;a.expected+=x.expected;a.pass+=x.pass;a.reject+=x.reject;a.wip+=x.wip;return a; },{issue:0,ret:0,actual:0,expected:0,pass:0,reject:0,wip:0});
   const foot=['Total',fmtInventoryNum(t.issue),fmtInventoryNum(t.ret),fmtInventoryNum(t.actual),'',fmtInventoryNum(t.expected),fmtInventoryNum(t.pass),fmtInventoryNum(t.reject),fmtInventoryNum(t.wip),'-'];
-  el.innerHTML='<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">WIP Vendor-wise</h3><p class="dash-summary-sub">Work in progress grouped by job-work vendor</p></div></div>'+dashboardSimpleTable('WIP Vendor-wise',['Vendor Name','Fabric Issue','Fabric Return','Actual Issue','Cons.','Garment Expected','Garment Inward','Rejection','WIP','WIP mtr'],rows,foot)+'</div>';
+  el.innerHTML='<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">WIP Vendor-wise</h3></div></div>'+dashboardSimpleTable('WIP Vendor-wise',['Vendor Name','Fabric Issue','Fabric Return','Actual Issue','Cons.','Garment Expected','Garment Inward','Rejection','WIP','WIP mtr'],rows,foot)+'</div>';
 }
 function renderBothDashboardWidgets() {
   renderDashboardFabricWidget();
@@ -3151,8 +3151,8 @@ function renderDashboard() {
     (!useLS ? '<div class="warn"><b>Preview mode:</b> this in-app preview can\u2019t save to disk, so data resets on refresh. <b>Download the file and open it in your browser</b> — entries then save permanently on your device.</div>' : '') +
     '<div class="stats">' +
       statCard('order','Open PO value', fmtINR(poTotal), poOpen.length + ' of ' + db.po.length + ' POs still open', '', "go('po')") +
-      statCard('box','Fabric in stock', fmtInventoryNum(stock.m) + '<small> (Meter)</small>', fmtInventoryNum(stock.issuedM) + ' m issued · ₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
-      statCard('needle','Trims in stock', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', '₹' + fmtInventoryNum(trimsValuation()) + ' total valuation', 'blue', "openReportType('trims_inout_summary')") +
+      statCard('box','Fabric in stock', fmtInventoryNum(stock.m) + '<small> (Meter)</small>', (stock.issuedM > 0 ? fmtInventoryNum(stock.issuedM) + ' m issued · ' : '') + '₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
+      statCard('needle','Trims in stock', '₹' + fmtInventoryNum(trimsValuation()) + '<small> Value</small>', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', 'blue', "openReportType('trims_inout_summary')") +
       statCard('chart','Job works active', jwActive, db.jobwork.length + ' total job works', '', "go('jobwork')") +
       statCard('check','FG received', fmtNum(fgRecv) + '<small> pcs</small>', fgStyles + ' styles across job works', 'green', "go('jobwork')") +
       statCard('cash','Sales', fmtINR(saleAmt), '', '', "go('sale')") +
@@ -3176,9 +3176,12 @@ function sparkBar(pct, tone) {
   const w = Math.max(0, Math.min(100, pct));
   return '<div class="prog ' + (tone || '') + '"><span style="width:' + w + '%"></span></div>';
 }
-function isFabricItem(name) {
-  const it = db.masters.items.find(x => x.name.toLowerCase() === String(name).toLowerCase());
-  if (it) return it.category === 'Fabric';
+function isFabricItem(name, category) {
+  const lineCategory = String(category || '').trim().toLowerCase();
+  if (lineCategory) return lineCategory === 'fabric';
+  const cleanName = String(name || '').trim().toLowerCase();
+  const it = db.masters.items.find(x => String(x.name || '').trim().toLowerCase() === cleanName);
+  if (it) return String(it.category || '').trim().toLowerCase() === 'fabric';
   return /fabric/i.test(String(name));
 }
 function jwFabricTotal(j) {
