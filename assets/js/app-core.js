@@ -2338,14 +2338,14 @@ function fabricValuation() {
   (db.inward || []).forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
     (inw.items || []).forEach(i => {
-      if (isFabricItem(i.name) && pf(i.recQty) > 0) {
+      if (isFabricItem(i.name, i.category) && pf(i.recQty) > 0) {
         val += pf(i.recQty) * pf(i.poRate != null ? i.poRate : i.rate);
       }
     });
   });
   (db.jobwork || []).forEach(j => {
     (j.issues || []).concat(j.extras || []).forEach(i => {
-      if (i.item && isFabricItem(i.item)) {
+      if (i.item && isFabricItem(i.item, i.category)) {
         const r = sfGetItemRate(i.item, i.inwardNo);
         val -= pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty) * r;
       }
@@ -2359,14 +2359,14 @@ function trimsValuation() {
   (db.inward || []).forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
     (inw.items || []).forEach(i => {
-      if (!isFabricItem(i.name) && pf(i.recQty) > 0) {
+      if (!isFabricItem(i.name, i.category) && pf(i.recQty) > 0) {
         val += pf(i.recQty) * pf(i.poRate != null ? i.poRate : i.rate);
       }
     });
   });
   (db.jobwork || []).forEach(j => {
     (j.issues || []).concat(j.extras || []).forEach(i => {
-      if (i.item && !isFabricItem(i.item)) {
+      if (i.item && !isFabricItem(i.item, i.category)) {
         const r = sfGetItemRate(i.item, i.inwardNo);
         val -= pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty) * r;
       }
@@ -3177,18 +3177,18 @@ function sparkBar(pct, tone) {
   return '<div class="prog ' + (tone || '') + '"><span style="width:' + w + '%"></span></div>';
 }
 function isFabricItem(name, category) {
-  const lineCategory = String(category || '').trim().toLowerCase();
-  if (lineCategory) return lineCategory === 'fabric';
-  const cleanName = String(name || '').trim().toLowerCase();
+  const cleanName = String(bareItemName(name) || '').trim().toLowerCase();
   const it = db.masters.items.find(x => String(x.name || '').trim().toLowerCase() === cleanName);
   if (it) return String(it.category || '').trim().toLowerCase() === 'fabric';
+  const lineCategory = String(category || '').trim().toLowerCase();
+  if (lineCategory) return lineCategory === 'fabric';
   return /fabric/i.test(String(name));
 }
 function jwFabricTotal(j) {
-  return (j.issues || []).concat(j.extras || []).filter(i => i.item && isFabricItem(i.item)).reduce((a, i) => a + pf(i.qty), 0);
+  return (j.issues || []).concat(j.extras || []).filter(i => i.item && isFabricItem(i.item, i.category)).reduce((a, i) => a + pf(i.qty), 0);
 }
 function jwFabricUnit(j) {
-  const it = (j.issues || []).find(i => i.item && isFabricItem(i.item) && i.unit);
+  const it = (j.issues || []).find(i => i.item && isFabricItem(i.item, i.category) && i.unit);
   return it ? it.unit : 'm';
 }
 function jwGarments(j) { return Array.isArray(j.garments) ? j.garments : []; }
@@ -3208,7 +3208,7 @@ function jwFabricReturned(j) {
   const scan = function (r) {
     if (r.jwRef !== j.no) return;
     (r.items || []).forEach(function (i) {
-      if (!i.name || !isFabricItem(i.name)) return;
+      if (!i.name || !isFabricItem(i.name, i.category)) return;
       tot += pf(i.retQty) + pf(i.recQty);
     });
   };
@@ -3224,7 +3224,7 @@ function jwWorkOrderCons(j) {
   if (req > 0 && ord > 0) return ord / req;
   /* older records never stored requiredFabric — fall back to the planned
      Cons./Gmt on the fabric issue lines (metre per garment -> pcs per metre) */
-  const consRows = (j.issues || []).filter(function (i) { return i.item && isFabricItem(i.item) && pf(i.cons) > 0; });
+  const consRows = (j.issues || []).filter(function (i) { return i.item && isFabricItem(i.item, i.category) && pf(i.cons) > 0; });
   if (!consRows.length) return 0;
   const avg = consRows.reduce(function (a, i) { return a + pf(i.cons); }, 0) / consRows.length;
   return avg > 0 ? 1 / avg : 0;
@@ -3235,7 +3235,7 @@ function jwFirstStyle(j) { const g = jwGarments(j).find(x => x.desc); return g ?
 function jwTrimSummary(j) {
   const map = {};
   (j.issues || []).forEach(i => {
-    if (!i.item || isFabricItem(i.item)) return;
+    if (!i.item || isFabricItem(i.item, i.category)) return;
     const k = i.item + '||' + (i.unit || '');
     map[k] = map[k] || { name: i.item, unit: i.unit || '', qty: 0 };
     map[k].qty += pf(i.qty);
@@ -3247,7 +3247,7 @@ function fabricStock() {
   db.inward.forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
     (inw.items || []).forEach(i => {
-      if (isFabricItem(i.name) && /^(m|meter|metre|mtr)$/i.test(String(i.unit || '').trim()) && pf(i.recQty) > 0) received += pf(i.recQty);
+      if (isFabricItem(i.name, i.category) && /^(m|meter|metre|mtr)$/i.test(String(i.unit || '').trim()) && pf(i.recQty) > 0) received += pf(i.recQty);
     });
   });
   db.jobwork.forEach(j => { issued += jwFabricTotal(j); });
@@ -3257,9 +3257,9 @@ function trimStock() {
   // per-item trims balance: received (from Inward) − issued (across all Job Work issue records)
   const recv = {}, issue = {};
   db.inward.forEach(inw => (inw.items || []).forEach(i => {
-    if (i.name && !isFabricItem(i.name) && pf(i.recQty) > 0) recv[i.name] = (recv[i.name] || 0) + pf(i.recQty);
+    if (i.name && !isFabricItem(i.name, i.category) && pf(i.recQty) > 0) recv[i.name] = (recv[i.name] || 0) + pf(i.recQty);
   }));
-  db.jobwork.forEach(j => (j.issues || []).forEach(i => { if (i.item && !isFabricItem(i.item)) issue[i.item] = (issue[i.item] || 0) + pf(i.qty); }));
+  db.jobwork.forEach(j => (j.issues || []).forEach(i => { if (i.item && !isFabricItem(i.item, i.category)) issue[i.item] = (issue[i.item] || 0) + pf(i.qty); }));
   const names = Array.from(new Set(Object.keys(recv).concat(Object.keys(issue))));
   return names.map(n => ({ name: n, received: recv[n] || 0, issued: issue[n] || 0, balance: (recv[n] || 0) - (issue[n] || 0) }));
 }
