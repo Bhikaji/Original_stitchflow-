@@ -2675,7 +2675,7 @@ function renderSummaryReportBody(el, rep, from, to) {
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
-          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Balance</span>' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
           '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
         '</div>' +
@@ -2699,13 +2699,13 @@ function renderSummaryReportBody(el, rep, from, to) {
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtInventoryNum(s.avgOutVal) + '</span>' +
         '</div>' +
         '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
-          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Valuation</span>' +
+          '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
           '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a">₹' + fmtInventoryNum(s.closingVal) + '</span>' +
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims valuation</span>' +
         '</div>' +
         '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
           '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Timeframe</span>' +
-          '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a">' + dispFrom + ' → ' + dispTo + '</span>' +
+          '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;white-space:nowrap">' + dispFrom + ' → ' + dispTo + '</span>' +
           '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
         '</div>' +
       '</div>';
@@ -2730,6 +2730,18 @@ function ensureSummaryReportStyles() {
   st.id = 'sf-excel-summary-styles';
   st.textContent =
     '.dash-summary-panel{background:#fff!important;border:1px solid #d1d5db!important;border-radius:12px!important;padding:18px 20px!important;margin:18px 0 24px 0!important;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04)!important;box-sizing:border-box!important}' +
+    '.dash-trims-inventory-row{display:grid!important;grid-template-columns:minmax(0,50fr) minmax(0,50fr)!important;gap:0 18px!important;align-items:start!important}' +
+    '.dash-trims-inventory-row>div{min-width:0!important}' +
+    '.dash-inventory-panel{min-width:0!important;max-width:100%!important;overflow:visible!important}' +
+    '.dash-inventory-panel .dash-table-wrap{width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important}' +
+    '.dash-inventory-panel .summary-report-table{display:table!important;table-layout:fixed!important;width:100%!important;min-width:520px!important;max-width:none!important;font-size:11px!important}' +
+    '.dash-inventory-panel .summary-report-table th:nth-child(1),.dash-inventory-panel .summary-report-table td:nth-child(1){width:40%!important}' +
+    '.dash-inventory-panel .summary-report-table th:nth-child(2),.dash-inventory-panel .summary-report-table td:nth-child(2){width:20%!important}' +
+    '.dash-inventory-panel .summary-report-table th:nth-child(3),.dash-inventory-panel .summary-report-table td:nth-child(3){width:25%!important}' +
+    '.dash-inventory-panel .summary-report-table th:nth-child(4),.dash-inventory-panel .summary-report-table td:nth-child(4){width:15%!important}' +
+    '.dash-inventory-panel .summary-report-table th,.dash-inventory-panel .summary-report-table td{box-sizing:border-box!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-all!important;padding:5px 3px!important}' +
+    '.dash-inventory-panel .summary-report-table td.num{ text-align:right!important}' +
+    '@media(max-width:900px){.dash-trims-inventory-row{grid-template-columns:1fr!important}}' +
     '.dash-summary-head{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;flex-wrap:wrap!important;gap:14px!important;margin-bottom:14px!important;border-bottom:1px solid #f1f5f9!important;padding-bottom:12px!important}' +
     '.dash-summary-titles{flex:1 1 320px!important}' +
     '.dash-summary-badge{display:inline-flex!important;align-items:center!important;gap:6px!important;font-size:11px!important;font-weight:750!important;letter-spacing:0.5px!important;color:#0f766e!important;background:#f0fdfa!important;padding:3px 9px!important;border-radius:20px!important;border:1px solid #ccfbf1!important;margin-bottom:5px!important}' +
@@ -2764,7 +2776,7 @@ function ensureSummaryReportStyles() {
     '.summary-report-table.excel-style tbody td.td-date{font-weight:600!important;color:#0f172a!important;text-align:left!important;background:#fff!important}' +
     '.summary-report-table.excel-style tbody td.num{text-align:right!important}' +
     '.summary-report-table.excel-style tfoot tr.tot-row td,.summary-report-table.excel-style tfoot tr.avg-row td{background:#e2e8f0!important;color:#000!important;font-weight:800!important;border:1px solid #000!important;padding:6px 8px!important}' +
-    '.summary-report-table.excel-style tfoot tr.tot-row td.td-tot,.summary-report-table.excel-style tfoot tr.avg-row td.td-avg{text-align:left!important;font-weight:850!important}';
+    '.summary-report-table.excel-style tfoot tr.tot-row td.td-tot,.summary-report-table.excel-style tfoot tr.avg-row td.td-avg{text-align:right!important;font-weight:850!important}';
   document.head.appendChild(st);
 }
 
@@ -2831,7 +2843,7 @@ function buildSummaryExcelTableHtml(rep) {
 
   const footerRow = function (cells, rowClass, labelClass) {
     const labelSpan = rep.isFabric ? 3 : 2;
-    const labelStyle = 'background:#ffff00!important;color:#000!important;font-weight:850;border:1px solid #000;padding:7px 10px;text-align:left';
+    const labelStyle = 'background:#ffff00!important;color:#000!important;font-weight:850;border:1px solid #000;padding:7px 10px;text-align:right';
     const valueStyle = 'background:#ffff00!important;color:#000!important;font-weight:800;border:1px solid #000;padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums';
     return '<tr class="' + rowClass + '" style="background:#ffff00!important;color:#000!important;font-weight:800;border:1px solid #000">' +
       '<td colspan="' + labelSpan + '" class="' + labelClass + '" style="' + labelStyle + '"><b>' + (cells[0] ? esc(cells[0]) : '') + '</b></td>' +
@@ -2940,7 +2952,7 @@ function renderDashboardFabricWidget() {
     '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
         '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Report Period</span>' +
-        '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a;line-height:1.2">' + dispFrom + ' → ' + dispTo + '</span>' +
+        '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.2;white-space:nowrap">' + dispFrom + ' → ' + dispTo + '</span>' +
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
@@ -2954,7 +2966,7 @@ function renderDashboardFabricWidget() {
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalOutVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
-        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Balance</span>' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
         '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12;line-height:1.2">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
       '</div>' +
@@ -2993,7 +3005,7 @@ function renderDashboardTrimsWidget() {
     '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
         '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Report Period</span>' +
-        '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a;line-height:1.2">' + dispFrom + ' → ' + dispTo + '</span>' +
+        '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.2;white-space:nowrap">' + dispFrom + ' → ' + dispTo + '</span>' +
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
@@ -3007,7 +3019,7 @@ function renderDashboardTrimsWidget() {
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily Avg: ₹' + fmtNum(s.avgOutVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
-        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Valuation</span>' +
+        '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
         '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a;line-height:1.2">₹' + fmtInventoryNum(s.closingVal) + '</span>' +
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims in stock</span>' +
       '</div>' +
@@ -3035,8 +3047,11 @@ function renderDashboardTrimsWidget() {
 function dashboardSimpleTable(title, header, rows, foot) {
   const head = header.map(function(h, i) { return '<th class="' + (i ? 'num' : '') + '">' + esc(h) + '</th>'; }).join('');
   const body = rows.length ? rows.map(function(row) { return '<tr>' + row.map(function(c, i) { return '<td class="' + (i ? 'num' : '') + '">' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') : '<tr><td colspan="' + header.length + '" style="text-align:center;color:var(--muted)">No data available</td></tr>';
-  const total = foot ? '<tfoot><tr>' + foot.map(function(c, i) { return '<td class="' + (i ? 'num' : '') + '"><b>' + esc(c) + '</b></td>'; }).join('') + '</tr></tfoot>' : '';
-  return '<div class="table-wrap dash-table-wrap"><table class="summary-report-table excel-style"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>' + total + '</table></div>';
+  const total = foot ? '<tfoot><tr>' + (title === 'Inventory'
+    ? '<td colspan="2" class="td-tot" style="text-align:right"><b>' + esc(foot[0]) + '</b></td>' + foot.slice(2).map(function(c) { return '<td class="num"><b>' + esc(c) + '</b></td>'; }).join('')
+    : foot.map(function(c, i) { return '<td class="' + (i ? 'num' : '') + '"><b>' + esc(c) + '</b></td>'; }).join('')) + '</tr></tfoot>' : '';
+  const cols = title === 'Inventory' ? '<colgroup><col style="width:40%"><col style="width:20%"><col style="width:25%"><col style="width:15%"></colgroup>' : '';
+  return '<div class="table-wrap dash-table-wrap"><table class="summary-report-table excel-style' + (title === 'Inventory' ? ' inventory-simple-table' : '') + '">' + cols + '<thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>' + total + '</table></div>';
 }
 function dashboardWipVendorRows() {
   const grouped = {};
@@ -3057,8 +3072,8 @@ function renderDashboardInventoryWidget() {
   const fabricValue = fabricValuation(), trimsValue = trimStock().reduce(function(a,x) { return a + Math.max(0,x.balance) * sfGetItemRate(x.name,''); }, 0) || trimsValuation();
   const wip = dashboardWipVendorRows().reduce(function(a,x) { return a + x.wip; }, 0), fg = (db.jobwork || []).reduce(function(a,j) { return a + jwTotalReceived(j); }, 0);
   const rows = [['Fabric Stock','mtr',fmtInventoryNum(fabricStock().m),fmtInventoryNum(fabricValue)],['Trims Stock','-', '-',fmtInventoryNum(trimsValue)],['WIP','pcs',fmtInventoryNum(wip),'-'],['FG','pcs',fmtInventoryNum(fg),'-']];
-  const total = ['Total','-','-',fmtInventoryNum(fabricValue + trimsValue)];
-  el.innerHTML = '<div class="dash-summary-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">Inventory</h3><p class="dash-summary-sub">Current material, work in progress and finished-goods balances</p></div></div>' + dashboardSimpleTable('Inventory',['Particulars','UOM','Qty','Value'],rows,total) + '</div>';
+  const total = ['Total','-',fmtInventoryNum(fabricStock().m + wip + fg),fmtInventoryNum(fabricValue + trimsValue)];
+  el.innerHTML = '<div class="dash-summary-panel dash-inventory-panel"><div class="dash-summary-head"><div class="dash-summary-titles"><h3 class="dash-panel-main-title">Inventory</h3><p class="dash-summary-sub">Current material, work in progress and finished-goods balances</p></div></div>' + dashboardSimpleTable('Inventory',['Particulars','UOM','Qty','Value'],rows,total) + '</div>';
 }
 function renderDashboardWipWidget() {
   const el = $('dash-wip-widget'); if (!el) return;
@@ -3136,15 +3151,14 @@ function renderDashboard() {
     (!useLS ? '<div class="warn"><b>Preview mode:</b> this in-app preview can\u2019t save to disk, so data resets on refresh. <b>Download the file and open it in your browser</b> — entries then save permanently on your device.</div>' : '') +
     '<div class="stats">' +
       statCard('order','Open PO value', fmtINR(poTotal), poOpen.length + ' of ' + db.po.length + ' POs still open', '', "go('po')") +
-      statCard('box','Fabric in stock', fmtInventoryNum(stock.m) + '<small> m</small>', fmtInventoryNum(stock.issuedM) + ' m issued · ₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
+      statCard('box','Fabric in stock', fmtInventoryNum(stock.m) + '<small> (Meter)</small>', fmtInventoryNum(stock.issuedM) + ' m issued · ₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
       statCard('needle','Trims in stock', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', '₹' + fmtInventoryNum(trimsValuation()) + ' total valuation', 'blue', "openReportType('trims_inout_summary')") +
       statCard('chart','Job works active', jwActive, db.jobwork.length + ' total job works', '', "go('jobwork')") +
       statCard('check','FG received', fmtNum(fgRecv) + '<small> pcs</small>', fgStyles + ' styles across job works', 'green', "go('jobwork')") +
-      statCard('cash','Sales', fmtINR(saleAmt), 'Starting value', '', "go('sale')") +
+      statCard('cash','Sales', fmtINR(saleAmt), '', '', "go('sale')") +
     '</div>' +
     '<div id="dash-fabric-summary-widget"></div>' +
-    '<div id="dash-trims-summary-widget"></div>' +
-    '<div id="dash-inventory-widget"></div>' +
+    '<div class="dash-trims-inventory-row"><div id="dash-trims-summary-widget"></div><div id="dash-inventory-widget"></div></div>' +
     '<div id="dash-wip-widget"></div>' +
     '';
 
@@ -7994,7 +8008,7 @@ function inwardItemRow(it, poQty, excludeId) {
     '<td class="num" style="color:var(--muted);font-weight:600">' + fmtNum(poQty) + '</td>' +
     '<td class="num tdr"><b>' + fmtNum(done) + '</b>' +
       (pf(poQty) > 0 ? '<div class="sub-line">balance ' + fmtNum(bal) + '</div>' : '') + '</td>' +
-    '<td><input class="inp num" type="number" min="0" data-f="recQty" value="' + (it.recQty ?? '') + '" placeholder="0" oninput="inwardCheckQty(this);calcInward()"></td>' +
+    '<td><input class="inp num" type="number" min="0" step="0.01" inputmode="decimal" data-f="recQty" value="' + (it.recQty ?? '') + '" placeholder="0" oninput="inwardCheckQty(this);calcInward()"></td>' +
     '<td><input class="inp num" type="number" data-f="poRate" value="' + (it.poRate ?? '') + '" placeholder="Auto" disabled>' +
       '<input type="text" data-f="gst" value="' + gstPct + '" style="display:none" tabindex="-1" aria-hidden="true">' +
     '</td>' +
