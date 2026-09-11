@@ -3256,10 +3256,18 @@ function fabricStock() {
 function trimStock() {
   // per-item trims balance: received (from Inward) − issued (across all Job Work issue records)
   const recv = {}, issue = {};
-  db.inward.forEach(inw => (inw.items || []).forEach(i => {
+  db.inward.forEach(inw => {
+    if (inw.status && /cancel|reject/i.test(inw.status)) return;
+    (inw.items || []).forEach(i => {
     if (i.name && !isFabricItem(i.name, i.category) && pf(i.recQty) > 0) recv[i.name] = (recv[i.name] || 0) + pf(i.recQty);
-  }));
-  db.jobwork.forEach(j => (j.issues || []).forEach(i => { if (i.item && !isFabricItem(i.item, i.category)) issue[i.item] = (issue[i.item] || 0) + pf(i.qty); }));
+    });
+  });
+  db.jobwork.forEach(j => {
+    if (j.status && /cancel/i.test(j.status)) return;
+    (j.issues || []).concat(j.extras || []).forEach(i => {
+      if (i.item && !isFabricItem(i.item, i.category)) issue[i.item] = (issue[i.item] || 0) + issueLineQty(i);
+    });
+  });
   const names = Array.from(new Set(Object.keys(recv).concat(Object.keys(issue))));
   return names.map(n => ({ name: n, received: recv[n] || 0, issued: issue[n] || 0, balance: (recv[n] || 0) - (issue[n] || 0) }));
 }
