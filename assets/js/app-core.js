@@ -11761,7 +11761,7 @@ function buildReport(type, from, to) {
     const header = ['Date','Inward No','PO Ref','Supplier','Item','Colour','Qty','Unit','Rate','Value'];
     const rows = [];
     db.inward.forEach(inw => (inw.items || []).forEach(i => {
-      const isF = isFabricItem(i.name);
+      const isF = isFabricItem(i.name, i.category, i.classification);
       if ((fab ? isF : !isF) && pf(i.recQty) > 0 && inR(inw.date)) {
         const rate = pf(i.poRate != null ? i.poRate : i.rate);
         rows.push([dpToDisplay(inw.date) || inw.date, inw.no, inw.poRef || '—', inw.supplier, i.name, i.color || '—',
@@ -11783,7 +11783,7 @@ function buildReport(type, from, to) {
       (p.items || []).forEach(function (it) {
         const nm = String(it.name || '').trim();
         if (!nm) return;
-        const isF = isFabricItem(nm);
+        const isF = isFabricItem(nm, it.category, it.classification);
         if (fab ? !isF : isF) return;
         const key = nm.toLowerCase();
         const ordered = pf(it.qty);
@@ -11831,13 +11831,14 @@ function buildReport(type, from, to) {
     const header = ['Date','JW No','Vendor','Item','Colour','Qty','Unit','Rate','Value','JW Status'];
     const rows = [];
     db.jobwork.forEach(j => (j.issues || []).forEach(i => {
-      const isF = isFabricItem(i.item);
-      if ((fab ? isF : !isF) && pf(i.qty) > 0 && inR(i.date || '')) {
+      const isF = isFabricItem(i.item, i.category, i.classification);
+      const issueQty = issueLineQty(i);
+      if ((fab ? isF : !isF) && issueQty > 0 && inR(i.date || '')) {
         const inw = inwardByNo(i.inwardNo);
         const source = inw ? (inw.items || []).find(function (x) { return lcName(x.name) === lcName(i.item); }) : null;
         const rate = source ? pf(source.poRate != null ? source.poRate : source.rate) : 0;
         rows.push([dpToDisplay(i.date) || i.date || '', j.no, j.vendor, i.item, i.colour || '—',
-          fmtNum(pf(i.qty)), i.unit || '', fmtNum(rate), fmtNum(pf(i.qty) * rate), j.status]);
+          fmtNum(issueQty), i.unit || '', fmtNum(rate), fmtNum(issueQty * rate), j.status]);
       }
     }));
     rows.sort((a, b) => (a[0] < b[0] ? -1 : 1));
@@ -11947,28 +11948,28 @@ function stockSections(from, to) {
   // Fabric
   let fOpen = 0, fIn = 0, fOut = 0;
   db.inward.forEach(inw => (inw.items || []).forEach(i => {
-    if (isFabricItem(i.name) && pf(i.recQty) > 0) {
+    if (isFabricItem(i.name, i.category, i.classification) && pf(i.recQty) > 0) {
       if (inw.date < from) fOpen += pf(i.recQty); else if (inR(inw.date, from, to)) fIn += pf(i.recQty);
     }
   }));
   db.jobwork.forEach(j => (j.issues || []).forEach(i => {
-    if (isFabricItem(i.item) && pf(i.qty) > 0) {
-      if ((i.date || '') < from) fOpen -= pf(i.qty); else if (inR(i.date || '', from, to)) fOut += pf(i.qty);
+    if (isFabricItem(i.item, i.category, i.classification) && issueLineQty(i) > 0) {
+      if ((i.date || '') < from) fOpen -= issueLineQty(i); else if (inR(i.date || '', from, to)) fOut += issueLineQty(i);
     }
   }));
   sections.push({ title: '🧶 Fabric Stock', header: ['Item','Opening','GRN Received','Issued to JW','Closing'], rows: [['Fabric (m)', fmtNum(fOpen), fmtNum(fIn), fmtNum(fOut), fmtNum(fOpen + fIn - fOut)]] });
   // Trims
   const tMap = {};
   db.inward.forEach(inw => (inw.items || []).forEach(i => {
-    if (!isFabricItem(i.name) && pf(i.recQty) > 0) {
+    if (!isFabricItem(i.name, i.category, i.classification) && pf(i.recQty) > 0) {
       tMap[i.name] = tMap[i.name] || { open: 0, inn: 0, out: 0 };
       if (inw.date < from) tMap[i.name].open += pf(i.recQty); else if (inR(inw.date, from, to)) tMap[i.name].inn += pf(i.recQty);
     }
   }));
   db.jobwork.forEach(j => (j.issues || []).forEach(i => {
-    if (!isFabricItem(i.item) && pf(i.qty) > 0) {
+    if (!isFabricItem(i.item, i.category, i.classification) && issueLineQty(i) > 0) {
       tMap[i.item] = tMap[i.item] || { open: 0, inn: 0, out: 0 };
-      if ((i.date || '') < from) tMap[i.item].open -= pf(i.qty); else if (inR(i.date || '', from, to)) tMap[i.item].out += pf(i.qty);
+      if ((i.date || '') < from) tMap[i.item].open -= issueLineQty(i); else if (inR(i.date || '', from, to)) tMap[i.item].out += issueLineQty(i);
     }
   }));
   sections.push({ title: '🧷 Trims Stock', header: ['Item','Opening','GRN Received','Issued to JW','Closing'], rows: Object.keys(tMap).map(k => [k, fmtNum(tMap[k].open), fmtNum(tMap[k].inn), fmtNum(tMap[k].out), fmtNum(tMap[k].open + tMap[k].inn - tMap[k].out)]) });
@@ -13845,7 +13846,7 @@ try {
     if(type==='fabric_grn'||type==='trims_grn')rep.rows=rep.rows.filter(r=>!/rejected|cancelled/i.test(String(r[11]||'')));
     if(type==='fabric_issue'||type==='trims_issue'){
       const fab=type==='fabric_issue',rows=[];
-      function add(rec,list){(list||[]).forEach(function(i){const q=issueLineQty(i),d=i.date||rec.date||'',isF=isFabricItem(i.item);if((fab?isF:!isF)&&q>0&&inRange(d,from,to)&&!/cancel/i.test(rec.status||'')){const inw=inwardByNo(i.inwardNo),src=inw?(inw.items||[]).find(x=>lcName(x.name)===lcName(i.item)):null,rate=src?pf(src.poRate!=null?src.poRate:src.rate):0;rows.push([dpToDisplay(d)||d,rec.no,rec.vendor,i.item,i.colour||'—',fmtNum(q),i.unit||'',fmtNum(rate),fmtNum(q*rate),rec.status]);}});}
+      function add(rec,list){(list||[]).forEach(function(i){const q=issueLineQty(i),d=i.date||rec.date||'',isF=isFabricItem(i.item,i.category,i.classification);if((fab?isF:!isF)&&q>0&&inRange(d,from,to)&&!/cancel/i.test(rec.status||'')){const inw=inwardByNo(i.inwardNo),src=inw?(inw.items||[]).find(x=>lcName(x.name)===lcName(i.item)):null,rate=src?pf(src.poRate!=null?src.poRate:src.rate):0;rows.push([dpToDisplay(d)||d,rec.no,rec.vendor,i.item,i.colour||'—',fmtNum(q),i.unit||'',fmtNum(rate),fmtNum(q*rate),rec.status]);}});}
       (db.jobwork||[]).forEach(r=>{add(r,r.issues);add(r,r.extras);});(db.sample||[]).forEach(r=>add(r,r.extras));rows.sort((a,b)=>qaIso(a[0]).localeCompare(qaIso(b[0])));rep.rows=rows;
     }
     if(rep&&rep.rows&&rep.header){const di=rep.header.findIndex(h=>/date/i.test(h));if(di>-1)rep.rows.sort((a,b)=>qaIso(a[di]).localeCompare(qaIso(b[di])));}
@@ -13856,10 +13857,10 @@ try {
     const material={};
     (db.masters.items||[]).filter(i=>i.category==='Fabric'||i.category==='Trims').forEach(i=>material[lcName(i.name)]={name:i.name,cat:i.category,open:0,inn:0,out:0});
     function bucket(name,cat){const k=lcName(bareItemName(name));return material[k]||(material[k]={name:bareItemName(name),cat:cat||'Trims',open:0,inn:0,out:0});}
-    (db.inward||[]).forEach(r=>{if(!qaGoodStatus(r)&&r.entryType!=='Opening Stock'&&r.entryType!=='Job Work Return')return;(r.items||[]).forEach(i=>{const b=bucket(i.name,isFabricItem(i.name)?'Fabric':'Trims'),q=pf(i.recQty);if(r.date<from)b.open+=q;else if(inRange(r.date,from,to))b.inn+=q;});});
-    function issue(rec,list){if(/cancel/i.test(rec.status||''))return;(list||[]).forEach(i=>{const b=bucket(i.item,isFabricItem(i.item)?'Fabric':'Trims'),q=issueLineQty(i),d=i.date||rec.date||'';if(d<from)b.open-=q;else if(inRange(d,from,to))b.out+=q;});}
+    (db.inward||[]).forEach(r=>{if(!qaGoodStatus(r)&&r.entryType!=='Opening Stock'&&r.entryType!=='Job Work Return')return;(r.items||[]).forEach(i=>{const b=bucket(i.name,isFabricItem(i.name,i.category,i.classification)?'Fabric':'Trims'),q=pf(i.recQty);if(r.date<from)b.open+=q;else if(inRange(r.date,from,to))b.inn+=q;});});
+    function issue(rec,list){if(/cancel/i.test(rec.status||''))return;(list||[]).forEach(i=>{const b=bucket(i.item,isFabricItem(i.item,i.category,i.classification)?'Fabric':'Trims'),q=issueLineQty(i),d=i.date||rec.date||'';if(d<from)b.open-=q;else if(inRange(d,from,to))b.out+=q;});}
     (db.jobwork||[]).forEach(r=>{issue(r,r.issues);issue(r,r.extras);});(db.sample||[]).forEach(r=>issue(r,r.extras));
-    (db.purchasereturn||[]).forEach(r=>{if(/cancel/i.test(r.status||''))return;(r.items||[]).forEach(i=>{const b=bucket(i.name,isFabricItem(i.name)?'Fabric':'Trims'),q=pf(i.retQty);if(r.date<from)b.open-=q;else if(inRange(r.date,from,to))b.out+=q;});});
+    (db.purchasereturn||[]).forEach(r=>{if(/cancel/i.test(r.status||''))return;(r.items||[]).forEach(i=>{const b=bucket(i.name,isFabricItem(i.name,i.category,i.classification)?'Fabric':'Trims'),q=pf(i.retQty);if(r.date<from)b.open-=q;else if(inRange(r.date,from,to))b.out+=q;});});
     const make=cat=>Object.values(material).filter(b=>b.cat===cat).map(b=>[b.name,fmtNum(b.open),fmtNum(b.inn),fmtNum(b.out),fmtNum(b.open+b.inn-b.out)]);
     const fg={};function fgb(k){k=String(k||'').split(' · ')[0];return fg[k]||(fg[k]={open:0,inn:0,out:0});}
     (db.jobwork||[]).forEach(j=>{if(/cancel/i.test(j.status||''))return;(jwReceipts(j)||[]).forEach(rx=>{if(/reject|fail/i.test(rx.qc||''))return;const b=fgb(rx.desc),q=pf(rx.qty),d=rx.date||j.date||'';if(d<from)b.open+=q;else if(inRange(d,from,to))b.inn+=q;});});
