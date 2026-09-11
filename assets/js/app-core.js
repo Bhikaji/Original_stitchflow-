@@ -3069,7 +3069,7 @@ function dashboardWipVendorRows() {
 }
 function renderDashboardInventoryWidget() {
   const el = $('dash-inventory-widget'); if (!el) return;
-  const fabricValue = fabricValuation(), trimsValue = trimStock().reduce(function(a,x) { return a + Math.max(0,x.balance) * sfGetItemRate(x.name,''); }, 0) || trimsValuation();
+  const fabricValue = fabricValuation(), trimsValue = trimsValuation();
   const wip = dashboardWipVendorRows().reduce(function(a,x) { return a + x.wip; }, 0), fg = (db.jobwork || []).reduce(function(a,j) { return a + jwTotalReceived(j); }, 0);
   const rows = [['Fabric Stock','mtr',fmtInventoryNum(fabricStock().m),fmtInventoryNum(fabricValue)],['Trims Stock','-', '-',fmtInventoryNum(trimsValue)],['WIP','pcs',fmtInventoryNum(wip),'-'],['FG','pcs',fmtInventoryNum(fg),'-']];
   const total = ['Total','-',fmtInventoryNum(fabricStock().m + wip + fg),fmtInventoryNum(fabricValue + trimsValue)];
