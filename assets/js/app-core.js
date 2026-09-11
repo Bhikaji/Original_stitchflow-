@@ -2742,6 +2742,13 @@ function ensureSummaryReportStyles() {
     '.dash-inventory-panel .summary-report-table th,.dash-inventory-panel .summary-report-table td{box-sizing:border-box!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-all!important;padding:5px 3px!important}' +
     '.dash-inventory-panel .summary-report-table td.num{ text-align:right!important}' +
     '@media(max-width:900px){.dash-trims-inventory-row{grid-template-columns:1fr!important}}' +
+    '.dash-trims-summary-widget{min-width:0!important;width:100%!important}' +
+    '.dash-trims-summary-table-wrap{overflow:hidden!important;width:100%!important;max-width:100%!important}' +
+    '.summary-report-table.trims-summary-table{display:table!important;table-layout:fixed!important;width:100%!important;min-width:0!important;max-width:100%!important;font-size:13px!important}' +
+    '.summary-report-table.trims-summary-table th,.summary-report-table.trims-summary-table td{box-sizing:border-box!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;padding:6px 3px!important;line-height:1.25!important}' +
+    '.summary-report-table.trims-summary-table th:first-child,.summary-report-table.trims-summary-table td:first-child{width:22%!important}' +
+    '.summary-report-table.trims-summary-table th:not(:first-child),.summary-report-table.trims-summary-table td:not(:first-child){width:19.5%!important}' +
+    '.summary-report-table.trims-summary-table td.num{text-align:right!important;font-size:13px!important}' +
     '.dash-summary-head{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;flex-wrap:wrap!important;gap:14px!important;margin-bottom:14px!important;border-bottom:1px solid #f1f5f9!important;padding-bottom:12px!important}' +
     '.dash-summary-titles{flex:1 1 320px!important}' +
     '.dash-summary-badge{display:inline-flex!important;align-items:center!important;gap:6px!important;font-size:11px!important;font-weight:750!important;letter-spacing:0.5px!important;color:#0f766e!important;background:#f0fdfa!important;padding:3px 9px!important;border-radius:20px!important;border:1px solid #ccfbf1!important;margin-bottom:5px!important}' +
@@ -2858,8 +2865,10 @@ function buildSummaryExcelTableHtml(rep) {
   thead = thead.replace(/#ffff00/g, '#f1f5f9');
   const neutralTfoot = tfoot.replace(/#ffff00/g, '#e2e8f0');
 
-  return '<div class="table-wrap dash-table-wrap" style="overflow-x:auto;border:1px solid #777;border-radius:0 0 6px 6px;background:#fff;box-sizing:border-box">' +
-           '<table class="summary-report-table excel-style" style="width:100%;border-collapse:collapse;font-size:12px;background:#fff;margin:0">' +
+  const tableClass = rep.isFabric ? '' : ' trims-summary-table';
+  const wrapperClass = rep.isFabric ? '' : ' dash-trims-summary-table-wrap';
+  return '<div class="table-wrap dash-table-wrap' + wrapperClass + '" style="overflow:hidden;border:1px solid #777;border-radius:0 0 6px 6px;background:#fff;box-sizing:border-box">' +
+           '<table class="summary-report-table excel-style' + tableClass + '" style="width:100%;border-collapse:collapse;font-size:12px;background:#fff;margin:0">' +
            thead + tbody + neutralTfoot +
            '</table>' +
          '</div>';
@@ -2975,7 +2984,7 @@ function renderDashboardFabricWidget() {
   const tableHtml = buildSummaryExcelTableHtml(rep);
 
   el.innerHTML =
-    '<div class="dash-summary-panel" style="background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:18px 20px;margin:18px 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.05);box-sizing:border-box">' +
+    '<div class="dash-summary-panel dash-trims-summary-widget" style="background:#fff;border:1px solid #d1d5db;border-radius:12px;padding:18px 20px;margin:18px 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.05);box-sizing:border-box">' +
       '<div class="dash-summary-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px;border-bottom:1px solid #f1f5f9;padding-bottom:12px">' +
         '<div class="dash-summary-titles" style="flex:1 1 320px">' +
           '<h3 class="dash-panel-main-title" style="font-size:16.5px;font-weight:750;color:#0f172a;margin:0 0 3px 0;letter-spacing:-0.2px">Date Wise Fabric Report (In-Out)</h3>' +
