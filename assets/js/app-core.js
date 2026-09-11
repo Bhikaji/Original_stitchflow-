@@ -2957,7 +2957,7 @@ function renderDashboardFabricWidget() {
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
         '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward</span>' +
-        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">' + fmtNum(s.totalInQty) + ' (Meter)</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">' + fmtInventoryNum(s.totalInQty) + ' (Meter)</span>' +
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalInVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
@@ -14513,7 +14513,7 @@ function renderPartnerOnboarding(){
         '<button class="btn-icon danger" title="Delete" onclick="obDeletePartner(\''+p.id+'\')">'+ic('trash',15)+'</button>'+
       '</td></tr>';
   }).join('') || '<tr><td colspan="6"><div class="empty"><h3>No partners yet</h3><p>Create a partner and verify GSTIN to auto-fetch legal name, trade name and address.</p></div></td></tr>';
-  $('content').innerHTML='<div class="ob-wrap"><div class="ob-notice"><div>ⓘ</div><div><strong>GST auto-fetch</strong> Enter a 15-character GSTIN and click Verify (or type all 15 digits). Data is pulled from the provider configured in <a href="#" onclick="go(\'gstapi\');return false">GST API connection</a>.</div></div><div class="panel list-panel"><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+  $('content').innerHTML='<div class="ob-wrap"><div class="panel list-panel"><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
 }
 
 function obDeletePartner(id){
@@ -14550,12 +14550,12 @@ function obRegHtml(r,i){
     '</div>'+
     '<div class="grid-fixed" style="margin-top:8px">'+
       field('City *','<input class="inp" data-ob="city" value="'+esc(r.city||'')+'">')+
-      field('District *','<input class="inp" data-ob="district" value="'+esc(r.district||'')+'">')+
+      field('District','<input class="inp" data-ob="district" value="'+esc(r.district||'')+'">')+
       field('State *','<input class="inp" data-ob="placeState" value="'+esc(r.placeState||'')+'">')+
       field('PIN code *','<input class="inp" data-ob="pincode" maxlength="6" value="'+esc(r.pincode||'')+'">')+
     '</div>'+
     '<div class="ob-mini">Principal place of business</div>'+
-    '<div class="grid-fixed">'+field('Full GST address *','<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address">'+esc(r.principalAddress||'')+'</textarea>')+'</div></div>';
+    '<div class="grid-fixed wide-last">'+field('Full GST address','<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address">'+esc(r.principalAddress||'')+'</textarea>')+'</div></div>';
 }
 function obToggleBrand(btn){
   const box=btn.closest('[data-ob-brand]'); if(!box) return;
@@ -14730,10 +14730,8 @@ function obSubmitPartner(){
     ['legalName','GST legal name is required'],
     ['tradeName','Trade name is required'],
     ['city','City is required'],
-    ['district','District is required'],
     ['placeState','State is required'],
     ['pincode','PIN code is required'],
-    ['principalAddress','Full GST address is required']
   ];
   for(let i=0;i<cards.length;i++){
     const card=cards[i], n=i+1;
