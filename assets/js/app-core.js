@@ -7059,13 +7059,13 @@ function poItemRow(it) {
     '<td><input class="inp" data-f="hsn" value="' + esc(it.hsn || '') + '" placeholder="Auto" disabled></td>' +
     '<td><input class="inp" data-f="unit" value="' + esc(it.unit || '') + '" placeholder="Auto" disabled></td>' +
     '<td class="num" data-stock style="color:var(--muted);font-weight:600">' + fmtNum(itemStockQty(it.name)) + '</td>' +
-    '<td><input class="inp num" type="number" min="0" data-f="qty" value="' + (it.qty ?? '') + '" oninput="calcPO()"></td>' +
-    '<td><input class="inp num" type="number" min="0" step="0.01" data-f="rate" value="' + (it.rate ?? '') + '" oninput="calcPO()"></td>' +
-    '<td><input class="inp num inp-sm" type="number" data-f="cgstPct" value="' + (it.cgstPct ?? '') + '" placeholder="Auto" disabled></td>' +
+    '<td><input class="inp num" type="number" min="0" step="any" data-f="qty" value="' + (it.qty ?? '') + '" oninput="calcPO()"></td>' +
+    '<td><input class="inp num" type="number" min="0" step="any" data-f="rate" value="' + (it.rate ?? '') + '" oninput="calcPO()"></td>' +
+    '<td><input class="inp num inp-sm" type="number" step="any" data-f="cgstPct" value="' + (it.cgstPct ?? '') + '" placeholder="Auto" disabled></td>' +
     '<td class="num" data-camt style="color:var(--muted)">0</td>' +
-    '<td><input class="inp num inp-sm" type="number" data-f="sgstPct" value="' + (it.sgstPct ?? '') + '" placeholder="Auto" disabled></td>' +
+    '<td><input class="inp num inp-sm" type="number" step="any" data-f="sgstPct" value="' + (it.sgstPct ?? '') + '" placeholder="Auto" disabled></td>' +
     '<td class="num" data-samt style="color:var(--muted)">0</td>' +
-    '<td><input class="inp num inp-sm" type="number" data-f="igstPct" value="' + (it.igstPct ?? '') + '" placeholder="Auto" disabled></td>' +
+    '<td><input class="inp num inp-sm" type="number" step="any" data-f="igstPct" value="' + (it.igstPct ?? '') + '" placeholder="Auto" disabled></td>' +
     '<td class="num" data-iamt style="color:var(--muted)">0</td>' +
     '<td class="num" data-amt style="font-weight:700">0</td>' +
     '<td class="num" data-total style="font-weight:800;color:var(--pink-dark)">0</td>' +
