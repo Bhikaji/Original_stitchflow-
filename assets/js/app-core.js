@@ -2909,25 +2909,26 @@ function exportSummaryPanelCSV(kind) {
   const type = isFab ? 'fabric_inout_summary' : 'trims_inout_summary';
   const rep = buildSummaryInOutReport(type, range.from, range.to);
   const from = range.from, to = range.to;
-  let csv = rep.title + ' ' + (dpToDisplay(from)||from) + ' and ' + (dpToDisplay(to)||to) + '\n';
+  let csv = '';
   if (isFab) {
-    csv += 'Date,Opening Qty Meter,Opening Value Rs.,Inward Qty Meter,Inward Value Rs.,Outward Qty Meter,Outward Value Rs.,Closing Qty Meter,Closing Value Rs.\n';
-    csv += ',,,Inward,Inward,"Job Work, Purchase Return, Sample","Job Work, Purchase Return, Sample",,\n';
+    csv += 'Date,Opening,,Inward,,Outward,,Closing,\n';
+    csv += ',Meter,Value (INR),Meter,Value (INR),Meter,Value (INR),Meter,Value (INR)\n';
   } else {
-    csv += 'Date,Opening Value Rs.,Inward Value Rs.,Outward Value Rs.,Closing Value Rs.\n';
-    csv += ',,Inward,"Job Work, Purchase Return, Sample",\n';
+    csv += 'Date,Opening,Inward,Outward,Closing\n';
+    csv += ',Value (INR),Value (INR),Value (INR),Value (INR)\n';
   }
   csv += rep.rows.map(row => row.map(csvEsc).join(',')).join('\n') + '\n';
   if (rep.foot) csv += rep.foot.map(csvEsc).join(',') + '\n';
   if (rep.footAvg) csv += rep.footAvg.map(csvEsc).join(',') + '\n';
 
   try {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = (isFab ? 'Fabric_Summary_' : 'Trims_Summary_') + from + '_to_' + to + '.csv';
     document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     toast('Summary CSV exported', 'green');
   } catch (e) { toast('Download blocked in preview'); }
 }
@@ -2961,8 +2962,8 @@ function renderDashboardFabricWidget() {
       '</div>' +
       '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
         '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">Closing Balance</span>' +
-        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12;line-height:1.2">' + fmtNum(s.closingQty) + ' m</span>' +
-        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtNum(s.closingVal) + '</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12;line-height:1.2">' + fmtInventoryNum(s.closingQty) + ' m</span>' +
+        '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Valuation: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
       '</div>' +
     '</div>';
 
@@ -3014,7 +3015,7 @@ function renderDashboardTrimsWidget() {
       '</div>' +
       '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
         '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Valuation</span>' +
-        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a;line-height:1.2">₹' + fmtNum(s.closingVal) + '</span>' +
+        '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a;line-height:1.2">₹' + fmtInventoryNum(s.closingVal) + '</span>' +
         '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims in stock</span>' +
       '</div>' +
     '</div>';
@@ -3152,7 +3153,7 @@ function renderDashboard() {
     '<div id="dash-trims-summary-widget"></div>' +
     '<div id="dash-inventory-widget"></div>' +
     '<div id="dash-wip-widget"></div>' +
-    '<details class="footnote"><summary>How this workflow fits together</summary><div class="fn-body"> Raise a <b>PO</b> for fabric &amp; trims → record <b>Inward</b> when they arrive (auto-updates PO status) → <b>Job Work</b>: add <b>multiple issue records</b> (fabric + trims to the job-worker vendor) and <b>styles with size-wise qty</b> — <b>Internal ID style no. is mandatory</b> (from Style Master) &amp; record finished goods received back with consumption → <b>Sale</b> entry (Myntra D2C), and use <b>Reports</b> for GRN / issues / WIP / FG received / stock. Set up <b>Style Master</b> (Internal + Portal ID) and <b>Size Master</b> in Masters. Every dropdown is searchable — just type to filter. Search, export &amp; print are available on every module.</div></details>';
+    '';
 
   renderBothDashboardWidgets();
 }
