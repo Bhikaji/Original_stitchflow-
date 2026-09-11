@@ -4939,10 +4939,14 @@ function printInward(id) {
   const hsnMap = {};
 
   const rows = items.map(function (it, idx) {
-    const poItem = (po && po.items) ? po.items.find(function(pi){ return pi.name === it.name || (it.code && pi.code === it.code); }) : null;
-    const im = itemByName(it.name);
-    const itemCode = it.code || (im && im.code) || (poItem && poItem.code) || it.item_id || '—';
+    const rawItemName = String(it.name || '').trim();
+    const leadingCode = /^(?:\(|\[)?([A-Za-z]{2,}-\d+)(?:\)|\])?\s*(.*)$/.exec(rawItemName);
+    const lookupName = leadingCode ? leadingCode[2].trim() : bareItemName(rawItemName);
+    const poItem = (po && po.items) ? po.items.find(function(pi){ return pi.name === it.name || bareItemName(pi.name) === lookupName || (it.code && pi.code === it.code); }) : null;
+    const im = itemByName(lookupName) || itemByName(rawItemName);
+    const itemCode = it.code || (leadingCode && leadingCode[1]) || (im && im.code) || (poItem && poItem.code) || it.item_id || '—';
     const hsn = it.hsn || (im && im.hsn) || (poItem && poItem.hsn) || '—';
+    const itemName = (leadingCode ? leadingCode[2].trim() : bareItemName(rawItemName)) || rawItemName;
     const specs = it.specs || (poItem && poItem.specs) || '';
     const qty = pf(it.recQty != null ? it.recQty : it.qty);
     const uom = it.unit || (im && im.unit) || (poItem && poItem.unit) || '—';
@@ -4977,7 +4981,7 @@ function printInward(id) {
       '<td class="ctr">' + (idx + 1) + '</td>' +
       '<td>' + esc(it.classification || (im && im.classification) || (poItem && poItem.classification) || '') + '</td>' +
       '<td>' + esc(itemCode) + '</td>' +
-      '<td><b>' + esc(it.name || '') + '</b>' + (specs ? '<div class="sub">' + esc(specs) + '</div>' : '') + '</td>' +
+      '<td><b>' + esc(itemName) + '</b>' + (specs ? '<div class="sub">' + esc(specs) + '</div>' : '') + '</td>' +
       '<td>' + esc(hsn) + '</td>' +
       '<td class="rt">' + fmtNum(qty) + '</td>' +
       '<td>' + esc(uom) + '</td>' +
@@ -5107,7 +5111,7 @@ function printInward(id) {
         '<p>' + esc(PRINT_CO.reg2) + '</p>' +
         '<p>' + esc(PRINT_CO.works) + '</p>' +
         '<p>' + esc(PRINT_CO.contact) + '</p>' +
-        '<div class="gst">GSTIN: ' + esc(PRINT_CO.gstNo || 'Not configured') + ' &nbsp; | &nbsp; PAN: ' + esc(PRINT_CO.pan || '—') + ' &nbsp; | &nbsp; State: ' + esc(PRINT_CO.state || '') + ' (' + esc(PRINT_CO.stateCode || '') + ')</div>' +
+        '<div class="gst">GSTIN: ' + esc(PRINT_CO.gstNo || 'Not configured') + ' &nbsp; | &nbsp; State: ' + esc(PRINT_CO.state || '') + ' (' + esc(PRINT_CO.stateCode || '') + ')</div>' +
       '</div>' +
       '<div class="pohead">' +
         '<div class="eyebrow">Receipt Document</div>' +
@@ -5123,8 +5127,8 @@ function printInward(id) {
       '<div><span>Invoice / Challan Date</span><b>' + esc(invoiceDate) + '</b></div>' +
     '</section>' +
     '<section class="parties">' +
-      '<div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || '—') + '<br><strong>PAN:</strong> ' + esc(supplierPan || '—') + '<br><strong>State:</strong> ' + esc(supplierState || '—') + '</div></div></div>' +
-      '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(coWorks) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || '—') + '<br><strong>PAN:</strong> ' + esc(PRINT_CO.pan || '—') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || '—') + '</div></div></div>' +
+      '<div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || '—') + '<br><strong>State:</strong> ' + esc(supplierState || '—') + '</div></div></div>' +
+      '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(coWorks) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || '—') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || '—') + '</div></div></div>' +
       '<div class="card"><h3>Ship To / Delivery Address</h3><div class="body"><b>' + esc(shipName) + '</b><p>' + esc(shipAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(shipGst || '—') + '<br><strong>State:</strong> ' + esc(shipState || '—') + '</div></div></div>' +
     '</section>' +
     '<section class="commercial">' +
