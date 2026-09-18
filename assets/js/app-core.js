@@ -1345,15 +1345,9 @@ function sfServerBase(){
     return base;
   }catch(e){return '';}
 }
-function syncMastersToMysql(){var base=typeof sfServerBase==='function'?sfServerBase():'';if(!base||typeof fetch!=='function'||!db||!db.masters)return;fetch(base+'api/masters.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({masters:db.masters})}).catch(function(){});}
+function syncMastersToMysql(){saveDB();}
 function syncUsersToMysql(){
-  var base=sfServerBase();
-  if(!base||typeof fetch!=='function') return;
-  var users=(typeof db!=='undefined'&&db.users)?db.users:[];
-  fetch(base+'api/users.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({users:users})})
-    .then(function(r){return r.json();})
-    .then(function(j){ if(j&&j.ok&&typeof toast==='function'){ /* silent success */ } })
-    .catch(function(){});
+  saveDB();
 }
 
 function syncDocForeignKeys(doc, m) {
@@ -1448,14 +1442,6 @@ function saveDB() {
   try{syncAllForeignKeys(db);}catch(e){}
   var ok=false;
   try { if (useLS) { localStorage.setItem(DB_KEY, JSON.stringify(db)); ok=true; } } catch (e) { useLS = false; }
-  try{
-    var base=sfServerBase();
-    if(base && typeof fetch==='function'){
-      fetch(base+'api/data.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(db)}).catch(function(){});
-      fetch(base+'api/users.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({users:db.users||[]})}).catch(function(){});
-      fetch(base+'api/masters.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({masters:db.masters||{}})}).catch(function(){});
-    }
-  }catch(e){}
   return ok;
 }
 let db = loadDB();

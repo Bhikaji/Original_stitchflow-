@@ -56,12 +56,16 @@ function sf_kv_del(PDO $pdo, string $key): void {
     $pdo->prepare('DELETE FROM kv_store WHERE k = ?')->execute([$key]);
 }
 
-function sf_prevent_truncate(PDO $pdo, array $docs, string $tableName): void {
+function sf_prevent_truncate(PDO $pdo, array $docs, string $tableName, string $where = ''): void {
     if (empty($docs)) {
         // Allow if the table is already empty (e.g. fresh installation)
-        $count = (int)$pdo->query("SELECT COUNT(*) FROM `$tableName`")->fetchColumn();
+        $sql = "SELECT COUNT(*) FROM `$tableName`";
+        if ($where !== '') {
+            $sql .= " WHERE $where";
+        }
+        $count = (int)$pdo->query($sql)->fetchColumn();
         if ($count > 0) {
-            throw new RuntimeException("Safeguard Triggered: Refusing to truncate table '$tableName'.");
+            throw new RuntimeException("Server error: Safeguard Triggered: Refusing to truncate table '$tableName'.");
         }
     }
 }
@@ -694,7 +698,7 @@ function persist_inwards(PDO $pdo, array $docs, string $actor): void {
 function persist_jobwork_like(PDO $pdo, array $docs, string $docType, string $actor): void {
     sf_capture_status($pdo, $docType, 'jobworks', 'id', 'jw_no', 'status',
         array_filter($docs, 'is_array'), $actor);
-    sf_prevent_truncate($pdo, $docs, 'jobworks');
+    sf_prevent_truncate($pdo, $docs, 'jobworks', 'doc_type = ' . $pdo->quote($docType));
     $prev = [];
     $st = $pdo->prepare('SELECT id, created_by, created_at FROM jobworks WHERE doc_type = ?');
     $st->execute([$docType]);

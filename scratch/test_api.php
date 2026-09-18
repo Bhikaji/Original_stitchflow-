@@ -1,3 +1,5 @@
 <?php
-$res = file_get_contents('http://localhost/stitchflow/index.php');
-echo substr($res, 0, 500);
+require 'api/bootstrap.php';
+require 'api/lib/assemble.php';
+$db = assemble_db();
+print_r(array_keys($db));
