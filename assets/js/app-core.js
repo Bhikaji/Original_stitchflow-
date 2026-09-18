@@ -6523,6 +6523,7 @@ function goPage(kind, key, p) {
   else if (kind === 'party') { ptState.page = p; const el = $('pt-list'); if (el) el.innerHTML = partyListHtml(); }
   else if (kind === 'rep') { repState.page = p; renderReportBody(); }
   else if (kind === 'audit') { auditState.page = p; renderAuditTrail(); }
+  else if (kind === 'ob') { obListState.page = p; renderPartnerOnboarding(); }
 }
 function goPageSize(kind, key, n) {
   n = parseInt(n, 10) || 25;
@@ -6532,6 +6533,7 @@ function goPageSize(kind, key, n) {
   else if (kind === 'party') { ptState.size = n; ptState.page = 1; const el = $('pt-list'); if (el) el.innerHTML = partyListHtml(); }
   else if (kind === 'rep') { repState.size = n; repState.page = 1; renderReportBody(); }
   else if (kind === 'audit') { auditState.size = n; auditState.page = 1; renderAuditTrail(); }
+  else if (kind === 'ob') { obListState.size = n; obListState.page = 1; renderPartnerOnboarding(); }
 }
 function refreshMasterBody() {
   const el = $('m-body'); if (!el) { renderMasters(); return; }
@@ -14501,6 +14503,7 @@ async function gstFetchProfile(gstin){
 }
 
 var obEditId = (typeof obEditId !== 'undefined') ? obEditId : null;
+var obListState = (typeof obListState !== 'undefined') ? obListState : { q:'', page:1, size:25 };
 function partnersDb(){ if(!db.partners) db.partners=[]; return db.partners; }
 function nextPartnerCode(){
   const used={};
@@ -14511,8 +14514,49 @@ function nextPartnerCode(){
 }
 function obField(root,f){ const el=qs('[data-ob="'+f+'"]',root||document); return el?(el.type==='checkbox'?el.checked:el.value):''; }
 function obSet(root,f,v){ const el=qs('[data-ob="'+f+'"]',root||document); if(!el)return; if(el.type==='checkbox') el.checked=!!v; else el.value=v==null?'':v; }
+function obSearch(value){
+  const input=value && value.nodeType ? value : null;
+  const text=input ? input.value : String(value||'');
+  const caret=input && typeof input.selectionStart==='number' ? input.selectionStart : text.length;
+  obListState.q=text; obListState.page=1; renderPartnerOnboarding();
+  setTimeout(function(){
+    const next=qs('.ob-filter-tools input');
+    if(!next)return;
+    next.focus();
+    try{next.setSelectionRange(caret,caret);}catch(e){}
+  },0);
+}
+function obClearFilters(){ obListState.q=''; obListState.page=1; renderPartnerOnboarding(); }
+function obRegUsed(gstin, partnerId){
+  const key=String(gstin||'').trim().toUpperCase(); if(!key) return false;
+  const parties=(db.masters.parties||[]).filter(function(p){return String(p.gstNo||'').trim().toUpperCase()===key;});
+  if(parties.some(function(p){return p.partnerId!==partnerId;})) return true;
+  const names={};
+  parties.forEach(function(p){[p.name,p.legalName,p.tradeName,p.shortName].forEach(function(v){const n=String(v||'').trim().toLowerCase();if(n)names[n]=true;});});
+  if(!Object.keys(names).length) return false;
+  const used=function(v){return !!names[String(v||'').trim().toLowerCase()];};
+  return (db.po||[]).some(function(r){return used(r.supplier)||used(r.supplierTrade)||used(r.shipTo)||used(r.buyer);}) ||
+    (db.inward||[]).some(function(r){return used(r.supplier)||used(r.supplierTrade);}) ||
+    (db.jobwork||[]).some(function(r){return used(r.vendor);}) ||
+    (db.sample||[]).some(function(r){return used(r.vendor);}) ||
+    (db.sale||[]).some(function(r){return used(r.customer)||used(r.party);}) ||
+    (db.purchasereturn||[]).some(function(r){return used(r.supplier)||used(r.party);});
+}
+function obDuplicateExists(displayName, registrations, currentId){
+  const nameKey=String(displayName||'').trim().toLowerCase();
+  const gstKeys=(registrations||[]).map(function(r){return String(r.gstin||'').trim().toUpperCase();}).filter(Boolean);
+  return partnersDb().some(function(p){
+    if (currentId && p.id===currentId) return false;
+    if (nameKey && String(p.displayName||'').trim().toLowerCase()===nameKey) return true;
+    return (p.registrations||[]).some(function(r){return gstKeys.indexOf(String(r.gstin||'').trim().toUpperCase())>-1;});
+  });
+}
+function obPartnerUsed(partner){
+  return (partner && partner.registrations||[]).some(function(r){return obRegUsed(r.gstin, partner.id);});
+}
 
 function renderPartnerOnboarding(){
+  if(!obListState) obListState={q:'',page:1,size:25};
   const list=partnersDb();
   if(obEditId==='new' || (obEditId && list.some(function(x){return x.id===obEditId;}))){
     renderPartnerForm(obEditId==='new'?null:list.find(function(x){return x.id===obEditId;}));
@@ -14520,7 +14564,17 @@ function renderPartnerOnboarding(){
   }
   $('tb-title').textContent='Partner onboarding';
   $('tb-sub').textContent='Onboard buyer and vendor accounts with GSTIN auto-fetch';
-  const rows=list.slice().reverse().map(function(p){
+  if($('tb-actions')) $('tb-actions').innerHTML='';
+  const query=String(obListState.q||'').trim().toLowerCase();
+  const filtered=list.slice().reverse().filter(function(p){
+    if(!query) return true;
+    return [p.code,p.displayName,p.shortName].concat((p.registrations||[]).map(function(r){return r.gstin||'';})).join(' ').toLowerCase().indexOf(query)>-1;
+  });
+  const total=filtered.length, pages=Math.max(1,Math.ceil(total/(obListState.size||25)));
+  obListState.page=Math.min(Math.max(1,obListState.page||1),pages);
+  const visible=filtered.slice((obListState.page-1)*obListState.size,obListState.page*obListState.size);
+  const rows=visible.map(function(p){
+    const used=obPartnerUsed(p);
     const roles=(p.roles||[]).map(function(r){
       if(r==='JOB_WORKER'||r==='SUPPLIER') return 'Supplier';
       if(r==='VENDOR') return 'Vendor';
@@ -14531,15 +14585,17 @@ function renderPartnerOnboarding(){
     return '<tr><td><b>'+esc(p.code||'')+'</b></td><td>'+esc(p.displayName||'')+'</td><td>'+esc(roles)+'</td><td>'+esc(gst)+'</td><td>'+esc(p.status||'Draft')+'</td>'+
       '<td class="actions-cell no-print" onclick="event.stopPropagation()">'+
         '<button class="btn-icon" title="Edit" onclick="obEditPartner(\''+p.id+'\')">'+ic('pencil',15)+'</button>'+
-        '<button class="btn-icon danger" title="Delete" onclick="obDeletePartner(\''+p.id+'\')">'+ic('trash',15)+'</button>'+
+        '<button class="btn-icon danger" title="'+(used?'Cannot delete — partner is used in transactions':'Delete')+'" '+(used?'disabled':'onclick="obDeletePartner(\''+p.id+'\')"')+'>'+ic('trash',15)+'</button>'+ 
       '</td></tr>';
-  }).join('') || '<tr><td colspan="6"><div class="empty"><h3>No partners yet</h3><p>Create a partner and verify GSTIN to auto-fetch legal name, trade name and address.</p></div></td></tr>';
-  $('content').innerHTML='<div class="ob-wrap"><div class="panel list-panel"><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+  }).join('') || '<tr><td colspan="6"><div class="empty"><h3>No partners found</h3><p>Create a partner or change the search text.</p></div></td></tr>';
+  const pg={page:obListState.page,pages:pages,size:obListState.size,total:total,from:total?(obListState.page-1)*obListState.size+1:0,to:Math.min(obListState.page*obListState.size,total)};
+  $('content').innerHTML='<div class="ob-wrap"><div class="panel list-panel"><div class="mtools ob-filter-tools"><div class="search msearch">'+ic('search',16)+'<input class="inp" placeholder="Search partner, GSTIN or code" value="'+esc(obListState.q)+'" oninput="obSearch(this)"></div><span class="rowcount" id="ob-count">'+filtered.length+' of '+list.length+'</span><button class="btn btn-ghost btn-sm" id="ob-clear-filters" onclick="obClearFilters()"'+(obListState.q?'':' disabled')+'>Clear filters</button></div><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+pagerBar(pg,'ob','partners')+'</div></div>';
 }
 
 function obDeletePartner(id){
   const rec=partnersDb().find(function(x){return x.id===id;});
   if(!rec) return;
+  if(obPartnerUsed(rec)) return toast('Cannot delete — this partner is used in transactions','red');
   const goDel=function(){
     db.partners=partnersDb().filter(function(x){return x.id!==id;});
     if(db.masters&&db.masters.parties){
@@ -14559,24 +14615,26 @@ function obBackList(){ obEditId=null; render(); }
 
 function obRegHtml(r,i){
   r=r||{};
+  const locked=obRegUsed(r.gstin, obEditId && obEditId!=='new' ? obEditId : '');
+  const disabled=locked?' disabled':'';
   return '<div class="ob-repeat" data-ob-reg>'+
     '<div class="ob-repeat-h"><div><b>GST registration</b> <span class="ob-badge">GSTIN '+(i+1)+'</span></div>'+
-    '<button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-reg]\').remove();obUpdateSummary()">×</button></div>'+
+    (locked?'<span class="ob-badge">Used</span>':'<button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-reg]\').remove();obUpdateSummary()">×</button>')+'</div>'+ 
     '<div class="grid-fixed">'+
-      field('GSTIN *','<div class="ob-inline"><input class="inp ob-gstin" data-ob="gstin" maxlength="15" value="'+esc(r.gstin||'')+'" placeholder="27ABCDE1234F1Z5" oninput="obGstinTyped(this)"><button type="button" class="btn btn-ghost btn-sm" onclick="obVerifyGstin(this)">Verify</button></div><div class="ob-ver" data-ob-ver></div>')+
+      field('GSTIN *','<div class="ob-inline"><input class="inp ob-gstin" data-ob="gstin" maxlength="15" value="'+esc(r.gstin||'')+'" placeholder="27ABCDE1234F1Z5" oninput="obGstinTyped(this)"'+disabled+'><button type="button" class="btn btn-ghost btn-sm" onclick="obVerifyGstin(this)"'+disabled+'>Verify</button></div><div class="ob-ver" data-ob-ver></div>')+
       field('PAN','<input class="inp" data-ob="pan" maxlength="10" value="'+esc(r.pan||'')+'" placeholder="Auto from GSTIN" disabled title="Auto-filled from GSTIN">')+
-      field('State / GST state code *','<input class="inp" data-ob="state" value="'+esc(r.state||'')+'" placeholder="Maharashtra / 27">')+
-      field('GST legal name *','<input class="inp" data-ob="legalName" value="'+esc(r.legalName||'')+'" placeholder="Fetched from GST provider">')+
-      field('Trade name *','<input class="inp" data-ob="tradeName" value="'+esc(r.tradeName||'')+'" placeholder="Brand / trade name">')+
+      field('State / GST state code *','<input class="inp" data-ob="state" value="'+esc(r.state||'')+'" placeholder="Maharashtra / 27"'+disabled+'>')+
+      field('GST legal name *','<input class="inp" data-ob="legalName" value="'+esc(r.legalName||'')+'" placeholder="Fetched from GST provider"'+disabled+'>')+
+      field('Trade name *','<input class="inp" data-ob="tradeName" value="'+esc(r.tradeName||'')+'" placeholder="Brand / trade name"'+disabled+'>')+
     '</div>'+
     '<div class="grid-fixed" style="margin-top:8px">'+
-      field('City *','<input class="inp" data-ob="city" value="'+esc(r.city||'')+'">')+
-      field('District','<input class="inp" data-ob="district" value="'+esc(r.district||'')+'">')+
-      field('State *','<input class="inp" data-ob="placeState" value="'+esc(r.placeState||'')+'">')+
-      field('PIN code *','<input class="inp" data-ob="pincode" maxlength="6" value="'+esc(r.pincode||'')+'">')+
+      field('City *','<input class="inp" data-ob="city" value="'+esc(r.city||'')+'"'+disabled+'>')+
+      field('District','<input class="inp" data-ob="district" value="'+esc(r.district||'')+'"'+disabled+'>')+
+      field('State *','<input class="inp" data-ob="placeState" value="'+esc(r.placeState||'')+'"'+disabled+'>')+
+      field('PIN code *','<input class="inp" data-ob="pincode" maxlength="6" value="'+esc(r.pincode||'')+'"'+disabled+'>')+
     '</div>'+
     '<div class="ob-mini">Principal place of business</div>'+
-    '<div class="grid-fixed wide-last">'+field('Full GST address','<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address">'+esc(r.principalAddress||'')+'</textarea>')+'</div></div>';
+    '<div class="grid-fixed wide-last">'+field('Full GST address','<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address"'+disabled+'>'+esc(r.principalAddress||'')+'</textarea>')+'</div></div>';
 }
 function obToggleBrand(btn){
   const box=btn.closest('[data-ob-brand]'); if(!box) return;
@@ -14619,7 +14677,7 @@ function renderPartnerForm(rec){
   const contacts=rec.contacts&&rec.contacts.length?rec.contacts:[{}];
   $('content').innerHTML='<div class="ob-wrap"><div>'+
     '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">01</span><h3 style="margin:0">Partner account</h3></div><p class="ob-help">One commercial account even if the partner has several brands or GSTINs.</p></div></div>'+
-    '<div class="grid-fixed ob-account-grid" style="display:flex;flex-wrap:wrap;gap:0 18px;align-items:flex-start">'+field('Account / group name *','<input class="inp" id="ob-name" value="'+esc(rec.displayName||'')+'" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()">','ob-account-field')+field('Short name *','<input class="inp" id="ob-short" value="'+esc(rec.shortName||'')+'" placeholder="e.g. ABC Retail">','ob-account-field')+
+    '<div class="grid-fixed ob-account-grid" style="display:flex;flex-wrap:wrap;gap:0 18px;align-items:flex-start">'+field('Account / group name *','<input class="inp" id="ob-name" value="'+esc(rec.displayName||'')+'" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()"'+(rec.id?' disabled title="Group name cannot be changed after saving"':'')+'>','ob-account-field')+field('Short name *','<input class="inp" id="ob-short" value="'+esc(rec.shortName||'')+'" placeholder="e.g. ABC Retail">','ob-account-field')+
     '<div class="field" id="ob-biztype" style="max-width:none;min-width:max-content;flex-shrink:0"><label class="lbl">Business Type *</label><div class="ob-check" style="display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap">'+
       [['BUYER','Buyer'],['VENDOR','Vendor'],['SUPPLIER','Supplier']].map(function(r){
         const checked = roles.indexOf(r[0])>-1 || (r[0]==='SUPPLIER' && roles.indexOf('JOB_WORKER')>-1);
@@ -14767,8 +14825,16 @@ function obSubmitPartner(){
     }
   }
   const registrations=obCardData('[data-ob-reg]');
+  const currentId=(obEditId && obEditId!=='new') ? obEditId : '';
+  const seenGst={};
+  for(let i=0;i<registrations.length;i++){
+    const gst=String(registrations[i].gstin||'').trim().toUpperCase();
+    if(gst && seenGst[gst]) return obNeed(obRegField(cards[i],'gstin'),'GSTIN is duplicated in this partner');
+    if(gst) seenGst[gst]=true;
+  }
+  if(obDuplicateExists(displayName,registrations,currentId)) return toast('Duplicate group name or GSTIN — partner was not saved','red');
   const rec={
-    id: (obEditId && obEditId!=='new') ? obEditId : uid(),
+    id: currentId || uid(),
     code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
     displayName:displayName, shortName:shortName, roles:roles, status:(($('ob-status')||{}).value==='Inactive'?'Inactive':'Active'),
     registrations:registrations, brands:obCardData('[data-ob-brand]'), contacts:obCardData('[data-ob-contact]'),

@@ -2,5 +2,9 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/kenerp/public_html/kend2c/test_stitchflow/
+    - /bin/mkdir -p $DEPLOYPATH
     - /bin/cp -R * $DEPLOYPATH
     - /bin/cp -R .[^.]* $DEPLOYPATH
+    - /bin/cp -f assets/css/app.css $DEPLOYPATH/assets/css/app.css
+    - /bin/cp -f assets/js/app-core.js $DEPLOYPATH/assets/js/app-core.js
+    - /bin/cp -f assets/server-sync.js $DEPLOYPATH/assets/server-sync.js
