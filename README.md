@@ -116,19 +116,31 @@ original first-run behaviour.
 
 ## Automated database backups
 
-`backup_database.php` is CLI-only. It creates a compressed MySQL dump and emails it to
-`kenaiitdeparment@gmail.com` using the hosting server's `mail()` service. It never accepts
-backup commands from a browser and does not store an email password in the repository.
+`backup_database.php` is CLI-only. It creates a compressed MySQL dump and uploads it directly
+to a Google Drive folder using a Google service account. It never accepts backup commands from
+a browser and does not store Google credentials in the repository. An email notification is
+sent only when `STITCHFLOW_BACKUP_EMAIL` is configured.
 
-In cPanel, add a Cron Job with the schedule `0 */2 * * *` and this command (adjust the
-PHP and project paths if needed):
+Create a Google Cloud service account, enable the Google Drive API, share the destination Drive
+folder with the service account email as an Editor, and store the downloaded JSON key outside the
+web root. Configure these environment variables for the cron account:
 
 ```bash
-/usr/local/bin/php /home/kenerp/public_html/kend2c/test_stitchflow/backup_database.php
+export STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE=/home/kenerp/private/google-drive-backup.json
+export STITCHFLOW_DRIVE_FOLDER_ID=1COCYE739q8-5GUpf0J8HwT757Q5ZJSs0
+export STITCHFLOW_BACKUP_EMAIL=kenaiitdeparment@gmail.com
 ```
 
-The hosting mail service must be enabled for the account. If cPanel blocks PHP `mail()`,
-configure SMTP through the hosting provider instead; do not put a Gmail password in PHP.
+The PHP `curl` and `openssl` extensions must be enabled.
+
+In cPanel, add a Cron Job with the schedule `0 */2 * * *` and this command:
+
+```bash
+export STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE=/home/kenerp/private/google-drive-backup.json; export STITCHFLOW_DRIVE_FOLDER_ID=1COCYE739q8-5GUpf0J8HwT757Q5ZJSs0; export STITCHFLOW_BACKUP_EMAIL=kenaiitdeparment@gmail.com; /usr/local/bin/php /home/kenerp/public_html/stitchflow/backup_database.php
+```
+
+If cPanel blocks PHP `mail()`, the Drive upload still works; configure SMTP through the hosting
+provider if email notifications are needed.
 
 ## Server-side rule enforcement (api/lib/validate.php)
 
