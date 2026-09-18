@@ -13349,9 +13349,6 @@ try {
     return qaToast(msg, type);
   };
 
-  window.addEventListener('storage', function (e) {
-
-
   function qaStyleKey(v) { return String(v || '').split(' · ')[0].trim().toLowerCase(); }
   window.qaStyleKey = qaStyleKey;
   function qaGoodStatus(r) { return r && !/cancel|reject|pending qc/i.test(String(r.status || '')); }
