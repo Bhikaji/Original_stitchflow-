@@ -13405,8 +13405,9 @@ try {
       useLS = true; window.__qaSaveFailed = false; qaDirty = false; qaClearDraft();
       return true;
     } catch (e) {
+      const alreadyFailed = window.__qaSaveFailed === true;
       useLS = false; window.__qaSaveFailed = true;
-      toast('Not saved — browser storage is full or unavailable. Keep this form open and export/clear space.', 'red');
+      if (!alreadyFailed) toast('Browser storage is unavailable. Changes will continue saving to the server.', 'red');
       return false;
     }
   };
@@ -13414,8 +13415,7 @@ try {
   const qaToast = toast;
   toast = function (msg, type) {
     if (window.__qaSaveFailed && type === 'green' && /saved|updated|created|changed/i.test(String(msg || ''))) {
-      window.__qaSaveFailed = false;
-      return qaToast('Not saved — please keep the form open and retry after freeing browser storage.', 'red');
+      return;
     }
     return qaToast(msg, type);
   };
