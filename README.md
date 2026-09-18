@@ -114,6 +114,22 @@ classifications, sizes S–XXL, UOMs, GST rates, warehouses, process types Embro
 Washing / Printing, payment terms, etc.) and pushes them into MySQL — identical to the
 original first-run behaviour.
 
+## Automated database backups
+
+`backup_database.php` is CLI-only. It creates a compressed MySQL dump and emails it to
+`kenaiitdeparment@gmail.com` using the hosting server's `mail()` service. It never accepts
+backup commands from a browser and does not store an email password in the repository.
+
+In cPanel, add a Cron Job with the schedule `0 */2 * * *` and this command (adjust the
+PHP and project paths if needed):
+
+```bash
+/usr/local/bin/php /home/kenerp/public_html/kend2c/test_stitchflow/backup_database.php
+```
+
+The hosting mail service must be enabled for the account. If cPanel blocks PHP `mail()`,
+configure SMTP through the hosting provider instead; do not put a Gmail password in PHP.
+
 ## Server-side rule enforcement (api/lib/validate.php)
 
 Every save is checked against the same rules the UI enforces before anything is written

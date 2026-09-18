@@ -8,3 +8,4 @@ deployment:
     - /bin/cp -f assets/css/app.css $DEPLOYPATH/assets/css/app.css
     - /bin/cp -f assets/js/app-core.js $DEPLOYPATH/assets/js/app-core.js
     - /bin/cp -f assets/server-sync.js $DEPLOYPATH/assets/server-sync.js
+    - /bin/cp -f backup_database.php $DEPLOYPATH/backup_database.php
