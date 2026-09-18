@@ -74,6 +74,10 @@
   var baseSave = saveDB;
   saveDB = function () {
     var ok = baseSave.apply(this, arguments);
+    if (!loaded && typeof sfServerBase === 'function' && sfServerBase()) {
+      try { toast('Database is not available — this change was not saved.', 'red'); } catch (e) {}
+      return ok;
+    }
     schedulePush();
     return ok;
   };
