@@ -10,13 +10,16 @@ if (PHP_SAPI !== 'cli') {
 $config = require __DIR__ . '/config.php';
 $db = $config['db'];
 $driveCredentialsFile = getenv('STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE') ?: '';
+$googleClientId = getenv('STITCHFLOW_GOOGLE_CLIENT_ID') ?: '';
+$googleClientSecret = getenv('STITCHFLOW_GOOGLE_CLIENT_SECRET') ?: '';
+$googleRefreshToken = getenv('STITCHFLOW_GOOGLE_REFRESH_TOKEN') ?: '';
 $driveFolderId = getenv('STITCHFLOW_DRIVE_FOLDER_ID') ?: '1COCYE739q8-5GUpf0J8HwT757Q5ZJSs0';
 $recipient = getenv('STITCHFLOW_BACKUP_EMAIL') ?: '';
 $backupDir = getenv('STITCHFLOW_BACKUP_DIR') ?: sys_get_temp_dir();
 $mysqldump = getenv('STITCHFLOW_MYSQLDUMP') ?: '/usr/bin/mysqldump';
 
-if ($driveCredentialsFile === '' || $driveFolderId === '') {
-    fwrite(STDERR, "Google Drive backup is not configured. Set STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE and STITCHFLOW_DRIVE_FOLDER_ID.\n");
+if ($driveFolderId === '' || (($googleClientId === '' || $googleClientSecret === '' || $googleRefreshToken === '') && $driveCredentialsFile === '')) {
+    fwrite(STDERR, "Google Drive backup is not configured. Set OAuth credentials or STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE, plus STITCHFLOW_DRIVE_FOLDER_ID.\n");
     exit(1);
 }
 if (!is_dir($backupDir) && !mkdir($backupDir, 0700, true) && !is_dir($backupDir)) {
@@ -64,42 +67,55 @@ fclose($input);
 gzclose($outputFile);
 @unlink($sqlPath);
 
-$credentials = json_decode((string) @file_get_contents($driveCredentialsFile), true);
-if (!is_array($credentials) || empty($credentials['client_email']) || empty($credentials['private_key'])) {
-    fwrite(STDERR, "Google Drive service-account credentials could not be read.\n");
-    exit(1);
+$tokenRequest = [
+    'grant_type' => 'refresh_token',
+    'client_id' => $googleClientId,
+    'client_secret' => $googleClientSecret,
+    'refresh_token' => $googleRefreshToken,
+];
+if ($googleClientId === '' || $googleClientSecret === '' || $googleRefreshToken === '') {
+    $credentials = json_decode((string) @file_get_contents($driveCredentialsFile), true);
+    if (!is_array($credentials) || empty($credentials['client_email']) || empty($credentials['private_key'])) {
+        fwrite(STDERR, "Google Drive service-account credentials could not be read.\n");
+        exit(1);
+    }
+    $base64Url = static function (string $value): string {
+        return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+    };
+    $jwtHeader = $base64Url(json_encode(['alg' => 'RS256', 'typ' => 'JWT'], JSON_THROW_ON_ERROR));
+    $jwtClaims = $base64Url(json_encode([
+        'iss' => $credentials['client_email'],
+        'scope' => 'https://www.googleapis.com/auth/drive.file',
+        'aud' => 'https://oauth2.googleapis.com/token',
+        'iat' => time(),
+        'exp' => time() + 3600,
+    ], JSON_THROW_ON_ERROR));
+    $signingInput = $jwtHeader . '.' . $jwtClaims;
+    $signature = '';
+    if (!openssl_sign($signingInput, $signature, $credentials['private_key'], OPENSSL_ALGO_SHA256)) {
+        fwrite(STDERR, "Google Drive JWT signing failed.\n");
+        exit(1);
+    }
+    $tokenRequest = [
+        'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        'assertion' => $signingInput . '.' . $base64Url($signature),
+    ];
 }
-
-$base64Url = static function (string $value): string {
-    return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
-};
-$jwtHeader = $base64Url(json_encode(['alg' => 'RS256', 'typ' => 'JWT'], JSON_THROW_ON_ERROR));
-$jwtClaims = $base64Url(json_encode([
-    'iss' => $credentials['client_email'],
-    'scope' => 'https://www.googleapis.com/auth/drive.file',
-    'aud' => 'https://oauth2.googleapis.com/token',
-    'iat' => time(),
-    'exp' => time() + 3600,
-], JSON_THROW_ON_ERROR));
-$signingInput = $jwtHeader . '.' . $jwtClaims;
-$signature = '';
-if (!openssl_sign($signingInput, $signature, $credentials['private_key'], OPENSSL_ALGO_SHA256)) {
-    fwrite(STDERR, "Google Drive JWT signing failed.\n");
-    exit(1);
-}
-$tokenResponse = json_decode((string) @file_get_contents('https://oauth2.googleapis.com/token', false, stream_context_create([
-    'http' => [
-        'method' => 'POST',
-        'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
-        'content' => http_build_query([
-            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-            'assertion' => $signingInput . '.' . $base64Url($signature),
-        ]),
-        'ignore_errors' => true,
-    ],
-])), true);
+$tokenCurl = curl_init('https://oauth2.googleapis.com/token');
+curl_setopt_array($tokenCurl, [
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => http_build_query($tokenRequest),
+    CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 30,
+]);
+$tokenBody = curl_exec($tokenCurl);
+$tokenError = curl_error($tokenCurl);
+$tokenStatus = (int) curl_getinfo($tokenCurl, CURLINFO_HTTP_CODE);
+curl_close($tokenCurl);
+$tokenResponse = json_decode((string) $tokenBody, true);
 if (!is_array($tokenResponse) || empty($tokenResponse['access_token'])) {
-    fwrite(STDERR, "Google Drive access token request failed.\n");
+    fwrite(STDERR, "Google Drive access token request failed (HTTP {$tokenStatus}): " . ($tokenError ?: (string) $tokenBody) . "\n");
     exit(1);
 }
 

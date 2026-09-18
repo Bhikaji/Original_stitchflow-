@@ -1905,7 +1905,7 @@ function userCan(m,action){
   const u=authUser();if(!u)return false;if(u.role==='Admin')return true;if(m==='usermanagement')return false;action=action||'view';
   if (m === 'styles' && userCanMaster('styles', action)) return true;
   if (m === 'itemmaster' && userCanMaster('items', action)) return true;
-  if (m === 'parties' && userCanMaster('partyrecords', action)) return true;
+  if ((m === 'parties' || m === 'partneronboarding') && userCanMaster('partyrecords', action)) return true;
   const perms=u.permissions||{};
   const mp=perms.modules&&perms.modules[m];if(mp&&mp[action])return true;if(action==='export'&&mp&&mp.view)return true;
   /* Detailed permissions can independently grant access even when the parent
@@ -2189,7 +2189,7 @@ function render() {
   } else if (cur === 'parties') {
     acts.innerHTML = '<button class="btn btn-ghost" onclick="exportPartiesCSV()">' + ic('download',16) + 'Export</button>';
   } else if (cur === 'partneronboarding') {
-    acts.innerHTML = '<button class="btn btn-ghost" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>';
+    acts.innerHTML = (typeof userCan !== 'function' || userCan('partneronboarding', 'create') ? '<button class="btn btn-primary" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>' : '');
   } else if (cur === 'gstapi') {
     acts.innerHTML = '<button class="btn btn-ghost" onclick="gstSettingsTest()">Test connection</button><button class="btn btn-primary" onclick="gstSettingsSave()">Save settings</button>';
   } else if (cur === 'reports') {
@@ -14568,7 +14568,8 @@ function renderPartnerOnboarding(){
   }
   $('tb-title').textContent='Partner onboarding';
   $('tb-sub').textContent='Onboard buyer and vendor accounts with GSTIN auto-fetch';
-  if($('tb-actions')) $('tb-actions').innerHTML='';
+  const canAddPartner = typeof userCan !== 'function' || userCan('partneronboarding', 'create');
+  if($('tb-actions')) $('tb-actions').innerHTML = canAddPartner ? '<button class="btn btn-primary" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>' : '';
   const query=String(obListState.q||'').trim().toLowerCase();
   const filtered=list.slice().reverse().filter(function(p){
     if(!query) return true;
@@ -14591,7 +14592,7 @@ function renderPartnerOnboarding(){
         '<button class="btn-icon" title="Edit" onclick="obEditPartner(\''+p.id+'\')">'+ic('pencil',15)+'</button>'+
         '<button class="btn-icon danger" title="'+(used?'Cannot delete — partner is used in transactions':'Delete')+'" '+(used?'disabled':'onclick="obDeletePartner(\''+p.id+'\')"')+'>'+ic('trash',15)+'</button>'+ 
       '</td></tr>';
-  }).join('') || '<tr><td colspan="6"><div class="empty"><h3>No partners found</h3><p>Create a partner or change the search text.</p></div></td></tr>';
+  }).join('') || ('<tr><td colspan="6"><div class="empty"><h3>No partners found</h3><p>Create a partner or change the search text.</p>' + (canAddPartner ? '<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="obNewPartner()">' + ic('plus',14) + 'New partner</button></div>' : '') + '</div></td></tr>');
   const pg={page:obListState.page,pages:pages,size:obListState.size,total:total,from:total?(obListState.page-1)*obListState.size+1:0,to:Math.min(obListState.page*obListState.size,total)};
   $('content').innerHTML='<div class="ob-wrap"><div class="panel list-panel"><div class="mtools ob-filter-tools"><div class="search msearch">'+ic('search',16)+'<input class="inp" placeholder="Search partner, GSTIN or code" value="'+esc(obListState.q)+'" oninput="obSearch(this)"></div><span class="rowcount" id="ob-count">'+filtered.length+' of '+list.length+'</span><button class="btn btn-ghost btn-sm" id="ob-clear-filters" onclick="obClearFilters()"'+(obListState.q?'':' disabled')+'>Clear filters</button></div><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+pagerBar(pg,'ob','partners')+'</div></div>';
 }

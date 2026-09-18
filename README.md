@@ -117,26 +117,32 @@ original first-run behaviour.
 ## Automated database backups
 
 `backup_database.php` is CLI-only. It creates a compressed MySQL dump and uploads it directly
-to a Google Drive folder using a Google service account. It never accepts backup commands from
-a browser and does not store Google credentials in the repository. An email notification is
-sent only when `STITCHFLOW_BACKUP_EMAIL` is configured.
+to a Google Drive folder using Google user OAuth. It never accepts backup commands from a
+browser and does not store Google credentials in the repository. An email notification is sent
+only when `STITCHFLOW_BACKUP_EMAIL` is configured.
 
-Create a Google Cloud service account, enable the Google Drive API, share the destination Drive
-folder with the service account email as an Editor, and store the downloaded JSON key outside the
-web root. Configure these environment variables for the cron account:
+For a personal Google Drive, create an OAuth client in Google Cloud, enable the Google Drive API,
+and obtain a refresh token for `kenaiitdeparment@gmail.com` with the `https://www.googleapis.com/auth/drive.file`
+scope. Store the client secret and refresh token outside the web root. Configure these variables
+for the cron account:
 
 ```bash
-export STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE=/home/kenerp/private/google-drive-backup.json
+export STITCHFLOW_GOOGLE_CLIENT_ID=your_oauth_client_id
+export STITCHFLOW_GOOGLE_CLIENT_SECRET=your_oauth_client_secret
+export STITCHFLOW_GOOGLE_REFRESH_TOKEN=your_google_refresh_token
 export STITCHFLOW_DRIVE_FOLDER_ID=1COCYE739q8-5GUpf0J8HwT757Q5ZJSs0
 export STITCHFLOW_BACKUP_EMAIL=kenaiitdeparment@gmail.com
 ```
 
 The PHP `curl` and `openssl` extensions must be enabled.
 
+The previous service-account JSON method is suitable for a Google Workspace Shared Drive, but
+not for this personal My Drive folder because service accounts have no storage quota.
+
 In cPanel, add a Cron Job with the schedule `0 */2 * * *` and this command:
 
 ```bash
-export STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE=/home/kenerp/private/google-drive-backup.json; export STITCHFLOW_DRIVE_FOLDER_ID=1COCYE739q8-5GUpf0J8HwT757Q5ZJSs0; export STITCHFLOW_BACKUP_EMAIL=kenaiitdeparment@gmail.com; /usr/local/bin/php /home/kenerp/public_html/stitchflow/backup_database.php
+export STITCHFLOW_GOOGLE_CLIENT_ID=your_oauth_client_id; export STITCHFLOW_GOOGLE_CLIENT_SECRET=your_oauth_client_secret; export STITCHFLOW_GOOGLE_REFRESH_TOKEN=your_google_refresh_token; export STITCHFLOW_DRIVE_FOLDER_ID=1COCYE739q8-5GUpf0J8HwT757Q5ZJSs0; export STITCHFLOW_BACKUP_EMAIL=kenaiitdeparment@gmail.com; /usr/local/bin/php /home/kenerp/public_html/kend2c/stitchflow/backup_database.php
 ```
 
 If cPanel blocks PHP `mail()`, the Drive upload still works; configure SMTP through the hosting

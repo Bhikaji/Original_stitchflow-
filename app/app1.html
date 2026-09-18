@@ -3539,7 +3539,7 @@ function render() {
   } else if (cur === 'parties') {
     acts.innerHTML = '<button class="btn btn-ghost" onclick="exportPartiesCSV()">' + ic('download',16) + 'Export</button>';
   } else if (cur === 'partneronboarding') {
-    acts.innerHTML = '<button class="btn btn-ghost" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>';
+    acts.innerHTML = (typeof userCan !== 'function' || userCan('partneronboarding', 'create') ? '<button class="btn btn-primary" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>' : '');
   } else if (cur === 'gstapi') {
     acts.innerHTML = '<button class="btn btn-ghost" onclick="gstSettingsTest()">Test connection</button><button class="btn btn-primary" onclick="gstSettingsSave()">Save settings</button>';
   } else if (cur === 'reports') {
@@ -15508,6 +15508,7 @@ function renderPartnerOnboarding(){
   }
   $('tb-title').textContent='Partner onboarding';
   $('tb-sub').textContent='Onboard buyer and vendor accounts with GSTIN auto-fetch';
+  if($('tb-actions')) $('tb-actions').innerHTML = (typeof userCan !== 'function' || userCan('partneronboarding', 'create') ? '<button class="btn btn-primary" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>' : '');
   const rows=list.slice().reverse().map(function(p){
     const roles=(p.roles||[]).map(function(r){
       if(r==='JOB_WORKER'||r==='SUPPLIER') return 'Supplier';
