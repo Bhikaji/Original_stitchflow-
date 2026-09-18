@@ -27,6 +27,14 @@
   var API = getApiUrl();
   var timer = 0, inflight = false, queued = false;
 
+  function clearLegacyBrowserData() {
+    try {
+      ['stitchflow_d2c_qa_fixed_v5', 'stitchflow_d2c_qa_fixed_v5_backup', 'stitchflow_d2c_v1'].forEach(function (key) {
+        localStorage.removeItem(key);
+      });
+    } catch (e) {}
+  }
+
   function actorHeader() {
     try { if (typeof currentAuditUser === 'function') return currentAuditUser(); } catch (e) {}
     return 'StitchFlow User';
@@ -47,6 +55,8 @@
         var m = 'The server rejected this save';
         try { var j = JSON.parse(xhr.responseText); if (j && j.error) m = j.error; } catch (e) {}
         try { toast('⚠️ Server: ' + m, 'red'); } catch (e) {}
+      } else {
+        clearLegacyBrowserData();
       }
       if (queued) { queued = false; pushNow(); }
     };
@@ -92,7 +102,7 @@
         db = d;
         db._revision = Date.now();
         try { AUDIT_PREV = auditSnapshot(db); } catch (e) {}
-        try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) {}
+        clearLegacyBrowserData();
         loaded = true;
       } else if (resp && resp.empty) {
         /* first run: seed the server with the local (default) database */
