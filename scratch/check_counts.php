@@ -1,0 +1,1 @@
+<?php require 'api/bootstrap.php'; require 'api/lib/assemble.php'; $db = assemble_db(); $counts = []; foreach($db as $k=>$v) $counts[$k] = is_array($v)?count($v):'not_array'; echo json_encode($counts);

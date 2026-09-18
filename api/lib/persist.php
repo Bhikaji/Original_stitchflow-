@@ -55,6 +55,17 @@ function sf_kv_set(PDO $pdo, string $key, ?string $val): void {
 function sf_kv_del(PDO $pdo, string $key): void {
     $pdo->prepare('DELETE FROM kv_store WHERE k = ?')->execute([$key]);
 }
+
+function sf_prevent_truncate(PDO $pdo, array $docs, string $tableName): void {
+    if (empty($docs)) {
+        // Allow if the table is already empty (e.g. fresh installation)
+        $count = (int)$pdo->query("SELECT COUNT(*) FROM `$tableName`")->fetchColumn();
+        if ($count > 0) {
+            throw new RuntimeException("Safeguard Triggered: Refusing to truncate table '$tableName'.");
+        }
+    }
+}
+
 function sf_changed(PDO $pdo, string $key, $subtree): bool {
     $hash = md5(json_encode($subtree, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     if (sf_hash_get($pdo, $key) === $hash) return false;
@@ -288,7 +299,12 @@ function persist_list_masters(PDO $pdo, array $masters, string $actor): void {
     $parents = is_array($masters['parentMap']     ?? null) ? $masters['parentMap']     : [];
     $idSeq   = is_array($masters['masterIdSeq']   ?? null) ? $masters['masterIdSeq']   : [];
     $whAddr  = is_array($masters['warehouseAddr'] ?? null) ? $masters['warehouseAddr'] : [];
-
+    /* these masters are simple string lists, stored in kv pairs */
+    $flat = [];
+    foreach (SF_LIST_MASTERS as $k) {
+        if (!empty($masters[$k])) $flat[$k] = $masters[$k];
+    }
+    sf_prevent_truncate($pdo, $flat, 'master_values');
     $pdo->exec('DELETE FROM master_values');
     $ins = $pdo->prepare('INSERT INTO master_values
         (master_key, value, master_id, parent_value, is_active, sort_order, created_by, updated_by)
@@ -325,6 +341,7 @@ function persist_list_masters(PDO $pdo, array $masters, string $actor): void {
 }
 
 function persist_styles(PDO $pdo, array $styles, string $actor): void {
+    sf_prevent_truncate($pdo, $styles, 'styles');
     $prevCreated = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM styles') as $r) $prevCreated[$r['id']] = $r;
     $pdo->exec('DELETE FROM styles');
@@ -347,6 +364,7 @@ function persist_styles(PDO $pdo, array $styles, string $actor): void {
 }
 
 function persist_items(PDO $pdo, array $items, string $actor): void {
+    sf_prevent_truncate($pdo, $items, 'items');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM items') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM items');
@@ -392,6 +410,7 @@ function persist_items(PDO $pdo, array $items, string $actor): void {
 }
 
 function persist_parties(PDO $pdo, array $parties, string $actor): void {
+    sf_prevent_truncate($pdo, $parties, 'parties');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM parties') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM parties');
@@ -498,6 +517,7 @@ function persist_gst_settings(PDO $pdo, array $g): void {
 }
 
 function persist_users(PDO $pdo, array $users): void {
+    sf_prevent_truncate($pdo, $users, 'users');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_at FROM users') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM users');
@@ -547,6 +567,7 @@ function sf_uid(array $x, array &$seen, string $prefix): string {
 
 function persist_pos(PDO $pdo, array $docs, string $actor): void {
     sf_capture_status($pdo, 'po', 'purchase_orders', 'id', 'po_no', 'status', $docs, $actor);
+    sf_prevent_truncate($pdo, $docs, 'purchase_orders');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM purchase_orders') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM purchase_orders');
@@ -616,6 +637,7 @@ function persist_pos(PDO $pdo, array $docs, string $actor): void {
 
 function persist_inwards(PDO $pdo, array $docs, string $actor): void {
     sf_capture_status($pdo, 'inward', 'inwards', 'id', 'inward_no', 'status', $docs, $actor);
+    sf_prevent_truncate($pdo, $docs, 'inwards');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM inwards') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM inwards');
@@ -672,8 +694,11 @@ function persist_inwards(PDO $pdo, array $docs, string $actor): void {
 function persist_jobwork_like(PDO $pdo, array $docs, string $docType, string $actor): void {
     sf_capture_status($pdo, $docType, 'jobworks', 'id', 'jw_no', 'status',
         array_filter($docs, 'is_array'), $actor);
+    sf_prevent_truncate($pdo, $docs, 'jobworks');
     $prev = [];
-    foreach ($pdo->query('SELECT id, created_by, created_at FROM jobworks WHERE doc_type = ' . $pdo->quote($docType)) as $r) $prev[$r['id']] = $r;
+    $st = $pdo->prepare('SELECT id, created_by, created_at FROM jobworks WHERE doc_type = ?');
+    $st->execute([$docType]);
+    foreach ($st as $r) $prev[$r['id']] = $r;
     $pdo->prepare('DELETE FROM jobworks WHERE doc_type = ?')->execute([$docType]);
     $known = ['id','no','date','vendor','vendor_id','processType','process_type_id','styles','issues','garments','extras','receipts','issueDate',
               'expectedDate','receiveDate','status','notes','createdAt'];
@@ -762,6 +787,7 @@ function persist_samples(PDO $pdo, array $docs, string $actor): void { persist_j
 
 function persist_process_outwards(PDO $pdo, array $docs, string $actor): void {
     sf_capture_status($pdo, 'processoutward', 'process_outwards', 'id', 'out_no', 'status', $docs, $actor);
+    sf_prevent_truncate($pdo, $docs, 'process_outwards');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM process_outwards') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM process_outwards');
@@ -798,6 +824,7 @@ function persist_process_outwards(PDO $pdo, array $docs, string $actor): void {
 
 function persist_process_inwards(PDO $pdo, array $docs, string $actor): void {
     sf_capture_status($pdo, 'processinward', 'process_inwards', 'id', 'in_no', 'status', $docs, $actor);
+    sf_prevent_truncate($pdo, $docs, 'process_inwards');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM process_inwards') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM process_inwards');
@@ -834,6 +861,7 @@ function persist_process_inwards(PDO $pdo, array $docs, string $actor): void {
 
 function persist_sales(PDO $pdo, array $docs, string $actor): void {
     sf_capture_status($pdo, 'sale', 'sales', 'id', 'sale_no', 'status', $docs, $actor);
+    sf_prevent_truncate($pdo, $docs, 'sales');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM sales') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM sales');
@@ -871,6 +899,7 @@ function persist_sales(PDO $pdo, array $docs, string $actor): void {
 }
 
 function persist_costings(PDO $pdo, array $docs, string $actor): void {
+    sf_prevent_truncate($pdo, $docs, 'costings');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM costings') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM costings');
@@ -933,6 +962,7 @@ function persist_costings(PDO $pdo, array $docs, string $actor): void {
 
 function persist_purchase_returns(PDO $pdo, array $docs, string $actor): void {
     sf_capture_status($pdo, 'purchasereturn', 'purchase_returns', 'id', 'return_no', 'status', $docs, $actor);
+    sf_prevent_truncate($pdo, $docs, 'purchase_returns');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM purchase_returns') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM purchase_returns');
@@ -976,6 +1006,7 @@ function persist_purchase_returns(PDO $pdo, array $docs, string $actor): void {
 
 function persist_jobwork_returns(PDO $pdo, array $docs, string $actor): void {
     sf_capture_status($pdo, 'jobworkreturn', 'jobwork_returns', 'id', 'return_no', 'status', $docs, $actor);
+    sf_prevent_truncate($pdo, $docs, 'jobwork_returns');
     $prev = [];
     foreach ($pdo->query('SELECT id, created_by, created_at FROM jobwork_returns') as $r) $prev[$r['id']] = $r;
     $pdo->exec('DELETE FROM jobwork_returns');
