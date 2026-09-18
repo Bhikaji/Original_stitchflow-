@@ -1345,12 +1345,12 @@ function sfServerBase(){
     return base;
   }catch(e){return '';}
 }
-function syncMastersToMysql(){var base=typeof sfServerBase==='function'?sfServerBase():'';if(!base||typeof fetch!=='function'||!db||!db.masters)return;fetch(base+'api/masters.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({masters:db.masters}),keepalive:true}).catch(function(){});}
+function syncMastersToMysql(){var base=typeof sfServerBase==='function'?sfServerBase():'';if(!base||typeof fetch!=='function'||!db||!db.masters)return;fetch(base+'api/masters.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({masters:db.masters})}).catch(function(){});}
 function syncUsersToMysql(){
   var base=sfServerBase();
   if(!base||typeof fetch!=='function') return;
   var users=(typeof db!=='undefined'&&db.users)?db.users:[];
-  fetch(base+'api/users.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({users:users}),keepalive:true})
+  fetch(base+'api/users.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({users:users})})
     .then(function(r){return r.json();})
     .then(function(j){ if(j&&j.ok&&typeof toast==='function'){ /* silent success */ } })
     .catch(function(){});
@@ -1451,9 +1451,9 @@ function saveDB() {
   try{
     var base=sfServerBase();
     if(base && typeof fetch==='function'){
-      fetch(base+'api/data.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(db),keepalive:true}).catch(function(){});
-      fetch(base+'api/users.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({users:db.users||[]}),keepalive:true}).catch(function(){});
-      fetch(base+'api/masters.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({masters:db.masters||{}}),keepalive:true}).catch(function(){});
+      fetch(base+'api/data.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(db)}).catch(function(){});
+      fetch(base+'api/users.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({users:db.users||[]})}).catch(function(){});
+      fetch(base+'api/masters.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({masters:db.masters||{}})}).catch(function(){});
     }
   }catch(e){}
   return ok;
