@@ -68,7 +68,7 @@
     };
     xhr.send(payload);
   }
-  function schedulePush() { clearTimeout(timer); timer = setTimeout(pushNow, 350); }
+  function schedulePush() { clearTimeout(timer); timer = setTimeout(pushNow, 25); }
 
   /* wrap whatever saveDB currently is (the QA layer's version) */
   var baseSave = saveDB;
