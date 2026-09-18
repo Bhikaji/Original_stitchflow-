@@ -7478,7 +7478,7 @@ function savePO(id) {
   if (id) Object.assign(db.po.find(r => r.id === id), data);
   else { data.id = uid(); data.no = nextNo('po','PO'); data.createdAt = Date.now(); db.po.push(data); }
   const poNoSaved = id ? ((db.po.find(r => r.id === id) || {}).no || '') : data.no;
-  saveDB(); pageView = null; toast('PO saved — ' + poNoSaved, 'green'); render();
+  saveDB(); pageView = null; render();
 }
 
 /* ================= INWARD ================= */

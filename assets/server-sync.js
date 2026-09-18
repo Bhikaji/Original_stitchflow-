@@ -57,6 +57,7 @@
         try { toast('⚠️ Server: ' + m, 'red'); } catch (e) {}
       } else {
         clearLegacyBrowserData();
+        try { toast('Database saved successfully', 'green'); } catch (e) {}
       }
       if (queued) { queued = false; pushNow(); }
     };
