@@ -6823,7 +6823,7 @@ const TABLE_COLS = {
         ? '<span class="badge b-blue">Opening</span>'
         : r.entryType === 'Job Work Return'
           ? '<span class="badge b-pink">JW Return</span>'
-          : '<span class="badge b-gray">PO</span>' },
+          : '<span class="badge b-gray">Against PO</span>' },
     { h:'PO Ref', v:r => esc(r.poRef) || '—' },
     { h:'Supplier', v:r => esc(r.supplier) },
     { h:'Recv Qty', v:r => fmtNum(sumBy(r.items,'recQty')), cls:'num' }
@@ -8056,7 +8056,7 @@ function formInward(rec) {
     '</div>' +
   '</div>' +
   '<div class="grid-fixed' + (jwret ? ' in-jwr' : '') + '">' +
-    (isEdit ? field('Inward No', '<input class="inp" id="f-no" value="' + esc(r.no || '') + '" disabled>', 'inj-no') : '') +
+    field('Inward No', '<input class="inp" id="f-no" value="' + esc(r.no || 'Auto-generated') + '" disabled>', 'inj-no') +
     field('Date *', '<input class="inp" type="text" data-date autocomplete="off" readonly disabled id="f-date" value="' + esc(r.date || today()) + '">', 'inj-date') +
     '<div class="field po-only"' + (poMode ? '' : ' style="display:none"') + '><label class="lbl">PO Reference *</label>' +
       cbox('in-po', { opts: poOptions(), value: r.poRef || '', f:'poRef', placeholder:'Search PO…', free:false, onSet: onPOSelect }) + '</div>' +
