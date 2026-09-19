@@ -8973,9 +8973,14 @@ function jwRowRefresh(anyEl) {
     const c = CBOX[inEl.dataset.cbInput];
     if (c) {
       c.opts = inwardOptionsForItem(item, tr).map(normalizeOpt);
-      if (!c.opts.some(function (o) { return o.v === c.val; })) {
-        c.val = ''; inEl.value = '';
-        if (c.opts.length === 1) { c.val = c.opts[0].v; inEl.value = c.opts[0].l; }
+      if (c.val && !c.opts.some(function (o) { return o.v === c.val; })) {
+        const missing = normalizeOpt({ v: c.val, l: c.display || String(c.val) }, null);
+        if (!c.opts.some(function (o) { return o.v === c.val; })) c.opts.push(missing);
+        inEl.value = c.display || c.val;
+      } else if (!c.val && c.opts.length === 1) {
+        c.val = c.opts[0].v; inEl.value = c.opts[0].l;
+      } else if (!c.val) {
+        inEl.value = '';
       }
       renderCboxList(inEl.dataset.cbInput);
       jwSyncPoRef(tr);
