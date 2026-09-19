@@ -8645,8 +8645,9 @@ function inwardOptionsForItem(itemName, skipTr) {
   if (!nm) return [];
   return db.inward
     .filter(function (r) {
-      const hasItem = (r.items || []).some(function (i) { return lcName(i.name) === nm && pf(i.recQty) > 0; });
-      return hasItem && inwardItemStock(r.no, itemName, stockExcept(skipTr)) > 0;
+      return (r.items || []).some(function (i) {
+        return lcName(i.name) === nm && pf(i.recQty) > 0;
+      });
     })
     .sort(function (a, b) { return (b.date || '') < (a.date || '') ? -1 : 1; })
     .map(function (r) {
