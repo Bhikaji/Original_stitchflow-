@@ -7507,6 +7507,20 @@ function inwardReceivedSoFar(poRef, itemName, colour, excludeId) {
    ===================================================================== */
 function lcName(v) { return String(v == null ? '' : v).trim().toLowerCase(); }
 
+function sameItemRef(left, right) {
+  const a = String(left == null ? '' : left).trim();
+  const b = String(right == null ? '' : right).trim();
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  const aBare = lcName(bareItemName(a));
+  const bBare = lcName(bareItemName(b));
+  if (aBare && bBare && aBare === bBare) return true;
+  if (lcName(a) === lcName(b)) return true;
+  const aCode = (a.match(/[\[(]([A-Za-z]{2,}-\d+)[\])]/) || [])[1];
+  const bCode = (b.match(/[\[(]([A-Za-z]{2,}-\d+)[\])]/) || [])[1];
+  return !!aCode && !!bCode && lcName(aCode) === lcName(bCode);
+}
+
 /* --- PO level: is there any Inward booked against this PO? --- */
 function poInwardEntries(poNo) {
   if (!poNo) return [];
@@ -8711,7 +8725,7 @@ function issueLineQty(s) {
   return pf(s.qty);
 }
 function issueHitsInward(s, inwardNo, itemName) {
-  if (lcName(bareItemName(s.item)) !== lcName(bareItemName(itemName))) return false;
+  if (!sameItemRef(s.item, itemName)) return false;
   return String(inwardNoForIssue(s) || '') === String(inwardNo || '');
 }
 function liveFormIssued(inwardNo, itemName, skipTr) {
@@ -8722,7 +8736,7 @@ function liveFormIssued(inwardNo, itemName, skipTr) {
       if (skipTr && tr === skipTr) return;
       const itEl = qs('[data-f="item"]', tr);
       const item = itEl ? (itEl.dataset.cbInput ? cboxGet(itEl.dataset.cbInput) : itEl.value) : '';
-      if (lcName(item) !== lcName(itemName)) return;
+      if (!sameItemRef(item, itemName)) return;
       const inEl = qs('[data-f="inwardNo"]', tr);
       const no = inEl ? (inEl.dataset.cbInput ? cboxGet(inEl.dataset.cbInput) : inEl.value) : '';
       if (String(no || '') !== String(inwardNo || '')) return;
@@ -8745,11 +8759,9 @@ function stockExcept(skipTr) {
 function inwardItemStock(inwardNo, itemName, except) {
   const rec = inwardByNo(inwardNo);
   if (!rec) return 0;
-  const nm = lcName(itemName);
-  if (!nm) return 0;
   except = except || stockExcept();
   let q = 0;
-  (rec.items || []).forEach(function (i) { if (lcName(i.name) === nm) q += pf(i.recQty); });
+  (rec.items || []).forEach(function (i) { if (sameItemRef(i.name, itemName)) q += pf(i.recQty); });
   (db.jobwork || []).forEach(function (j) {
     if (except.jwId && j.id === except.jwId) return;
     (j.issues || []).concat(j.extras || []).forEach(function (s) {
@@ -8770,7 +8782,7 @@ function inwardItemStock(inwardNo, itemName, except) {
     } else if (!poRef || r.poRef !== poRef) {
       return;
     }
-    (r.items || []).forEach(function (i) { if (lcName(i.name) === nm) q -= pf(i.retQty); });
+    (r.items || []).forEach(function (i) { if (sameItemRef(i.name, itemName)) q -= pf(i.retQty); });
   });
   if (!except.ignoreLive) q -= liveFormIssued(inwardNo, itemName, except.skipTr);
   return Math.max(0, q);
