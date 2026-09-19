@@ -8641,12 +8641,12 @@ function inwardByNo(no) {
 }
 /* Inward documents that received this item (PO receipt, opening stock, JW return) */
 function inwardOptionsForItem(itemName, skipTr) {
-  const nm = lcName(itemName);
+  const nm = lcName(bareItemName(itemName));
   if (!nm) return [];
   return db.inward
     .filter(function (r) {
       return (r.items || []).some(function (i) {
-        return lcName(i.name) === nm && pf(i.recQty) > 0;
+        return lcName(bareItemName(i.name)) === nm && pf(i.recQty) > 0;
       });
     })
     .sort(function (a, b) { return (b.date || '') < (a.date || '') ? -1 : 1; })
@@ -8670,7 +8670,9 @@ function inwardNoForIssue(it) {
   if (it.poRef && it.item) {
     const hit = db.inward.find(function (r) {
       const ref = r.poRef || inwardRef(r);
-      return ref === it.poRef && (r.items || []).some(function (i) { return lcName(i.name) === lcName(it.item) && pf(i.recQty) > 0; });
+      return ref === it.poRef && (r.items || []).some(function (i) {
+        return lcName(bareItemName(i.name)) === lcName(bareItemName(it.item)) && pf(i.recQty) > 0;
+      });
     });
     if (hit) return hit.no;
   }
@@ -8682,7 +8684,7 @@ function issueLineQty(s) {
   return pf(s.qty);
 }
 function issueHitsInward(s, inwardNo, itemName) {
-  if (lcName(s.item) !== lcName(itemName)) return false;
+  if (lcName(bareItemName(s.item)) !== lcName(bareItemName(itemName))) return false;
   return String(inwardNoForIssue(s) || '') === String(inwardNo || '');
 }
 function liveFormIssued(inwardNo, itemName, skipTr) {
