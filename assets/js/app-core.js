@@ -8652,8 +8652,8 @@ function inwardOptionsForItem(itemName, skipTr) {
     .sort(function (a, b) { return (b.date || '') < (a.date || '') ? -1 : 1; })
     .map(function (r) {
       const extra = r.entryType === 'Opening Stock' ? 'Opening Stock'
-        : r.entryType === 'Job Work Return' ? ('JW Return' + (r.vendor ? ' \u00b7 ' + r.vendor : ''))
-        : ((r.poRef ? r.poRef + ' \u00b7 ' : '') + (r.supplier || ''));
+        : r.entryType === 'Job Work Return' ? ('Job Work Return' + (r.vendor ? ' \u00b7 ' + r.vendor : ''))
+        : ('Against PO' + (r.poRef ? ' \u00b7 ' + r.poRef : '') + (r.supplier ? ' \u00b7 ' + r.supplier : ''));
       const available = inwardItemStock(r.no, itemName, stockExcept(skipTr));
       return { v: r.no, l: r.no + (extra ? ' \u00b7 ' + extra : '') + ' \u00b7 Stock ' + fmtNum(available) };
     });
