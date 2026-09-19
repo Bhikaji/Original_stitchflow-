@@ -5875,7 +5875,14 @@ function delItemMaster(i) {
 function itemOpts() { return db.masters.items.filter(function(i){return i.active !== false;}).map(i => { const code = i.code ? '[' + i.code + '] ' : ''; return { v: i.name, l: code + i.name + (i.unit ? ' (' + i.unit + ')' : ''), mid: i.code || i.id, hint: i.unit ? i.unit : '' }; }); }
 function itemDisplay(name) { const it = itemByName(name); return it ? ((it.code ? '[' + it.code + '] ' : '') + it.name) : (name || ''); }
 function itemUnit(name) { const it = db.masters.items.find(i => i.name.toLowerCase() === String(name).toLowerCase()); return it && it.unit ? it.unit : ''; }
-function itemByName(name) { return db.masters.items.find(i => i.name.toLowerCase() === String(name || '').toLowerCase()); }
+function itemByName(name) {
+  const target = bareItemName(String(name || ''));
+  return (db.masters.items || []).find(function (i) {
+    return lcName(bareItemName(i.name)) === lcName(target)
+      || lcName(i.name) === lcName(target)
+      || lcName(i.name) === lcName(String(name || ''));
+  });
+}
 function sameItem(a, b) {
   if (!a || !b) return false;
   if (typeof a === 'object' || typeof b === 'object') {
@@ -7000,8 +7007,12 @@ function removeRow(btn) {
 /* the item cell displays "Name (ITM-0001)" — store the bare name */
 function bareItemName(v) {
   const s = String(v == null ? '' : v).trim();
-  const m = /^(.*?)\s*\([A-Za-z]{2,}-\d+\)$/.exec(s);
-  return m ? m[1].trim() : s;
+  const out = s
+    .replace(/^\[[^\]]+\]\s*/, '')
+    .replace(/\s*\([A-Za-z]{2,}-\d+\)\s*$/, '')
+    .replace(/\s*\[[A-Za-z]{2,}-\d+\]\s*$/, '')
+    .trim();
+  return out || s;
 }
 function gatherRows(tbodyId, keys) {
   const rows = [];
@@ -8641,12 +8652,20 @@ function inwardByNo(no) {
 }
 /* Inward documents that received this item (PO receipt, opening stock, JW return) */
 function inwardOptionsForItem(itemName, skipTr) {
-  const nm = lcName(bareItemName(itemName));
-  if (!nm) return [];
+  const target = String(itemName || '').trim();
+  const targetBare = bareItemName(target);
+  const targetId = findMasterId(targetBare, 'items') || findMasterId(target, 'items') || '';
+  const targetName = lcName(targetBare);
+  if (!targetName && !targetId) return [];
   return db.inward
     .filter(function (r) {
       return (r.items || []).some(function (i) {
-        return lcName(bareItemName(i.name)) === nm && pf(i.recQty) > 0;
+        const recName = String(i.name || '').trim();
+        const recBare = bareItemName(recName);
+        const recId = String(i.item_id || i.itemId || '');
+        const nameMatch = lcName(recBare) === targetName || lcName(recName) === lcName(target) || lcName(recBare) === lcName(target) || lcName(recName) === targetName;
+        const idMatch = !!targetId && !!recId && String(recId) === String(targetId);
+        return (nameMatch || idMatch) && pf(i.recQty) > 0;
       });
     })
     .sort(function (a, b) { return (b.date || '') < (a.date || '') ? -1 : 1; })
@@ -8668,10 +8687,18 @@ function inwardNoForIssue(it) {
   it = it || {};
   if (it.inwardNo) return it.inwardNo;
   if (it.poRef && it.item) {
+    const target = String(it.item || '').trim();
+    const targetBare = bareItemName(target);
+    const targetId = findMasterId(targetBare, 'items') || findMasterId(target, 'items') || '';
     const hit = db.inward.find(function (r) {
       const ref = r.poRef || inwardRef(r);
       return ref === it.poRef && (r.items || []).some(function (i) {
-        return lcName(bareItemName(i.name)) === lcName(bareItemName(it.item)) && pf(i.recQty) > 0;
+        const recName = String(i.name || '').trim();
+        const recBare = bareItemName(recName);
+        const recId = String(i.item_id || i.itemId || '');
+        const nameMatch = lcName(recBare) === lcName(targetBare) || lcName(recName) === lcName(target) || lcName(recBare) === lcName(target) || lcName(recName) === lcName(targetBare);
+        const idMatch = !!targetId && !!recId && String(recId) === String(targetId);
+        return (nameMatch || idMatch) && pf(i.recQty) > 0;
       });
     });
     if (hit) return hit.no;
