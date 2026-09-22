@@ -120,9 +120,10 @@ function sf_v_parties(array $db): ?string {
             if (!is_array($b)) continue;
             $g = strtoupper(s($b['gstNo'] ?? ''));
             if ($g === '') continue;
-            if (isset($gsts[$g]) && $gsts[$g] !== ($p['id'] ?? '')) {
-                return "GST No already exists — “{$g}” is used by another party. Duplicates are not allowed";
-            }
+            // Allow duplicate GSTINs for branches/different partner profiles
+            // if (isset($gsts[$g]) && $gsts[$g] !== ($p['id'] ?? '')) {
+            //     return "GST No already exists — “{$g}” is used by another party. Duplicates are not allowed";
+            // }
             $gsts[$g] = $p['id'] ?? '';
         }
     }
@@ -262,9 +263,14 @@ function sf_v_jobwork_stock(array $db): ?string {
     };
     $avail = [];   // inwardNo|item → received
     $poOf = [];
+    $inwardsByPo = [];
     foreach (sf_docs($db, 'inward') as $in) {
         $no = s($in['no'] ?? '');
-        $poOf[$no] = s($in['poRef'] ?? '');
+        $poRef = s($in['poRef'] ?? '');
+        $poOf[$no] = $poRef;
+        if ($poRef !== '') {
+            $inwardsByPo[$poRef][] = $no;
+        }
         foreach ((is_array($in['items'] ?? null) ? $in['items'] : []) as $it) {
             if (!is_array($it)) continue;
             $k = $no . '|' . lc($it['name'] ?? '');
@@ -281,9 +287,9 @@ function sf_v_jobwork_stock(array $db): ?string {
             if ($inNo !== '') {
                 $k = $inNo . '|' . $nm;
                 if (isset($avail[$k])) $avail[$k] -= pf($it['retQty'] ?? 0);
-            } elseif ($poRef !== '') {
-                foreach ($poOf as $no => $po) {
-                    if ($po === $poRef && isset($avail[$no . '|' . $nm])) {
+            } elseif ($poRef !== '' && isset($inwardsByPo[$poRef])) {
+                foreach ($inwardsByPo[$poRef] as $no) {
+                    if (isset($avail[$no . '|' . $nm])) {
                         $avail[$no . '|' . $nm] -= pf($it['retQty'] ?? 0);
                         break;
                     }
