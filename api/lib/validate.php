@@ -116,15 +116,15 @@ function sf_v_parties(array $db): ?string {
             if (isset($shorts[$lk])) return "“{$short}” already exists in Party onboarding Master — duplicate values are not allowed";
             $shorts[$lk] = 1;
         }
-        // foreach ((is_array($p['billTos'] ?? null) ? $p['billTos'] : []) as $b) {
-        //     if (!is_array($b)) continue;
-        //     $g = strtoupper(s($b['gstNo'] ?? ''));
-        //     if ($g === '') continue;
-        //     if (isset($gsts[$g]) && $gsts[$g] !== ($p['id'] ?? '')) {
-        //         return "GST No already exists — “{$g}” is used by another party. Duplicates are not allowed";
-        //     }
-        //     $gsts[$g] = $p['id'] ?? '';
-        // }
+        foreach ((is_array($p['billTos'] ?? null) ? $p['billTos'] : []) as $b) {
+            if (!is_array($b)) continue;
+            $g = strtoupper(s($b['gstNo'] ?? ''));
+            if ($g === '') continue;
+            if (isset($gsts[$g]) && $gsts[$g] !== ($p['id'] ?? '')) {
+                return "GST No already exists — “{$g}” is used by another party. Duplicates are not allowed";
+            }
+            $gsts[$g] = $p['id'] ?? '';
+        }
     }
     return null;
 }
