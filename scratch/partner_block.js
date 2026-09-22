@@ -98,7 +98,7 @@ async function gstFetchProfile(gstin){
 }
 
 let obEditId=null;
-function partnersDb(){ if(!db.partners) db.partners=[]; return db.partners; }
+function partnersDb(){ if(!db.masters) db.masters={}; if(!db.masters.parties) db.masters.parties=[]; return db.masters.parties; }
 function nextPartnerCode(){
   const n=(partnersDb().length||0)+1;
   return 'PRT-'+String(n).padStart(4,'0');
@@ -130,13 +130,19 @@ function obDeletePartner(id){
   const rec=partnersDb().find(function(x){return x.id===id;});
   if(!rec) return;
   const goDel=function(){
-    db.partners=partnersDb().filter(function(x){return x.id!==id;});
-    if(db.masters&&db.masters.parties){
-      db.masters.parties=db.masters.parties.filter(function(x){return x.partnerId!==id;});
-    }
-    saveDB();
-    toast((rec.code||rec.displayName||'Partner')+' deleted','green');
-    obEditId=null; render();
+    fetch('api/modules/partneronboarding.php?id=' + encodeURIComponent(id), { method: 'DELETE' })
+    .then(res => res.json())
+    .then(res => {
+      if(!res.ok) throw new Error(res.error || 'Server error');
+      if(db.masters && db.masters.parties) {
+        db.masters.parties = db.masters.parties.filter(function(x){return x.id!==id;});
+      }
+      toast((rec.code||rec.displayName||'Partner')+' deleted','green');
+      obEditId=null; renderPartnerOnboarding();
+    })
+    .catch(err => {
+      toast(err.message, 'red');
+    });
   };
   if(typeof confirmDelete==='function'){
     confirmDelete({kind:'partner', name:rec.displayName||rec.code||'this partner', confirmText:'Delete permanently'}, goDel);
@@ -355,35 +361,50 @@ function obSubmitPartner(){
     }
   }
   const registrations=obCardData('[data-ob-reg]');
+  
+  const types=[];
+  if(roles.indexOf('VENDOR')>-1||roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
+  if(roles.indexOf('BUYER')>-1||roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
+  if(!types.length) types.push('Supplier');
+  
+  const g=(registrations||[])[0]||{};
+  const legal=g.legalName||displayName;
+  const short=shortName||g.tradeName||displayName;
+
   const rec={
     id: (obEditId && obEditId!=='new') ? obEditId : uid(),
     code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
-    displayName:displayName, shortName:shortName, roles:roles, status:(($('ob-status')||{}).value==='Inactive'?'Inactive':'Active'),
+    displayName:displayName, shortName:short, roles:roles, status:(($('ob-status')||{}).value==='Inactive'?'Inactive':'Active'),
     registrations:registrations, brands:obCardData('[data-ob-brand]'), contacts:obCardData('[data-ob-contact]'),
-    updatedAt:Date.now()
+    updatedAt:Date.now(),
+    legalName:legal, gstNo:g.gstin||'', pan:g.pan||'', address:g.principalAddress||'', city:g.city||'', district:g.district||'', state:g.placeState||g.state||'', pin:g.pincode||'', businessType:types
   };
-  const arr=partnersDb();
-  const ix=arr.findIndex(function(x){return x.id===rec.id;});
-  if(ix>=0) arr[ix]=Object.assign({},arr[ix],rec);
-  else { rec.createdAt=Date.now(); arr.push(rec); }
-  obSyncToPartyMaster(rec);
-  saveDB();
-  toast(rec.code+' saved — GST data stored on the partner','green');
-  obEditId=null; render();
-}
-function obSyncToPartyMaster(rec){
-  if(!db.masters) db.masters={}; if(!db.masters.parties) db.masters.parties=[];
-  const g=(rec.registrations||[])[0]||{};
-  const legal=g.legalName||rec.displayName;
-  const short=rec.shortName||g.tradeName||rec.displayName;
-  const types=[];
-  if(rec.roles.indexOf('VENDOR')>-1||rec.roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
-  if(rec.roles.indexOf('BUYER')>-1||rec.roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
-  if(!types.length) types.push('Supplier');
-  let p=db.masters.parties.find(function(x){return x.partnerId===rec.id || String(x.gstNo||'').toUpperCase()===String(g.gstin||'').toUpperCase();});
-  const data={ partnerId:rec.id, legalName:legal, shortName:short, gstNo:g.gstin||'', pan:g.pan||'', address:g.principalAddress||'', city:g.city||'', district:g.district||'', state:g.placeState||g.state||'', pin:g.pincode||'', businessType:types, status:'Active' };
-  if(p) Object.assign(p,data);
-  else db.masters.parties.push(Object.assign({ id:uid(), code:rec.code }, data));
+  
+  const btn = window.event ? window.event.target : null;
+  if(btn) btn.disabled = true;
+
+  fetch('api/modules/partneronboarding.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(rec)
+  })
+  .then(res => res.json())
+  .then(res => {
+    if(btn) btn.disabled = false;
+    if(!res.ok) throw new Error(res.error || 'Server error');
+    
+    const arr=partnersDb();
+    const ix=arr.findIndex(function(x){return x.id===rec.id;});
+    if(ix>=0) arr[ix]=Object.assign({},arr[ix],res.record || rec);
+    else { if(!rec.createdAt) rec.createdAt=Date.now(); arr.push(res.record || rec); }
+    
+    toast(rec.code+' saved — GST data stored on the partner','green');
+    obEditId=null; renderPartnerOnboarding();
+  })
+  .catch(err => {
+    if(btn) btn.disabled = false;
+    toast(err.message, 'red');
+  });
 }
 
 function renderGstApi(){
