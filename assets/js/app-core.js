@@ -813,15 +813,15 @@ function defaultDB() {
     po: [], inward: [], jobwork: [], processoutward: [], processinward: [], sample: [], sale: [], costing: [], purchasereturn: [], jobworkreturn: [], auditTrail: [], customReports: [], users: [{ id: 'USR-0001', name: 'System Administrator', username: 'admin', pin: '1234', role: 'Admin', status: 'Active', accessLevel: 'Full', modules: ['*'] }],
     masters: {
       companyDetails: Object.assign({}, DEFAULT_COMPANY_DETAILS),
-      suppliers: [], customers: ['Myntra D2C'], colours: ['White', 'Black', 'Navy Blue', 'Red', 'Maroon', 'Beige'],
-      fabrics: ['Cotton 240 GSM', 'Cotton 180 GSM', 'Polyester', 'Viscose', 'Silk', 'Linen'],
-      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      suppliers: [], customers: [], colours: [],
+      fabrics: [],
+      sizes: [],
       styles: [],
       categories: ['Fabric', 'Trims', 'Packaging', 'Other'],
       classifications: ['Fabric', 'Label - Main/Size', 'Button', 'Zipper', 'Elastic', 'Thread', 'Hang Tag', 'Poly Bag', 'Carton', 'Sticker', 'Other'],
       materialTypes: ['Woven', 'Knit', 'Plastic', 'Metal', 'Paper', 'Cotton', 'Synthetic', 'Other'],
       qualities: ['Standard', 'Premium', 'Economy'],
-      firms: ['KEN Global Designs Pvt. Ltd.'],
+      firms: [],
       addresses: ['Ken Global Designs Private Limited – Head Office'],
       boms: [],
       raisedForList: ['Production', 'Merchandising', 'Sampling', 'Store / Warehouse', 'Accounts', 'Management'],
@@ -847,18 +847,7 @@ function defaultDB() {
       parties: [],
       /* partners onboarded via Partner onboarding */
 
-      items: [
-        { name: 'Fabric', category: 'Fabric', classification: 'Fabric', unit: 'm' },
-        { name: 'Thread', category: 'Trims', classification: 'Thread', unit: 'pcs' },
-        { name: 'Buttons', category: 'Trims', classification: 'Button', unit: 'pcs' },
-        { name: 'Zipper', category: 'Trims', classification: 'Zipper', unit: 'pcs' },
-        { name: 'Labels', category: 'Trims', classification: 'Label - Main/Size', unit: 'pcs' },
-        { name: 'Elastic', category: 'Trims', classification: 'Elastic', unit: 'm' },
-        { name: 'Poly Bag', category: 'Packaging', classification: 'Poly Bag', unit: 'pcs' },
-        { name: 'Carton', category: 'Packaging', classification: 'Carton', unit: 'pcs' },
-        { name: 'Sticker', category: 'Packaging', classification: 'Sticker', unit: 'pcs' },
-        { name: 'Hang Tag', category: 'Packaging', classification: 'Hang Tag', unit: 'pcs' }
-      ]
+      items: []
     }
   };
 }
@@ -3133,7 +3122,7 @@ function renderDashboard() {
     : '<div class="panel"><div class="empty"><div class="big">' + ic('inbox', 26) + '</div>' +
     '<h3>No activity yet</h3><p>Start by raising a purchase order, or load sample data to explore how the modules connect.</p>' +
     '<div style="display:flex;gap:8px">' +
-    '<button class="btn btn-primary" onclick="loadDemo()">' + ic('sparkle', 16) + 'Load demo data</button>' +
+    
     '<button class="btn btn-ghost" onclick="openForm(\'po\')">' + ic('plus', 16) + 'Create PO</button></div></div></div>';
 
   $('sidefoot').innerHTML = '<span class="dot"></span>Saved to database<div class="sf-sub">Updated ' + new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</div>';
@@ -12204,17 +12193,7 @@ function exportCSV(m) {
 
 /* ---------------- Demo data & clear ---------------- */
 function loadDemo() {
-  if (db.po.length || db.jobwork.length) {
-    openDialog({
-      title: 'Load demo data',
-      message: 'Existing purchase orders and job work entries will be <span class="dlg-strong">replaced</span> by the demo dataset.',
-      confirmText: 'Replace with demo data', danger: true,
-      onConfirm: function () { db = defaultDB(); saveDB(); loadDemo(); }
-    });
-    return;
-  }
-  const d = new Date();
-  const day = (n) => { const x = new Date(d); x.setDate(d.getDate() - n); return x.toISOString().slice(0, 10); };
+  return;
   db.masters.suppliers = ['Om Textiles', 'Shree Synthetics', 'Trim House', 'Raja Job Works', 'Global Stitching Unit'];
   db.masters.customers = ['Myntra D2C', 'Myntra B2B', 'Retail Store Pune'];
   db.masters.colours = ['White', 'Black', 'Navy Blue', 'Maroon', 'Beige'];
