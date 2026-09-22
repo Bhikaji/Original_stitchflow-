@@ -1,7 +1,7 @@
-/* =====================================================================
-   StitchFlow ERP v2 — Garment Manufacturing for D2C (Myntra)
-   Modules: PO → Inward → Job Work (fabric + trims to job-worker vendor,
-            multi-style FG received) → Sale, plus Reports
+﻿/* =====================================================================
+   StitchFlow ERP v2 â€” Garment Manufacturing for D2C (Myntra)
+   Modules: PO â†’ Inward â†’ Job Work (fabric + trims to job-worker vendor,
+            multi-style FG received) â†’ Sale, plus Reports
             (GRN / issues / WIP / FG received / stock) and Masters.
    Premium UI: every dropdown is a searchable combobox.
    Data persists in localStorage (in-memory fallback for sandboxed preview).
@@ -12,8 +12,8 @@ function showErr(msg, stack) {
   var el = document.getElementById('jsErr');
   if (el) {
     el.style.display = 'block';
-    var detail = stack ? '<span style="font-weight:400;opacity:.85"> — ' + esc(stack.split('\n').slice(0, 3).join(' → ')) + '</span>' : '';
-    el.innerHTML += '<div>• ' + esc(msg) + detail + '</div>';
+    var detail = stack ? '<span style="font-weight:400;opacity:.85"> â€” ' + esc(stack.split('\n').slice(0, 3).join(' â†’ ')) + '</span>' : '';
+    el.innerHTML += '<div>â€¢ ' + esc(msg) + detail + '</div>';
   }
 }
 function isForeignScript(src) {
@@ -23,7 +23,7 @@ function isForeignScript(src) {
     (/^https?:/.test(src) && src.indexOf(location.origin) !== 0);
 }
 window.onerror = function (msg, src, line, col, err) {
-  if (isForeignScript(src)) return false;   // not our code — stay quiet
+  if (isForeignScript(src)) return false;   // not our code â€” stay quiet
   showErr(msg + ' (line ' + line + ')', err && err.stack);
   return false;
 };
@@ -34,7 +34,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmtNum = (n) => (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
 const fmtInventoryNum = (n) => Math.round(Number(n) || 0).toLocaleString('en-IN');
-const fmtINR = (n) => '₹' + fmtNum(n);
+const fmtINR = (n) => 'â‚¹' + fmtNum(n);
 const pf = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -58,7 +58,7 @@ function badge(st) {
    Standard processes have fixed business colours; custom Master values use
    a deterministic palette so their colour remains stable between sessions. */
 function processTypeBadge(type) {
-  const label = String(type || '—').trim() || '—';
+  const label = String(type || 'â€”').trim() || 'â€”';
   const key = label.toLowerCase();
   const fixed = { washing: 'b-yellow', embroidery: 'b-blue', printing: 'b-purple' };
   let tone = fixed[key];
@@ -74,7 +74,7 @@ function processTypeBadge(type) {
 /* =====================================================================
    REQUIRED-FIELD HIGHLIGHTING
    Every save routine calls clearReqMarks() first, then returns
-   reqBad(target, message) instead of a bare toast — the offending field
+   reqBad(target, message) instead of a bare toast â€” the offending field
    is outlined red, its label flagged, scrolled into view and focused.
    ===================================================================== */
 function reqResolve(target) {
@@ -95,7 +95,7 @@ function clearReqMarks(root) {
   qsa('.field-bad', r).forEach(function (el) { el.classList.remove('field-bad'); });
   qsa('.cell-bad', r).forEach(function (el) { el.classList.remove('cell-bad'); });
 }
-/* mark a field invalid — returns false so callers can `return reqBad(...)` */
+/* mark a field invalid â€” returns false so callers can `return reqBad(...)` */
 function reqBad(target, msg) {
   const el = reqResolve(target);
   if (el) {
@@ -127,7 +127,7 @@ function reqBadCell(tbodyId, rowIndex, fieldName, msg) {
   if (tr) el = qs('[data-f="' + fieldName + '"]', tr) || qs('.inp', tr);
   return reqBad(el, msg);
 }
-/* value stored in a row cell — resolves comboboxes, multiselects and inputs */
+/* value stored in a row cell â€” resolves comboboxes, multiselects and inputs */
 function rowVal(tr, f) {
   const el = qs('[data-f="' + f + '"]', tr);
   if (!el) return '';
@@ -177,7 +177,7 @@ function requireRowFields(tbodyId, specs, rowNoun) {
   }
   if (!filled) {
     const first = rows[0];
-    if (first) reqBadIn(first, specs[0].f, specs[0].label + ' is required — complete at least one ' + (rowNoun || 'row'));
+    if (first) reqBadIn(first, specs[0].f, specs[0].label + ' is required â€” complete at least one ' + (rowNoun || 'row'));
     return false;
   }
   return true;
@@ -287,7 +287,7 @@ function toastUndo(msg, undoFn) {
 }
 
 /* =====================================================================
-   SEARCHABLE COMBOBOX — used for EVERY dropdown in the app
+   SEARCHABLE COMBOBOX â€” used for EVERY dropdown in the app
    ===================================================================== */
 const CBOX = {};
 let cbCounter = 0;
@@ -375,7 +375,7 @@ function cbox(id, cfg) {
     id: id,
     opts: (cfg.opts || []).map(function (o) { return normalizeOpt(o, keyHint); }).filter(function (o) { return masterValueAllowed(o.v); }),
     val: cfg.value != null ? cfg.value : '',
-    placeholder: cfg.placeholder || 'Select…',
+    placeholder: cfg.placeholder || 'Selectâ€¦',
     /* Every combobox is strictly list-only: typing filters the options but a
        value that is not on the list can never be committed, and no combobox
        may create a new master value. New values are added in Masters /
@@ -389,7 +389,7 @@ function cbox(id, cfg) {
     display: cfg.display != null ? cfg.display : null
   };
   /* A value already stored on a saved record must stay selectable even if it
-     is no longer in the master list — otherwise strict mode would silently
+     is no longer in the master list â€” otherwise strict mode would silently
      wipe historical data when the record is reopened. */
   if (c.val !== '' && c.val != null && !c.opts.some(function (o) { return o.v === c.val; })) {
     const missingOpt = normalizeOpt({ v: c.val, l: (c.display != null ? c.display : String(c.val)) }, keyHint);
@@ -428,7 +428,7 @@ function toggleCbox(id) {
   closeAllCbox();
   if (!wasOpen) {
     if (box) box.classList.add('open');
-    c.typed = false;                    // fresh open → show every option, not just the current value
+    c.typed = false;                    // fresh open â†’ show every option, not just the current value
     renderCboxList(id);
     const inp = qs('[data-cb-input="' + id + '"]');
     if (inp) { inp.focus(); try { inp.select(); } catch (e) { } }
@@ -510,12 +510,12 @@ function renderCboxList(id) {
   let h = '';
   if (c.opts.length > 7) h += '<div class="cbox-search">' + ic('search', 13) + (q ? esc(txt) : 'Type to filter ' + c.opts.length + ' options') + '</div>';
   if (!c.visible.length) h += '<div class="cbox-empty">' +
-    (c.opts.length ? 'No matching option — only listed values are allowed' : (c.emptyMsg || (c.addMaster ? 'No options available — add them in Masters first' : 'No records available'))) + '</div>';
+    (c.opts.length ? 'No matching option â€” only listed values are allowed' : (c.emptyMsg || (c.addMaster ? 'No options available â€” add them in Masters first' : 'No records available'))) + '</div>';
   c.visible.forEach(o => {
     h += '<div class="cbox-opt" data-val="' + esc(o.v) + '" data-label="' + esc(o.l) + '">' + esc(o.l) +
-      (o.v === c.val ? '<span class="tick">✓</span>' : '') + '</div>';
+      (o.v === c.val ? '<span class="tick">âœ“</span>' : '') + '</div>';
   });
-  /* no inline "+ Add" — only values already on the list can be picked */
+  /* no inline "+ Add" â€” only values already on the list can be picked */
   list.innerHTML = h;
   if (box.classList.contains('open')) placeFloatList(box, list);
 }
@@ -536,7 +536,7 @@ function pickCbox(id, v, label) {
   closeCbox(id);
   if (c.onSet) c.onSet(v);
 }
-/* retained for compatibility — comboboxes are list-only, nothing is added inline */
+/* retained for compatibility â€” comboboxes are list-only, nothing is added inline */
 function addCboxValue(id) {
   toast('New values must be added in Masters first \u2014 only listed options can be selected', 'red');
   return;
@@ -551,7 +551,7 @@ function addCboxValue(id) {
   if (vErr) { reqBad(inp, vErr); return; }
   addMasterVal(c.addMaster, v, true);
   pickCbox(id, v);
-  toast('Added “' + v + '” to ' + (c.addText || c.addMaster), 'green');
+  toast('Added â€œ' + v + 'â€ to ' + (c.addText || c.addMaster), 'green');
 }
 function moveCbox(id, dir) {
   const c = CBOX[id]; if (!c || !c.visible || !c.visible.length) return;
@@ -565,7 +565,7 @@ function moveCbox(id, dir) {
 }
 
 /* =====================================================================
-   MULTI-SELECT COMBOBOX — used for size selection per style row
+   MULTI-SELECT COMBOBOX â€” used for size selection per style row
    ===================================================================== */
 const MCBOX = {};
 const rowSz = {};    // per-style-row size values: { szId: { sizes: {S:'10',...} } }
@@ -577,12 +577,12 @@ function mcbox(id, cfg) {
   const opts = (cfg.opts || []).map(normalizeOpt).filter(function (o) { return masterValueAllowed(o.v); });
   const sel = (cfg.selected || []).slice();
   MCBOX[id] = {
-    id: id, opts: opts, sel: sel, onSet: cfg.onSet || null, placeholder: cfg.placeholder || 'Select…',
+    id: id, opts: opts, sel: sel, onSet: cfg.onSet || null, placeholder: cfg.placeholder || 'Selectâ€¦',
     locked: (cfg.locked || []).slice(), lockMsg: cfg.lockMsg || 'This size is already saved on the entry and cannot be removed',
     disabled: !!cfg.disabled, typed: false, q: ''
   };
   return '<div class="mcbox' + (cfg.disabled ? ' disabled' : '') + '" data-mcb="' + id + '">' +
-    '<input type="text" class="inp mcbox-input" data-mcb-input="' + id + '" value="' + esc(mcboxLabel(id)) + '" placeholder="' + esc(cfg.placeholder || 'Select…') + '" autocomplete="off" spellcheck="false"' + (cfg.disabled ? ' disabled' : '') + ' oninput="mcboxFilter(\'' + id + '\',this.value)">' +
+    '<input type="text" class="inp mcbox-input" data-mcb-input="' + id + '" value="' + esc(mcboxLabel(id)) + '" placeholder="' + esc(cfg.placeholder || 'Selectâ€¦') + '" autocomplete="off" spellcheck="false"' + (cfg.disabled ? ' disabled' : '') + ' oninput="mcboxFilter(\'' + id + '\',this.value)">' +
     '<span class="cbox-caret">' + ic('select', 16) + '</span><div class="mcbox-list"></div></div>';
 }
 function mcboxGet(id) { const c = MCBOX[id]; return c ? c.sel.slice() : []; }
@@ -618,13 +618,13 @@ function renderMcboxList(id) {
     return String(o.l).toLowerCase().indexOf(q) > -1 || String(o.v).toLowerCase().indexOf(q) > -1;
   }) : c.opts;
   const currentBuyer = (typeof cboxGet === 'function') ? (cboxGet('po-buyer') || cboxGet('smp-buyer') || '') : '';
-  const emptyHint = q ? 'No matches for “' + esc(c.q) + '”' : (currentBuyer ? 'No styles found for “' + esc(currentBuyer) + '”' : 'No styles available in Style Master');
-  list.innerHTML = '<div class="mcbox-hint">selected: ' + esc(mcboxLabel(id) || 'none') + ' — click to toggle</div>' +
+  const emptyHint = q ? 'No matches for â€œ' + esc(c.q) + 'â€' : (currentBuyer ? 'No styles found for â€œ' + esc(currentBuyer) + 'â€' : 'No styles available in Style Master');
+  list.innerHTML = '<div class="mcbox-hint">selected: ' + esc(mcboxLabel(id) || 'none') + ' â€” click to toggle</div>' +
     (shown.length ? shown.map(function (o) {
       const lock = mcboxLocked(id, o.v);
       return '<div class="mcbox-opt' + (lock ? ' mcbox-lock' : '') + '" data-val="' + esc(o.v) + '"' +
         (lock ? ' title="' + esc(c.lockMsg) + '"' : '') + '>' + esc(o.l) +
-        (c.sel.indexOf(o.v) > -1 ? '<span class="tick">' + (lock ? ic('lock', 12) : '✓') + '</span>' : '') + '</div>';
+        (c.sel.indexOf(o.v) > -1 ? '<span class="tick">' + (lock ? ic('lock', 12) : 'âœ“') + '</span>' : '') + '</div>';
     }).join('') : '<div class="cbox-empty">' + emptyHint + '</div>');
   if (box.classList.contains('open')) placeFloatList(box, list);
 }
@@ -684,7 +684,7 @@ document.addEventListener('input', function (e) {
   if (e.target && e.target.matches && e.target.matches('.cbox-input')) {
     const id = e.target.dataset.cbInput;
     const c = CBOX[id];
-    if (c) c.typed = true;                     // user is filtering now — the typed
+    if (c) c.typed = true;                     // user is filtering now â€” the typed
     // text is never stored as a value
     if (c && c.onSet) {                        // auto-fire onSet when typed text matches an option
       const val = String(e.target.value || '').trim().toLowerCase();
@@ -822,7 +822,7 @@ function defaultDB() {
       materialTypes: ['Woven', 'Knit', 'Plastic', 'Metal', 'Paper', 'Cotton', 'Synthetic', 'Other'],
       qualities: ['Standard', 'Premium', 'Economy'],
       firms: ['KEN Global Designs Pvt. Ltd.'],
-      addresses: ['Ken Global Designs Private Limited – Head Office'],
+      addresses: ['Ken Global Designs Private Limited â€“ Head Office'],
       boms: [],
       raisedForList: ['Production', 'Merchandising', 'Sampling', 'Store / Warehouse', 'Accounts', 'Management'],
       countries: ['India'],
@@ -864,7 +864,7 @@ function defaultDB() {
 }
 const MODULE_KEYS = ['po', 'inward', 'jobwork', 'processoutward', 'processinward', 'sample', 'sale', 'costing', 'purchasereturn', 'jobworkreturn'];
 const MASTER_KEYS = ['suppliers', 'customers', 'colours', 'fabrics', 'categories', 'classifications', 'materialTypes', 'qualities', 'firms', 'addresses', 'boms', 'raisedForList', 'countries', 'states', 'districts', 'talukas', 'partyStatuses', 'businessTypes', 'gstTypes', 'paymentTermsList', 'freightChargesList', 'transportModes', 'warehouses', 'gstRates', 'uoms', 'qcResults', 'returnTypes', 'washTypes', 'processTypes'];
-/* per-master value validation — '' when valid, else the reason */
+/* per-master value validation â€” '' when valid, else the reason */
 function masterValueError(k, v) {
   const s = String(v == null ? '' : v).trim();
   if (k === 'gstRates') {
@@ -877,7 +877,7 @@ function masterValueError(k, v) {
   }
   return '';
 }
-/* our own registered state — supplies in-state get CGST+SGST, others IGST */
+/* our own registered state â€” supplies in-state get CGST+SGST, others IGST */
 const HOME_STATE = 'Maharashtra';
 
 /* masters that hang off a parent master */
@@ -1025,7 +1025,7 @@ function normalizeDB(d) {
   if (!d.masters.materialTypes.length) d.masters.materialTypes = ['Woven', 'Knit', 'Plastic', 'Metal', 'Paper', 'Cotton', 'Synthetic', 'Other'];
   if (!d.masters.qualities.length) d.masters.qualities = ['Standard', 'Premium', 'Economy'];
   if (!d.masters.firms.length) d.masters.firms = ['KEN Global Designs Pvt. Ltd.'];
-  if (!d.masters.addresses.length) d.masters.addresses = ['Ken Global Designs Private Limited – Head Office'];
+  if (!d.masters.addresses.length) d.masters.addresses = ['Ken Global Designs Private Limited â€“ Head Office'];
   if (typeof d.seq.item !== 'number' || isNaN(d.seq.item)) d.seq.item = 0;
   if (!Array.isArray(d.masters.sizes) || !d.masters.sizes.length) d.masters.sizes = ['S', 'M', 'L', 'XL', 'XXL'];
   d.masters.sizes = d.masters.sizes.map(function (s) { return String(s).trim(); }).filter(Boolean);
@@ -1171,13 +1171,13 @@ function normalizeDB(d) {
   d.jobwork.forEach(function (j) {
     if (!Array.isArray(j.trims)) j.trims = [];
     if (!Array.isArray(j.issues)) {
-      // migrate legacy single-issue record → issues[] register
+      // migrate legacy single-issue record â†’ issues[] register
       j.issues = [];
       if (pf(j.fabricQty) > 0) j.issues.push({ date: j.issueDate || j.date || '', item: j.fabricItem || 'Fabric', colour: j.fabricColour || '', qty: pf(j.fabricQty), unit: j.fabricUnit || 'm' });
       (j.trims || []).forEach(function (t) { if (t && t.name) j.issues.push({ date: j.issueDate || j.date || '', item: t.name, colour: t.colour || '', qty: pf(t.qty), unit: t.unit || '' }); });
     }
     if (!Array.isArray(j.garments)) {
-      // migrate legacy single-garment record → garments[] register (multiple styles per JW)
+      // migrate legacy single-garment record â†’ garments[] register (multiple styles per JW)
       j.garments = [];
       if (j.garment || pf(j.orderQty) > 0 || pf(j.receivedQty) > 0) {
         j.garments.push({ desc: j.garment || '', colour: j.colour || '', orderQty: pf(j.orderQty), rate: pf(j.rate), receivedQty: pf(j.receivedQty) });
@@ -1185,7 +1185,7 @@ function normalizeDB(d) {
       delete j.garment; delete j.colour; delete j.orderQty; delete j.rate; delete j.charges; delete j.receivedQty;
     }
     if (!Array.isArray(j.receipts)) {
-      // migrate received quantities → receipts[] register (each receipt has own date + consumption)
+      // migrate received quantities â†’ receipts[] register (each receipt has own date + consumption)
       j.receipts = [];
       j.garments.forEach(function (g) {
         if (g && pf(g.receivedQty) > 0) j.receipts.push({ date: j.receiveDate || j.date || '', desc: g.desc || '', colour: g.colour || '', qty: pf(g.receivedQty), consumption: 0 });
@@ -1232,7 +1232,7 @@ function normalizeDB(d) {
   return d;
 }
 function migrate(old) {
-  // v1 → v2 upgrades
+  // v1 â†’ v2 upgrades
   if (old.masters) {
     if (Array.isArray(old.masters.items) && old.masters.items.length && typeof old.masters.items[0] === 'string') {
       old.masters.items = old.masters.items.map(n => ({ name: n, category: 'Other', unit: '' }));
@@ -1279,8 +1279,8 @@ function auditSnapshot(d) {
 function auditRecordKey(r, i) { return String((r && (r.id || r.no || r.code || r.internal || r.name)) || ('#' + i)); }
 function auditShort(v) {
   if (v == null || v === '') return 'blank';
-  if (typeof v === 'object') { const s = JSON.stringify(v); return s.length > 80 ? s.slice(0, 77) + '…' : s; }
-  const s = String(v); return s.length > 80 ? s.slice(0, 77) + '…' : s;
+  if (typeof v === 'object') { const s = JSON.stringify(v); return s.length > 80 ? s.slice(0, 77) + 'â€¦' : s; }
+  const s = String(v); return s.length > 80 ? s.slice(0, 77) + 'â€¦' : s;
 }
 function auditHighlights(r) {
   r = r || {}; const labels = { date: 'Date', supplier: 'Supplier', vendor: 'Vendor', customer: 'Customer', processType: 'Process', processor: 'Processor', status: 'Status', warehouse: 'Warehouse', jwRef: 'Job Work Ref', outwardRef: 'Outward Ref', name: 'Name' };
@@ -1297,11 +1297,11 @@ function auditDiff(a, b, path, out) {
   if (Array.isArray(a) && Array.isArray(b)) {
     const n = Math.max(a.length, b.length); for (let i = 0; i < n && out.length < 20; i++)auditDiff(a[i], b[i], path + '[' + i + ']', out); return out;
   }
-  out.push((path || 'value') + ': ' + auditShort(a) + ' → ' + auditShort(b)); return out;
+  out.push((path || 'value') + ': ' + auditShort(a) + ' â†’ ' + auditShort(b)); return out;
 }
 function auditPush(area, action, record, changes) {
   if (!Array.isArray(db.auditTrail)) db.auditTrail = [];
-  db.auditTrail.push({ id: uid(), at: new Date().toISOString(), user: currentAuditUser(), area: area, action: action, record: record || '—', changes: (changes || []).slice(0, 20) });
+  db.auditTrail.push({ id: uid(), at: new Date().toISOString(), user: currentAuditUser(), area: area, action: action, record: record || 'â€”', changes: (changes || []).slice(0, 20) });
   if (db.auditTrail.length > 2000) db.auditTrail = db.auditTrail.slice(-2000);
 }
 function captureAuditChanges() {
@@ -1316,7 +1316,7 @@ function captureAuditChanges() {
   });
   Object.keys(now.masters).forEach(function (k) {
     const a = AUDIT_PREV.masters[k] || [], b = now.masters[k] || []; if (JSON.stringify(a) === JSON.stringify(b)) return;
-    const area = k === 'items' ? 'Item Master' : k === 'parties' ? 'Party onboarding' : k === 'styles' ? 'Style Master' : ('Master — ' + k);
+    const area = k === 'items' ? 'Item Master' : k === 'parties' ? 'Party onboarding' : k === 'styles' ? 'Style Master' : ('Master â€” ' + k);
     if (Array.isArray(a) && Array.isArray(b)) {
       const objectList = (a.concat(b)).some(function (x) { return x && typeof x === 'object'; });
       if (objectList) { const am = {}, bm = {}; a.forEach(function (x, i) { am[auditRecordKey(x, i)] = x; }); b.forEach(function (x, i) { bm[auditRecordKey(x, i)] = x; }); Object.keys(bm).forEach(function (key) { if (!am[key]) auditPush(area, 'Added', key, ['Master record added']); else { const d = auditDiff(am[key], bm[key]); if (d.length) auditPush(area, 'Updated', key, d); } }); Object.keys(am).forEach(function (key) { if (!bm[key]) auditPush(area, 'Removed', key, ['Master record removed']); }); }
@@ -1496,14 +1496,14 @@ const MODULES = {
   jobwork: { label: 'Job Work', icon: 'needle', sub: 'Material issues to job-worker vendor; finished goods received' },
   processoutward: { label: 'Process PO / Outward', icon: 'truck', sub: 'Send style and size-wise garment quantities for embroidery, washing or printing' },
   processinward: { label: 'Process Inward', icon: 'receive', sub: 'Receive processed garments partially against a Process Outward' },
-  sample: { label: 'Sample', icon: 'sparkle', sub: 'Sample development — styles with size-wise qty; samples received back' },
-  sale: { label: 'Sale', icon: 'cash', sub: 'Sales entries — Myntra D2C &amp; others' },
-  costing: { label: 'Costing', icon: 'cash', sub: 'Buyer order costing — fabric, trims, CM, FOB &amp; margin' },
+  sample: { label: 'Sample', icon: 'sparkle', sub: 'Sample development â€” styles with size-wise qty; samples received back' },
+  sale: { label: 'Sale', icon: 'cash', sub: 'Sales entries â€” Myntra D2C &amp; others' },
+  costing: { label: 'Costing', icon: 'cash', sub: 'Buyer order costing â€” fabric, trims, CM, FOB &amp; margin' },
   purchasereturn: { label: 'Purchase Return', icon: 'back', sub: 'Return rejected or excess material back to the supplier against a PO' },
   jobworkreturn: { label: 'Job Work Return', icon: 'receive', sub: 'Material returned by the job worker back to our warehouse' },
   styles: { label: 'Style Master', icon: 'box', sub: 'Style master with buyer, SKU and size references' },
-  itemmaster: { label: 'Item Master', icon: 'box', sub: 'Detailed item / SKU master — pricing, GST, sizes &amp; images' },
-  parties: { label: 'Vendor onboarding', icon: 'home', sub: 'Onboarding master — legal entity, tax IDs, address &amp; business type' },
+  itemmaster: { label: 'Item Master', icon: 'box', sub: 'Detailed item / SKU master â€” pricing, GST, sizes &amp; images' },
+  parties: { label: 'Vendor onboarding', icon: 'home', sub: 'Onboarding master â€” legal entity, tax IDs, address &amp; business type' },
   partneronboarding: { label: 'Vendor onboarding', icon: 'home', sub: 'Onboard buyer and vendor accounts with GSTIN auto-fetch, brands and contacts' },
   gstapi: { label: 'GST API connection', icon: 'chart', sub: 'Configure third-party GST provider and auto-fetch taxpayer data' },
   reports: { label: 'Reports', icon: 'chart', sub: 'GRN, issues, WIP, FG received &amp; stock reports with date range' },
@@ -1663,7 +1663,7 @@ document.addEventListener('keydown', function (e) {
   const el = e.target;
   if (!isNumericField(el)) return;
   if (e.ctrlKey || e.metaKey || e.altKey) return;
-  if (e.key && e.key.length > 1) return;                       // arrows, Tab, Backspace…
+  if (e.key && e.key.length > 1) return;                       // arrows, Tab, Backspaceâ€¦
   if (e.key === '.' && allowsDecimal(el) && el.value.indexOf('.') === -1) return;
   if (!/^[0-9]$/.test(e.key)) e.preventDefault();              // block e, E, +, -, letters
 }, true);
@@ -1686,7 +1686,7 @@ document.addEventListener('wheel', function (e) {
 
 
 /* =====================================================================
-   DATE PICKER — Shopify/Polaris style calendar popover.
+   DATE PICKER â€” Shopify/Polaris style calendar popover.
    Inputs keep an ISO (YYYY-MM-DD) value, so every existing save,
    sort and comparison path keeps working untouched.
    ===================================================================== */
@@ -1706,7 +1706,7 @@ function dpToISO(disp) {
   m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
   return m ? s : '';
 }
-/* read the ISO value of a date field — use instead of .value everywhere */
+/* read the ISO value of a date field â€” use instead of .value everywhere */
 function dval(el) {
   if (typeof el === 'string') el = $(el);
   if (!el) return '';
@@ -1906,7 +1906,7 @@ function loginImageSrc(s) { return s && s.image === '__DEFAULT_LOGIN_BG__' ? DEF
 function loginActiveSlides() { const all = (((((db || {}).masters || {}).loginSettings || {}).slides) || []); return all.filter(function (s) { return s && s.active !== false && s.image && s.image !== '__DEFAULT_LOGIN_BG__' && s.image !== DEFAULT_LOGIN_BG; }); }
 function loginShowSlide(index) { const slides = loginActiveSlides(), visual = $('authVisual'), img = $('authSlideImage'); if (!visual || !img) return; if (!slides.length) { LOGIN_SLIDE_INDEX = 0; img.style.opacity = '0'; img.removeAttribute('src'); img.onload = null; qsa('.auth-slide-dots button').forEach(function (b) { b.classList.remove('on'); }); return; } LOGIN_SLIDE_INDEX = (index + slides.length) % slides.length; const s = slides[LOGIN_SLIDE_INDEX], src = loginImageSrc(s); img.style.opacity = '0'; setTimeout(function () { img.src = src; img.style.objectFit = s.fit === 'contain' ? 'contain' : s.fit === 'fill' ? 'fill' : 'cover'; img.style.objectPosition = s.position || 'center'; img.onload = function () { img.style.opacity = '1'; }; if (img.complete) img.style.opacity = '1'; }, 80); qsa('.auth-slide-dots button').forEach(function (b, i) { b.classList.toggle('on', i === LOGIN_SLIDE_INDEX); }); }
 function loginStartSlides() { if (LOGIN_SLIDE_TIMER) clearInterval(LOGIN_SLIDE_TIMER); const slides = loginActiveSlides(); loginShowSlide(0); if (slides.length > 1) { const sec = Math.max(2, pf((((db || {}).masters || {}).loginSettings || {}).interval) || 6); LOGIN_SLIDE_TIMER = setInterval(function () { loginShowSlide(LOGIN_SLIDE_INDEX + 1); }, sec * 1000); } }
-function showLogin() { let el = $('authLogin'); if (!el) { el = document.createElement('div'); el.id = 'authLogin'; el.className = 'auth-login'; document.body.appendChild(el); } const slides = loginActiveSlides(); el.innerHTML = '<div class="auth-visual" id="authVisual"><img id="authSlideImage" alt="Login page visual"><div class="auth-slide-dots">' + slides.map(function (_, i) { return '<button type="button" onclick="loginShowSlide(' + i + ')" aria-label="Slide ' + (i + 1) + '"></button>'; }).join('') + '</div></div><div class="auth-side"><div class="auth-login-card"><div class="login-eyebrow">KEND2C</div><h2>Welcome back</h2><p>Sign in to continue to your workspace.</p><div class="field"><label class="lbl">Username</label><input class="inp" id="login-user" autocomplete="username" placeholder="Enter your username"></div><div class="field"><label class="lbl">PIN</label><input class="inp" id="login-pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Enter your PIN" onkeydown="if(event.key===\'Enter\')authLogin()"></div><button class="btn btn-primary login-submit" style="width:100%" onclick="authLogin()">Sign in</button><div class="fhint" id="login-msg" style="margin-top:10px"></div><div class="sub-line" style="text-align:center;margin-top:20px;color:#8a929c">© ' + new Date().getFullYear() + ' KEN Global Designs Pvt. Ltd.</div></div></div>'; loginStartSlides(); setTimeout(function () { const i = $('login-user'); if (i) i.focus(); }, 0); }
+function showLogin() { let el = $('authLogin'); if (!el) { el = document.createElement('div'); el.id = 'authLogin'; el.className = 'auth-login'; document.body.appendChild(el); } const slides = loginActiveSlides(); el.innerHTML = '<div class="auth-visual" id="authVisual"><img id="authSlideImage" alt="Login page visual"><div class="auth-slide-dots">' + slides.map(function (_, i) { return '<button type="button" onclick="loginShowSlide(' + i + ')" aria-label="Slide ' + (i + 1) + '"></button>'; }).join('') + '</div></div><div class="auth-side"><div class="auth-login-card"><div class="login-eyebrow">KEND2C</div><h2>Welcome back</h2><p>Sign in to continue to your workspace.</p><div class="field"><label class="lbl">Username</label><input class="inp" id="login-user" autocomplete="username" placeholder="Enter your username"></div><div class="field"><label class="lbl">PIN</label><input class="inp" id="login-pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Enter your PIN" onkeydown="if(event.key===\'Enter\')authLogin()"></div><button class="btn btn-primary login-submit" style="width:100%" onclick="authLogin()">Sign in</button><div class="fhint" id="login-msg" style="margin-top:10px"></div><div class="sub-line" style="text-align:center;margin-top:20px;color:#8a929c">Â© ' + new Date().getFullYear() + ' KEN Global Designs Pvt. Ltd.</div></div></div>'; loginStartSlides(); setTimeout(function () { const i = $('login-user'); if (i) i.focus(); }, 0); }
 function authLogin() { const un = (($('login-user') || {}).value || '').trim().toLowerCase(), pin = (($('login-pin') || {}).value || '').trim(); const u = (db.users || []).find(function (x) { return String(x.username || '').toLowerCase() === un && pinMatches(x.pin, pin) && x.status !== 'Inactive'; }); if (u && u.pin && !isHashedPin(u.pin)) { u.pin = hashPin(pin); saveDB(); } if (!u) { const m = $('login-msg'); if (m) { m.textContent = 'Invalid username/PIN or inactive user.'; m.className = 'fhint bad'; } return; } try { sessionStorage.setItem('stitchflow_user_id', u.id); } catch (e) { } if (LOGIN_SLIDE_TIMER) { clearInterval(LOGIN_SLIDE_TIMER); LOGIN_SLIDE_TIMER = null; } const el = $('authLogin'); if (el) el.remove(); cur = (typeof window !== 'undefined' && window.__INITIAL_PAGE__ && MODULES[window.__INITIAL_PAGE__]) ? window.__INITIAL_PAGE__ : (cur || 'dashboard'); pageView = null; saveUiState(); render(); toast('Signed in as ' + (u.name || u.username), 'green'); }
 function authLogout() { try { sessionStorage.removeItem('stitchflow_user_id'); } catch (e) { } showLogin(); }
 function menuOrder(listName, key) { const a = ((db.masters.menuSettings || {})[listName] || []), i = a.indexOf(key); return i < 0 ? 9999 : i; }
@@ -2030,7 +2030,7 @@ function goAdd(m) { if (!userCan(m, 'create')) return toast('Create access denie
 /* =====================================================================
    COLUMN ALIGNMENT NORMALISER
    Runs after every render: for each table column the header, the body
-   cells and the totals row all end up on the same edge — numeric columns
+   cells and the totals row all end up on the same edge â€” numeric columns
    right-aligned, everything else left-aligned.
    ===================================================================== */
 function alignNumText(t) {
@@ -2055,7 +2055,7 @@ function attachExcelHeaderFilters(root) {
       if (th.classList.contains('srcol') || th.classList.contains('selcol') || th.classList.contains('no-print') || /action/i.test(th.textContent)) {
         cell.innerHTML = '';
       } else {
-        cell.innerHTML = '<input type="text" aria-label="Filter ' + esc(th.textContent.trim()) + '" placeholder="Filter…">';
+        cell.innerHTML = '<input type="text" aria-label="Filter ' + esc(th.textContent.trim()) + '" placeholder="Filterâ€¦">';
         const inp = cell.firstChild;
         inp.addEventListener('input', function () {
           const filters = Array.from(fr.querySelectorAll('input')).map(function (x) { return { ci: +x.dataset.ci, q: x.value.toLowerCase().trim() }; }).filter(function (x) { return x.q; });
@@ -2107,7 +2107,7 @@ function alignTables(root) {
         if (!v) allNum = false;
       }
       if (hasCtl && !numMarked) {
-        /* a column of input boxes — the header stays where the boxes start,
+        /* a column of input boxes â€” the header stays where the boxes start,
            so pull the totals cell onto that same edge */
         const foot0 = tb.tFoot;
         if (foot0) {
@@ -2121,7 +2121,7 @@ function alignTables(root) {
         }
         continue;
       }
-      /* a column the builder already marked numeric stays numeric — the header
+      /* a column the builder already marked numeric stays numeric â€” the header
          and the totals row are pulled onto the same edge as its values.
          Unmarked columns are judged purely on their content. */
       const numeric = numMarked > 0
@@ -2238,8 +2238,8 @@ function renderFormPage() {
   const closedDoc = !!(rec && rec.id && rec.status === 'Closed');
   const viewOnly = !!pageView.viewOnly;
   $('tb-title').textContent = (rec && rec.id ? ((closedDoc || viewOnly) ? 'View ' : 'Edit ') : rec && rec._repeat ? 'Repeat ' : rec && rec._duplicate ? 'Duplicate ' : 'New ') + M.label;
-  $('tb-sub').innerHTML = (rec && rec.id ? esc(rec.no) + ' — ' : rec && rec._repeat ? 'Copy of ' + esc(srcNo) + ' — ' : rec && rec._duplicate ? 'Copy of ' + esc(dupNo) + ' — ' : '') + M.sub +
-    (closedDoc ? ' · Closed' : '');
+  $('tb-sub').innerHTML = (rec && rec.id ? esc(rec.no) + ' â€” ' : rec && rec._repeat ? 'Copy of ' + esc(srcNo) + ' â€” ' : rec && rec._duplicate ? 'Copy of ' + esc(dupNo) + ' â€” ' : '') + M.sub +
+    (closedDoc ? ' Â· Closed' : '');
   $('tb-actions').innerHTML =
     '<button class="btn btn-ghost" onclick="back()">' + ic('back', 16) + 'Back</button>' +
     ((m === 'jobwork' || m === 'sample') && rec && rec.id
@@ -2647,21 +2647,21 @@ function renderSummaryReportBody(el, rep, from, to) {
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Qty</span>' +
       '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtInventoryNum(s.totalInQty) + ' (Meter)</span>' +
-      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtInventoryNum(s.totalInVal) + '</span>' +
+      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: â‚¹' + fmtInventoryNum(s.totalInVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Qty</span>' +
       '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">' + fmtInventoryNum(s.totalOutQty) + ' (Meter)</span>' +
-      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
+      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: â‚¹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">CLOSING</span>' +
       '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
-      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Value: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
+      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Value: â‚¹' + fmtInventoryNum(s.closingVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Daily Averages</span>' +
-      '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a">In: ' + fmtInventoryNum(s.avgInQty) + ' (Meter) · Out: ' + fmtInventoryNum(s.avgOutQty) + ' (Meter)</span>' +
+      '<span class="dash-kpi-val" style="font-size:15px;font-weight:800;color:#0f172a">In: ' + fmtInventoryNum(s.avgInQty) + ' (Meter) Â· Out: ' + fmtInventoryNum(s.avgOutQty) + ' (Meter)</span>' +
       '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Across ' + s.dayCount + ' continuous days</span>' +
       '</div>' +
       '</div>';
@@ -2670,22 +2670,22 @@ function renderSummaryReportBody(el, rep, from, to) {
       '<div class="dash-kpis summary-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Value</span>' +
-      '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtInventoryNum(s.totalInVal) + '</span>' +
-      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtInventoryNum(s.avgInVal) + '</span>' +
+      '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">â‚¹' + fmtInventoryNum(s.totalInVal) + '</span>' +
+      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: â‚¹' + fmtInventoryNum(s.avgInVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Value</span>' +
-      '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">₹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
-      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: ₹' + fmtInventoryNum(s.avgOutVal) + '</span>' +
+      '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a">â‚¹' + fmtInventoryNum(s.totalOutVal) + '</span>' +
+      '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily average: â‚¹' + fmtInventoryNum(s.avgOutVal) + '</span>' +
       '</div>' +
       '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
-      '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a">₹' + fmtInventoryNum(s.closingVal) + '</span>' +
+      '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a">â‚¹' + fmtInventoryNum(s.closingVal) + '</span>' +
       '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims valuation</span>' +
       '</div>' +
       '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
       '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Timeframe</span>' +
-      '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;white-space:nowrap">' + dispFrom + ' → ' + dispTo + '</span>' +
+      '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;white-space:nowrap">' + dispFrom + ' â†’ ' + dispTo + '</span>' +
       '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
       '</div>' +
       '</div>';
@@ -2941,23 +2941,23 @@ function renderDashboardFabricWidget() {
     '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
     '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Report Period</span>' +
-    '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.2;white-space:nowrap">' + dispFrom + ' → ' + dispTo + '</span>' +
+    '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.2;white-space:nowrap">' + dispFrom + ' â†’ ' + dispTo + '</span>' +
     '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
     '</div>' +
     '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward</span>' +
     '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">' + fmtInventoryNum(s.totalInQty) + ' (Meter)</span>' +
-    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalInVal) + '</span>' +
+    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: â‚¹' + fmtNum(s.totalInVal) + '</span>' +
     '</div>' +
     '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward</span>' +
     '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">' + fmtNum(s.totalOutQty) + ' (Meter)</span>' +
-    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: ₹' + fmtNum(s.totalOutVal) + '</span>' +
+    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Value: â‚¹' + fmtNum(s.totalOutVal) + '</span>' +
     '</div>' +
     '<div class="dash-kpi highlight" style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px">CLOSING</span>' +
     '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#713f12;line-height:1.2">' + fmtInventoryNum(s.closingQty) + ' (Meter)</span>' +
-    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Value: ₹' + fmtInventoryNum(s.closingVal) + '</span>' +
+    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#854d0e">Value: â‚¹' + fmtInventoryNum(s.closingVal) + '</span>' +
     '</div>' +
     '</div>';
 
@@ -2972,7 +2972,7 @@ function renderDashboardFabricWidget() {
     '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
     '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'fabric\', event)" title="Choose report date range">This month</button>' +
     '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'fabric\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
-    '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'fabric_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
+    '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'fabric_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report â†’</button>' +
     '</div>' +
     '</div>' +
     kpisHtml +
@@ -2994,22 +2994,22 @@ function renderDashboardTrimsWidget() {
     '<div class="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px">' +
     '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Report Period</span>' +
-    '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.2;white-space:nowrap">' + dispFrom + ' → ' + dispTo + '</span>' +
+    '<span class="dash-kpi-val" style="font-size:12px;font-weight:800;color:#0f172a;line-height:1.2;white-space:nowrap">' + dispFrom + ' â†’ ' + dispTo + '</span>' +
     '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">' + s.dayCount + ' continuous days</span>' +
     '</div>' +
     '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Inward Value</span>' +
-    '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">₹' + fmtNum(s.totalInVal) + '</span>' +
-    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily Avg: ₹' + fmtNum(s.avgInVal) + '</span>' +
+    '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">â‚¹' + fmtNum(s.totalInVal) + '</span>' +
+    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily Avg: â‚¹' + fmtNum(s.avgInVal) + '</span>' +
     '</div>' +
     '<div class="dash-kpi" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Total Outward Value</span>' +
-    '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">₹' + fmtNum(s.totalOutVal) + '</span>' +
-    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily Avg: ₹' + fmtNum(s.avgOutVal) + '</span>' +
+    '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#0f172a;line-height:1.2">â‚¹' + fmtNum(s.totalOutVal) + '</span>' +
+    '<span class="dash-kpi-sub" style="font-size:11.5px;color:#64748b">Daily Avg: â‚¹' + fmtNum(s.avgOutVal) + '</span>' +
     '</div>' +
     '<div class="dash-kpi highlight" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:3px">' +
     '<span class="dash-kpi-lbl" style="font-size:10.5px;font-weight:750;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px">Closing Value</span>' +
-    '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a;line-height:1.2">₹' + fmtInventoryNum(s.closingVal) + '</span>' +
+    '<span class="dash-kpi-val" style="font-size:17px;font-weight:800;color:#1e3a8a;line-height:1.2">â‚¹' + fmtInventoryNum(s.closingVal) + '</span>' +
     '<span class="dash-kpi-sub" style="font-size:11.5px;color:#1e40af">Total active trims in stock</span>' +
     '</div>' +
     '</div>';
@@ -3025,7 +3025,7 @@ function renderDashboardTrimsWidget() {
     '<div class="dash-summary-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
     '<button type="button" class="dash-pill active" onclick="dashboardDateFilter(\'trims\', event)" title="Choose report date range">This month</button>' +
     '<button type="button" class="btn btn-sm btn-ghost" onclick="exportSummaryPanelCSV(\'trims\')" title="Download CSV spreadsheet">' + ic('download', 14) + ' Export CSV</button>' +
-    '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'trims_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report →</button>' +
+    '<button type="button" class="btn btn-sm btn-primary" onclick="openReportType(\'trims_inout_summary\', \'' + range.from + '\', \'' + range.to + '\')">Full Report â†’</button>' +
     '</div>' +
     '</div>' +
     kpisHtml +
@@ -3051,7 +3051,7 @@ function dashboardWipVendorRows() {
     let inwardPass = 0, inwardReject = 0; const receipts = jwReceipts(j);
     if (receipts.length) receipts.forEach(function (r) { if (/reject|fail/i.test(String(r.qc || 'Pass'))) inwardReject += pf(r.qty); else inwardPass += pf(r.qty); }); else inwardPass = jwTotalReceived(j);
     const wip = Math.max(0, garmentExpected - inwardPass - inwardReject); if (!wip) return;
-    const key = String(j.vendor || '—').trim() || '—', g = grouped[key] || (grouped[key] = { vendor: key, issue: 0, ret: 0, actual: 0, expected: 0, pass: 0, reject: 0, wip: 0, cons: 0 });
+    const key = String(j.vendor || 'â€”').trim() || 'â€”', g = grouped[key] || (grouped[key] = { vendor: key, issue: 0, ret: 0, actual: 0, expected: 0, pass: 0, reject: 0, wip: 0, cons: 0 });
     g.issue += fabricIssue; g.ret += fabricReturn; g.actual += actualIssue; g.expected += garmentExpected; g.pass += inwardPass; g.reject += inwardReject; g.wip += wip; g.cons += consumption;
   });
   return Object.keys(grouped).map(function (k) { return grouped[k]; }).sort(function (a, b) { return a.vendor.localeCompare(b.vendor); });
@@ -3141,8 +3141,8 @@ function renderDashboard() {
   $('content').innerHTML =
     '<div class="stats">' +
     statCard('order', 'Open PO value', fmtINR(poTotal), poOpen.length + ' of ' + db.po.length + ' POs still open', '', "go('po')") +
-    statCard('box', 'Fabric in stock', fmtInventoryNum(stock.m) + '<small> (Meter)</small>', (stock.issuedM > 0 ? fmtInventoryNum(stock.issuedM) + ' m issued · ' : '') + '₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
-    statCard('needle', 'Trims in stock', '₹' + fmtInventoryNum(trimsValuation()) + '<small> Value</small>', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', 'blue', "openReportType('trims_inout_summary')") +
+    statCard('box', 'Fabric in stock', fmtInventoryNum(stock.m) + '<small> (Meter)</small>', (stock.issuedM > 0 ? fmtInventoryNum(stock.issuedM) + ' m issued Â· ' : '') + 'â‚¹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
+    statCard('needle', 'Trims in stock', 'â‚¹' + fmtInventoryNum(trimsValuation()) + '<small> Value</small>', trimStock().filter(t => t.balance > 0).length + '<small> items</small>', 'blue', "openReportType('trims_inout_summary')") +
     statCard('chart', 'Job works active', jwActive, db.jobwork.length + ' total job works', '', "go('jobwork')") +
     statCard('check', 'FG received', fmtNum(fgRecv) + '<small> pcs</small>', fgStyles + ' styles across job works', 'green', "go('jobwork')") +
     statCard('cash', 'Sales', fmtINR(saleAmt), '', '', "go('sale')") +
@@ -3194,7 +3194,7 @@ function jwTotalOrder(j) { const gs = jwGarments(j); return gs.length ? sumBy(gs
 function jwTotalReceived(j) {
   const rxs = jwReceipts(j);
   if (rxs.length) return sumBy(rxs, 'qty');
-  // Empty receipts list means FG was fully removed — do not fall back to stale garment.receivedQty
+  // Empty receipts list means FG was fully removed â€” do not fall back to stale garment.receivedQty
   if (Array.isArray(j.receipts)) return 0;
   return jwGarments(j).length ? sumBy(jwGarments(j), 'receivedQty') : pf(j.receivedQty);
 }
@@ -3213,13 +3213,13 @@ function jwFabricReturned(j) {
   db.inward.filter(function (r) { return r.entryType === 'Job Work Return'; }).forEach(scan);
   return tot;
 }
-/* fabric actually consumed at the job worker = issued − returned */
+/* fabric actually consumed at the job worker = issued âˆ’ returned */
 function jwActualFabricIssued(j) { return Math.max(0, jwFabricTotal(j) - jwFabricReturned(j)); }
 /* pcs per unit of fabric planned by the work order (from Cons./Gmt) */
 function jwWorkOrderCons(j) {
   const req = jwRequiredFabric(j), ord = jwTotalOrder(j);
   if (req > 0 && ord > 0) return ord / req;
-  /* older records never stored requiredFabric — fall back to the planned
+  /* older records never stored requiredFabric â€” fall back to the planned
      Cons./Gmt on the fabric issue lines (metre per garment -> pcs per metre) */
   const consRows = (j.issues || []).filter(function (i) { return i.item && isFabricItem(i.item, i.category) && pf(i.cons) > 0; });
   if (!consRows.length) return 0;
@@ -3251,7 +3251,7 @@ function fabricStock() {
   return { m: Math.max(0, received - issued), receivedM: received, issuedM: issued };
 }
 function trimStock() {
-  // per-item trims balance: received (from Inward) − issued (across all Job Work issue records)
+  // per-item trims balance: received (from Inward) âˆ’ issued (across all Job Work issue records)
   const recv = {}, issue = {};
   db.inward.forEach(inw => {
     if (inw.status && /cancel|reject/i.test(inw.status)) return;
@@ -3270,8 +3270,8 @@ function trimStock() {
 }
 function trimsChipHtml() {
   const list = trimStock().filter(x => x.issued > 0 || x.balance > 0);
-  if (!list.length) return '🧷 Trims stock: <span style="opacity:.6">—</span>';
-  return '🧷 Trims stock: ' + list.slice(0, 4).map(x => '<b>' + esc(x.name) + ': ' + fmtInventoryNum(x.balance) + '</b>').join(' &nbsp;·&nbsp; ') +
+  if (!list.length) return 'ðŸ§· Trims stock: <span style="opacity:.6">â€”</span>';
+  return 'ðŸ§· Trims stock: ' + list.slice(0, 4).map(x => '<b>' + esc(x.name) + ': ' + fmtInventoryNum(x.balance) + '</b>').join(' &nbsp;Â·&nbsp; ') +
     (list.length > 4 ? ' <span style="opacity:.7">+' + (list.length - 4) + ' more</span>' : '');
 }
 
@@ -3302,15 +3302,15 @@ function ptSearch(v) { ptState.q = v; ptState.page = 1; const b = $('pt-clear-fi
 
 function partyFormHtml(x, popup) {
   x = x || {};
-  return '<div class="sec">' + (x.id ? 'Edit party — ' + esc(x.legalName) : 'New Party onboarding') + '</div>' +
+  return '<div class="sec">' + (x.id ? 'Edit party â€” ' + esc(x.legalName) : 'New Party onboarding') + '</div>' +
     '<div class="grid-auto">' +
     (x.id ? field('Party Code', '<input class="inp" value="' + esc(x.code || '') + '" disabled>') : '') +
     field('Legal Name *', '<input class="inp" id="pt-legal" value="' + esc(x.legalName || '') + '" placeholder="Registered legal entity name">') +
     field('Short Name *', '<input class="inp" id="pt-short" value="' + esc(x.shortName || '') + '" placeholder="Trade / display name">') +
-    field('Business Type *', mcbox('pt-btypes', { opts: db.masters.businessTypes, selected: partyTypes(x), placeholder: 'Select one or more types…' })) +
+    field('Business Type *', mcbox('pt-btypes', { opts: db.masters.businessTypes, selected: partyTypes(x), placeholder: 'Select one or more typesâ€¦' })) +
     field('Status *', cbox('pt-status', { opts: db.masters.partyStatuses, value: x.status || 'Active', f: 'status', placeholder: 'Select status', addMaster: 'partyStatuses', addText: 'Statuses', free: true })) +
     '</div>' +
-    '<div class="sec">Bill To — trades / branches <span style="text-transform:none;color:var(--muted);font-weight:600">(one company can bill from several registered trades)</span></div>' +
+    '<div class="sec">Bill To â€” trades / branches <span style="text-transform:none;color:var(--muted);font-weight:600">(one company can bill from several registered trades)</span></div>' +
     '<div class="table-wrap"><table class="mini-table"><thead><tr>' +
     srTh() + '<th>Trade / Branch Name *</th><th>GST No *</th><th>PAN No *</th><th>Country *</th><th>State *</th>' +
     '<th>City Name *</th><th>Address *</th><th>GST Type</th><th>Pin Code *</th><th></th>' +
@@ -3351,7 +3351,7 @@ function billToRow(b) {
       opts: childValues('states', country), value: b.state || '', f: 'state', placeholder: 'State', free: true,
       onSet: function (v) { btGeoChanged(stId, 'state', v); btApplyGstType(stId); }
     }) + '</td>' +
-    /* District / Taluka were removed from the form — the saved values are kept
+    /* District / Taluka were removed from the form â€” the saved values are kept
        inside the City cell so existing records and exports stay intact */
     '<td><input type="hidden" data-f="district" value="' + esc(b.district || '') + '">' +
     '<input type="hidden" data-f="taluka" value="' + esc(b.taluka || '') + '">' +
@@ -3448,7 +3448,7 @@ function gstError(v, state, pan) {
   const code = GST_STATE_CODE[String(state || '').trim().toLowerCase()];
   if (state && code && s.slice(0, 2) !== code) return 'State code should be ' + code + ' for ' + state;
   const p = String(pan || '').trim().toUpperCase();
-  if (p && p.length === 10 && s.slice(2, 12) !== p) return 'Characters 3–12 must match the PAN';
+  if (p && p.length === 10 && s.slice(2, 12) !== p) return 'Characters 3â€“12 must match the PAN';
   return '';
 }
 function pinError(v) {
@@ -3517,7 +3517,7 @@ function btApplyGstType(srcId) {
   if (gtEl) gtEl.value = gstTypeForState(state);
   btValidateRow(gtEl || stEl);
 }
-/* every visible Bill To column is mandatory — checked screen order, row by row */
+/* every visible Bill To column is mandatory â€” checked screen order, row by row */
 const BT_REQUIRED = [
   { f: 'name', label: 'Trade / Branch Name' },
   { f: 'gstNo', label: 'GST No' },
@@ -3576,14 +3576,14 @@ function savePartyForm() {
     if (x.id === ptEditId) return false;
     return String(x.legalName || '').trim().toLowerCase() === legalName.toLowerCase();
   });
-  if (partyNameClash) return reqBad('pt-legal', '“' + legalName + '” already exists in Party onboarding Master — duplicate values are not allowed');
+  if (partyNameClash) return reqBad('pt-legal', 'â€œ' + legalName + 'â€ already exists in Party onboarding Master â€” duplicate values are not allowed');
   const partyShortClash = (db.masters.parties || []).find(function (x) {
     if (x.id === ptEditId) return false;
     return String(x.shortName || '').trim().toLowerCase() === shortName.toLowerCase();
   });
-  if (partyShortClash) return reqBad('pt-short', '“' + shortName + '” already exists in Party onboarding Master — duplicate values are not allowed');
+  if (partyShortClash) return reqBad('pt-short', 'â€œ' + shortName + 'â€ already exists in Party onboarding Master â€” duplicate values are not allowed');
   const types = mcboxGet('pt-btypes');
-  if (!types.length) return reqBad('pt-btypes', 'Business Type is required — pick at least one');
+  if (!types.length) return reqBad('pt-btypes', 'Business Type is required â€” pick at least one');
   const btype = types.join(', ');
   const pstatus = cboxGet('pt-status');
   if (!pstatus) return reqBad('pt-status', 'Status is required');
@@ -3592,7 +3592,7 @@ function savePartyForm() {
   const invalid = btValidateAll();
   if (invalid.length) {
     const firstBad = qs('#pt-billtos .inp-bad');
-    return reqBad(firstBad, 'Fix the highlighted tax details — ' + invalid.join(', '));
+    return reqBad(firstBad, 'Fix the highlighted tax details â€” ' + invalid.join(', '));
   }
   const billTos = gatherBillTos();
   if (!billTos.length) return reqBadCell('pt-billtos', 0, 'name', 'Add at least one Bill To trade / branch');
@@ -3600,15 +3600,15 @@ function savePartyForm() {
   for (let i = 0; i < billTos.length; i++) {
     const tradeKey = String(billTos[i].name || '').trim().toLowerCase();
     if (tradeKey && tradeNames[tradeKey]) {
-      return reqBadCell('pt-billtos', i, 'name', '“' + billTos[i].name + '” is duplicated — Bill To trade names must be unique');
+      return reqBadCell('pt-billtos', i, 'name', 'â€œ' + billTos[i].name + 'â€ is duplicated â€” Bill To trade names must be unique');
     }
     if (tradeKey) tradeNames[tradeKey] = true;
     const g = String(billTos[i].gstNo || '').trim();
     if (!g) continue;
     const who = gstDuplicateOf(g, ptEditId, null);
     if (who) {
-      toast('GST No already exists — “' + g + '” is used by ' + who, 'red');
-      return reqBadCell('pt-billtos', i, 'gstNo', 'GST No already exists — duplicates are not allowed');
+      toast('GST No already exists â€” â€œ' + g + 'â€ is used by ' + who, 'red');
+      return reqBadCell('pt-billtos', i, 'gstNo', 'GST No already exists â€” duplicates are not allowed');
     }
     for (let j = 0; j < i; j++) {
       if (String(billTos[j].gstNo || '').trim().toUpperCase() === g.toUpperCase()) {
@@ -3632,12 +3632,12 @@ function savePartyForm() {
   };
   if (ptEditId) {
     Object.assign(db.masters.parties.find(x => x.id === ptEditId), data);
-    toast('Party updated — ' + legalName, 'green'); ptEditId = null;
+    toast('Party updated â€” ' + legalName, 'green'); ptEditId = null;
   } else {
     db.seq.party = (db.seq.party || 0) + 1;
     data.id = uid(); data.code = 'PTY-' + String(db.seq.party).padStart(4, '0');
     db.masters.parties.push(data);
-    toast('Party added — ' + legalName, 'green');
+    toast('Party added â€” ' + legalName, 'green');
   }
   syncPartyIntoLists();
   saveDB();
@@ -3679,7 +3679,7 @@ function partyByName(name) {
   const raw = String(name || '').trim();
   if (!raw) return null;
   const n = raw.toLowerCase();
-  const withSuffix = raw.split(' · ')[0].trim();
+  const withSuffix = raw.split(' Â· ')[0].trim();
   const matchParty = function (p) {
     const names = [
       String(p.tradeName || ''),
@@ -3687,7 +3687,7 @@ function partyByName(name) {
       String(p.legalName || ''),
       String(p.displayName || ''),
       String(p.name || ''),
-      String((p.tradeName || p.shortName || p.legalName || p.displayName || '') + (p.city ? ' · ' + p.city : ''))
+      String((p.tradeName || p.shortName || p.legalName || p.displayName || '') + (p.city ? ' Â· ' + p.city : ''))
     ];
     if (Array.isArray(p.registrations)) {
       p.registrations.forEach(function (r) {
@@ -3707,7 +3707,7 @@ function partyByName(name) {
       String(p.displayName || ''),
       String(p.legalName || ''),
       String(p.code || ''),
-      String((p.shortName || p.displayName || p.legalName || '') + ((p.registrations && p.registrations[0] && p.registrations[0].city) ? ' · ' + p.registrations[0].city : ''))
+      String((p.shortName || p.displayName || p.legalName || '') + ((p.registrations && p.registrations[0] && p.registrations[0].city) ? ' Â· ' + p.registrations[0].city : ''))
     ];
     if (Array.isArray(p.registrations)) {
       p.registrations.forEach(function (r) {
@@ -3766,10 +3766,10 @@ function partyOptions() {
   (db.masters.parties || []).filter(function (x) { return x.status !== 'Inactive'; }).forEach(function (x) {
     const mid = x.code || x.id || '', prefix = mid ? '[' + mid + '] ' : '', types = partyTypes(x).join(', ');
     const main = x.shortName || x.legalName;
-    add(main, prefix + main + (x.city ? ' · ' + x.city : '') + (types ? ' (' + types + ')' : ''), mid);
+    add(main, prefix + main + (x.city ? ' Â· ' + x.city : '') + (types ? ' (' + types + ')' : ''), mid);
     (x.billTos || []).forEach(function (b) {
       const name = b.name || b.tradeName || b.legalName;
-      add(name, prefix + name + (b.city ? ' · ' + b.city : '') + (types ? ' (' + types + ')' : ''), mid);
+      add(name, prefix + name + (b.city ? ' Â· ' + b.city : '') + (types ? ' (' + types + ')' : ''), mid);
     });
   });
   return out.sort(function (a, b) { return String(a.l).localeCompare(String(b.l)); });
@@ -3793,7 +3793,7 @@ function supplierPartyOptions() {
     if (!nm) return;
     const mid = x.code || x.id || '';
     const code = mid ? '[' + mid + '] ' : '';
-    if (partyHasType(x, 'Supplier') || partyHasType(x, 'Vendor') || partyHasType(x, 'Job worker') || partyHasType(x, 'JobWorker')) add(nm, code + nm + (x.city ? ' · ' + x.city : ''), mid);
+    if (partyHasType(x, 'Supplier') || partyHasType(x, 'Vendor') || partyHasType(x, 'Job worker') || partyHasType(x, 'JobWorker')) add(nm, code + nm + (x.city ? ' Â· ' + x.city : ''), mid);
   });
   (db.partners || []).forEach(function (x) {
     const nm = (x.registrations && x.registrations[0] && x.registrations[0].tradeName) || x.shortName || x.displayName;
@@ -3801,11 +3801,11 @@ function supplierPartyOptions() {
     const mid = x.partnerCode || x.id || '';
     const code = mid ? '[' + mid + '] ' : '';
     const roles = (x.roles || []).map(function (r) { return String(r || '').trim(); });
-    if (roles.indexOf('SUPPLIER') > -1 || roles.indexOf('VENDOR') > -1 || roles.indexOf('JOB_WORKER') > -1) add(nm, code + nm + ((x.registrations && x.registrations[0] && x.registrations[0].city) ? ' · ' + x.registrations[0].city : ''), mid);
+    if (roles.indexOf('SUPPLIER') > -1 || roles.indexOf('VENDOR') > -1 || roles.indexOf('JOB_WORKER') > -1) add(nm, code + nm + ((x.registrations && x.registrations[0] && x.registrations[0].city) ? ' Â· ' + x.registrations[0].city : ''), mid);
   });
   return out.sort(function (a, b) { return String(a.l).localeCompare(String(b.l)); });
 }
-/* Party onboarding parties whose Business Type is Vendor — used as Production Factory */
+/* Party onboarding parties whose Business Type is Vendor â€” used as Production Factory */
 function vendorPartyOptions() {
   const seen = {};
   const out = [];
@@ -3820,7 +3820,7 @@ function vendorPartyOptions() {
     if (!nm) return;
     const mid = x.code || x.id || '';
     const code = mid ? '[' + mid + '] ' : '';
-    if (partyHasType(x, 'Vendor') || partyHasType(x, 'Supplier') || partyHasType(x, 'Job worker') || partyHasType(x, 'JobWorker')) add(nm, code + nm + (x.city ? ' · ' + x.city : ''), mid);
+    if (partyHasType(x, 'Vendor') || partyHasType(x, 'Supplier') || partyHasType(x, 'Job worker') || partyHasType(x, 'JobWorker')) add(nm, code + nm + (x.city ? ' Â· ' + x.city : ''), mid);
   });
   (db.partners || []).forEach(function (x) {
     const nm = x.shortName || x.displayName || x.legalName;
@@ -3828,13 +3828,13 @@ function vendorPartyOptions() {
     const mid = x.partnerCode || x.id || '';
     const code = mid ? '[' + mid + '] ' : '';
     const roles = (x.roles || []).map(function (r) { return String(r || '').trim(); });
-    if (roles.indexOf('VENDOR') > -1 || roles.indexOf('SUPPLIER') > -1 || roles.indexOf('JOB_WORKER') > -1) add(nm, code + nm + ((x.registrations && x.registrations[0] && x.registrations[0].city) ? ' · ' + x.registrations[0].city : ''), mid);
+    if (roles.indexOf('VENDOR') > -1 || roles.indexOf('SUPPLIER') > -1 || roles.indexOf('JOB_WORKER') > -1) add(nm, code + nm + ((x.registrations && x.registrations[0] && x.registrations[0].city) ? ' Â· ' + x.registrations[0].city : ''), mid);
   });
   return out.sort(function (a, b) { return String(a.l).localeCompare(String(b.l)); });
 }
 /* Job Work and Sample use only parties whose Business Type contains Vendor.
    Inactive vendors remain available here by design for these two modules. */
-/* Style Master: list parties whose Business Type contains Buyer — used to tag a
+/* Style Master: list parties whose Business Type contains Buyer â€” used to tag a
    style with the buyer it's made for. The dropdown shows the party's short
    (or legal) name plus city, and stays list-only like every other combobox. */
 function buyerPartyOptions() {
@@ -3858,7 +3858,7 @@ function buyerPartyOptions() {
       if (!nm) return;
       const mid = x.code || x.id || '';
       const code = mid ? '[' + mid + '] ' : '';
-      if (partyHasType(x, 'Buyer') || partyHasType(x, 'Customer')) add(nm, code + nm + (x.city ? ' · ' + x.city : ''), mid);
+      if (partyHasType(x, 'Buyer') || partyHasType(x, 'Customer')) add(nm, code + nm + (x.city ? ' Â· ' + x.city : ''), mid);
     });
   return out.sort(function (a, b) { return String(a.l).localeCompare(String(b.l)); });
 }
@@ -3869,8 +3869,8 @@ function jobWorkVendorOptions() {
     .sort(function (a, b) { return String(a.legalName || '').localeCompare(String(b.legalName || '')); })
     .map(function (x) {
       const nm = x.shortName || x.legalName;
-      const city = x.city ? ' · ' + x.city : '';
-      const inactive = x.status === 'Inactive' ? ' · Inactive' : '';
+      const city = x.city ? ' Â· ' + x.city : '';
+      const inactive = x.status === 'Inactive' ? ' Â· Inactive' : '';
       return { v: nm, l: nm + city + inactive };
     });
 }
@@ -3923,7 +3923,7 @@ function partyTradeRecords(name) {
       state: state,
       gstType: gstType,
       address: addr,
-      label: tradeNm + (place ? ' · ' + place : '') + (gst ? ' · ' + gst : '')
+      label: tradeNm + (place ? ' Â· ' + place : '') + (gst ? ' Â· ' + gst : '')
     });
   });
   const seen = {};
@@ -4175,17 +4175,17 @@ function partyListHtml() {
       '<td>' + esc(x.code) + '</td>' +
       '<td>' + (partyTypes(x).length ? partyTypes(x).map(function (t) {
         return '<span class="badge ' + (t === 'Buyer' ? 'b-blue' : t === 'Supplier' ? 'b-pink' : 'b-gray') + '">' + esc(t) + '</span>';
-      }).join(' ') : '—') + '</td>' +
-      '<td>' + esc(x.gstType || '—') + (x.billTos && x.billTos.length ? '<div class="sub-line">' + x.billTos.length + ' trade' + (x.billTos.length > 1 ? 's' : '') + '</div>' : '') + '</td>' +
-      '<td>' + esc(x.gstNo || '—') + '</td>' +
-      '<td>' + esc(x.pan || '—') + '</td>' +
-      '<td>' + esc(x.city || '—') + '</td>' +
-      '<td>' + esc(x.state || '—') + '</td>' +
+      }).join(' ') : 'â€”') + '</td>' +
+      '<td>' + esc(x.gstType || 'â€”') + (x.billTos && x.billTos.length ? '<div class="sub-line">' + x.billTos.length + ' trade' + (x.billTos.length > 1 ? 's' : '') + '</div>' : '') + '</td>' +
+      '<td>' + esc(x.gstNo || 'â€”') + '</td>' +
+      '<td>' + esc(x.pan || 'â€”') + '</td>' +
+      '<td>' + esc(x.city || 'â€”') + '</td>' +
+      '<td>' + esc(x.state || 'â€”') + '</td>' +
       '<td onclick="event.stopPropagation()"><button type="button" class="sw master-status-sw' + (x.status === 'Inactive' ? '' : ' on') + '" onclick="togglePartyRecordStatus(\'' + x.id + '\')"><span class="sw-knob"></span></button> <span class="master-status-label ' + (x.status === 'Inactive' ? 'off">Inactive' : 'on">Active') + '</span></td>' +
       '<td class="actions-cell no-print" onclick="event.stopPropagation()">' +
       '<button class="btn-icon" title="Edit" onclick="editParty(\'' + x.id + '\')">' + ic('pencil', 15) + '</button>' +
       (partyUsedIn(x).length
-        ? '<button class="btn-icon" disabled title="Cannot delete — used in ' + esc(partyUsedIn(x).join(', ')) + '">' + ic('lock', 15) + '</button>'
+        ? '<button class="btn-icon" disabled title="Cannot delete â€” used in ' + esc(partyUsedIn(x).join(', ')) + '">' + ic('lock', 15) + '</button>'
         : '<button class="btn-icon danger" title="Delete" onclick="deleteParty(\'' + x.id + '\')">' + ic('trash', 15) + '</button>') + '</td>' +
       '</tr>').join('') + '</tbody></table></div>' + pagerBar(pg, 'party', 'parties');
 }
@@ -4201,8 +4201,8 @@ function exportPartiesCSV() {
     a.href = URL.createObjectURL(blob);
     a.download = 'vendor_buyer_' + today() + '.csv';
     document.body.appendChild(a); a.click(); a.remove();
-    toast('CSV exported — ' + db.masters.parties.length + ' parties', 'green');
-  } catch (e) { toast('Download blocked in preview — open the file in a browser to export'); }
+    toast('CSV exported â€” ' + db.masters.parties.length + ' parties', 'green');
+  } catch (e) { toast('Download blocked in preview â€” open the file in a browser to export'); }
 }
 
 
@@ -4348,7 +4348,7 @@ function styleUsedIn(internal) {
 
 
 /* =====================================================================
-   PURCHASE RETURN — material going back to the supplier against a PO
+   PURCHASE RETURN â€” material going back to the supplier against a PO
    ===================================================================== */
 function prReceivedQty(poRef, itemName, colour) {
   if (!poRef || !itemName) return 0;
@@ -4399,8 +4399,8 @@ function inwardOptionsForPo(poNo) {
     })
     .sort(function (a, b) { return (b.date || '') < (a.date || '') ? -1 : 1; })
     .map(function (r) {
-      const extra = (dpToDisplay(r.date) || r.date || '') + (r.warehouse ? ' · ' + r.warehouse : '');
-      return { v: r.no, l: r.no + (extra ? ' · ' + extra : '') };
+      const extra = (dpToDisplay(r.date) || r.date || '') + (r.warehouse ? ' Â· ' + r.warehouse : '');
+      return { v: r.no, l: r.no + (extra ? ' Â· ' + extra : '') };
     });
 }
 function prRateFromPo(poNo, itemName) {
@@ -4429,7 +4429,7 @@ function prItemRow(it, poQty, excludeId, inwardNo) {
   const stock = inwardNo ? inwardItemStock(inwardNo, it.name, { prId: excludeId || (pageView && pageView.id) || null }) : 0;
   return '<tr data-recvd="' + recvd + '" data-stock="' + stock + '">' +
     srTd() +
-    '<td><input class="inp" data-f="classification" value="' + esc(it.classification || (itemByName(it.name) || {}).classification || '') + '" placeholder="—" disabled></td>' +
+    '<td><input class="inp" data-f="classification" value="' + esc(it.classification || (itemByName(it.name) || {}).classification || '') + '" placeholder="â€”" disabled></td>' +
     '<td><input class="inp" data-f="name" value="' + esc(itemDisplay(it.name) || it.name || '') + '" placeholder="From Inward" disabled>' +
     '<input type="hidden" data-f="specs" value="' + esc(it.specs || '') + '">' +
     '<input type="hidden" data-f="color" value="' + esc(it.color || '') + '">' +
@@ -4437,7 +4437,7 @@ function prItemRow(it, poQty, excludeId, inwardNo) {
     '<td class="num" style="color:var(--muted);font-weight:600">' + fmtNum(recvd) + '</td>' +
     '<td class="num tdr"><b>' + fmtNum(stock) + '</b></td>' +
     '<td><input class="inp num" type="number" min="0" step="0.01" data-f="retQty" value="' + (it.retQty ?? '') + '" placeholder="0" oninput="prCheckQty(this);calcPR()"></td>' +
-    '<td><input class="inp" data-f="unit" value="' + esc(it.unit || '') + '" placeholder="—" disabled></td>' +
+    '<td><input class="inp" data-f="unit" value="' + esc(it.unit || '') + '" placeholder="â€”" disabled></td>' +
     '<td><input class="inp num" type="number" data-f="rate" value="' + (it.rate ?? '') + '" placeholder="Auto" disabled></td>' +
     '<td class="num" data-prval style="font-weight:650">0</td>' +
     '<td><button type="button" class="btn-icon danger" onclick="removeRow(this);calcPR()">' + ic('trash', 15) + '</button></td>' +
@@ -4455,7 +4455,7 @@ function prCheckQty(el) {
     if (!tr.dataset.warned) {
       tr.dataset.warned = '1';
       const nm = tr.querySelector('[data-f="name"]');
-      toast('Return Qty capped at available stock — ' + ((nm && nm.value) || 'item') +
+      toast('Return Qty capped at available stock â€” ' + ((nm && nm.value) || 'item') +
         ' has only ' + fmtNum(avail) + ' in stock', 'red');
     }
     el.value = avail > 0 ? avail : 0;
@@ -4478,7 +4478,7 @@ function calcPR() {
 function prFillInwardOpts(poNo, keepVal) {
   const c = CBOX['pr-inward']; if (!c) return [];
   c.opts = inwardOptionsForPo(poNo).map(normalizeOpt);
-  c.emptyMsg = poNo ? 'No Inward receipts found for ' + poNo + ' — receive material in Inward first' : 'Select a PO Reference first';
+  c.emptyMsg = poNo ? 'No Inward receipts found for ' + poNo + ' â€” receive material in Inward first' : 'Select a PO Reference first';
   if (keepVal && c.opts.some(function (o) { return o.v === keepVal; })) {
     cboxSet('pr-inward', keepVal);
   } else {
@@ -4528,8 +4528,8 @@ function formPurchaseReturn(rec) {
   return '<div class="sec">Purchase Return</div><div class="grid-fixed">' +
     (isEdit ? field('Return No', '<input class="inp" id="f-no" value="' + esc(r.no || '') + '" disabled>') : '') +
     field('Date *', '<input class="inp" type="text" data-date autocomplete="off" readonly disabled id="f-date" value="' + esc(r.date || today()) + '">') +
-    field('PO Reference *', cbox('pr-po', { opts: poOptions(), value: r.poRef || '', f: 'poRef', placeholder: 'Search PO…', free: false, onSet: onPRPoSelect })) +
-    field('Inward No. *', cbox('pr-inward', { opts: inwardOptionsForPo(r.poRef), value: r.inwardNo || '', f: 'inwardNo', placeholder: 'Select Inward…', emptyMsg: r.poRef ? 'No Inward receipts found for ' + r.poRef + ' — receive material in Inward first' : 'Select a PO Reference first', free: false, onSet: onPRInwardSelect })) +
+    field('PO Reference *', cbox('pr-po', { opts: poOptions(), value: r.poRef || '', f: 'poRef', placeholder: 'Search POâ€¦', free: false, onSet: onPRPoSelect })) +
+    field('Inward No. *', cbox('pr-inward', { opts: inwardOptionsForPo(r.poRef), value: r.inwardNo || '', f: 'inwardNo', placeholder: 'Select Inwardâ€¦', emptyMsg: r.poRef ? 'No Inward receipts found for ' + r.poRef + ' â€” receive material in Inward first' : 'Select a PO Reference first', free: false, onSet: onPRInwardSelect })) +
     field('Supplier', '<input class="inp" id="pr-supplier" value="' + esc(r.supplier || '') + '" placeholder="Auto from PO" disabled>') +
     field('Vehicle No', '<input class="inp" id="pr-vehicle" value="' + esc(r.vehicle || '') + '">') +
     field('Warehouse (from) *', cbox('pr-warehouse', { opts: db.masters.warehouses, value: r.warehouse || '', f: 'warehouse', placeholder: 'Select warehouse', addMaster: 'warehouses', addText: 'Warehouse', free: true, onSet: function (v) { prShowWhAddr(v); } }) +
@@ -4544,7 +4544,7 @@ function formPurchaseReturn(rec) {
     '<tbody id="pr-items">' + ((r.items && r.items.length) ? r.items.map(function (it) { return prItemRow(it, 0, r.id, r.inwardNo); }).join('') : prItemRow()) + '</tbody></table></div>' +
     '<div class="grid-even5" style="margin-top:18px">' +
     field('Total Return Qty', '<input class="inp" id="pr-sum-qty" value="0" disabled>') +
-    field('Total Return Value', '<input class="inp" id="pr-sum-amt" value="₹0" disabled>') +
+    field('Total Return Value', '<input class="inp" id="pr-sum-amt" value="â‚¹0" disabled>') +
     field('Reason *', '<input class="inp" id="pr-remarks" value="' + esc(r.reason || r.remarks || '') + '" placeholder="Why is this material going back?">') +
     '</div>';
 }
@@ -4572,15 +4572,15 @@ function savePurchaseReturn(id) {
   };
   if (id) Object.assign(prev, data);
   else { data.id = uid(); data.no = nextNo('purchasereturn', 'PR'); data.createdAt = Date.now(); db.purchasereturn.push(data); }
-  saveDB(); pageView = null; toast('Purchase Return saved — ' + (prev ? prev.no : data.no), 'green'); render();
+  saveDB(); pageView = null; toast('Purchase Return saved â€” ' + (prev ? prev.no : data.no), 'green'); render();
 }
 
 /* =====================================================================
-   JOB WORK RETURN — job worker sending material back to our warehouse
+   JOB WORK RETURN â€” job worker sending material back to our warehouse
    ===================================================================== */
 function jwOptions() {
   return db.jobwork.filter(j => !isInactiveDoc(j)).sort((a, b) => b.date < a.date ? -1 : 1)
-    .map(j => ({ v: j.no, l: j.no + ' · ' + (j.vendor || '') }));
+    .map(j => ({ v: j.no, l: j.no + ' Â· ' + (j.vendor || '') }));
 }
 function jwrIssuedQty(jwRef, itemName) {
   const j = db.jobwork.find(x => x.no === jwRef); if (!j) return 0;
@@ -4639,7 +4639,7 @@ function jwrCheckQty(el) {
   if (bad && !tr.dataset.warned) {
     tr.dataset.warned = '1';
     const nm = tr.querySelector('[data-f="name"]');
-    toast('Return exceeds issued balance — ' + ((nm && nm.value) || 'item') +
+    toast('Return exceeds issued balance â€” ' + ((nm && nm.value) || 'item') +
       ' has only ' + fmtNum(avail) + ' outstanding', 'red');
   }
   if (!bad) delete tr.dataset.warned;
@@ -4694,7 +4694,7 @@ function formJobWorkReturn(rec) {
   return '<div class="sec">Job Work Return</div><div class="grid-fixed">' +
     (isEdit ? field('Return No', '<input class="inp" id="f-no" value="' + esc(r.no || '') + '" disabled>') : '') +
     field('Date *', '<input class="inp" type="text" data-date autocomplete="off" readonly disabled id="f-date" value="' + esc(r.date || today()) + '">') +
-    field('Job Work No. *', cbox('jwr-jw', { opts: jwOptions(), value: r.jwRef || '', f: 'jwRef', placeholder: 'Search Job Work…', free: false, onSet: onJWRSelect })) +
+    field('Job Work No. *', cbox('jwr-jw', { opts: jwOptions(), value: r.jwRef || '', f: 'jwRef', placeholder: 'Search Job Workâ€¦', free: false, onSet: onJWRSelect })) +
     field('Job Worker', '<input class="inp" id="jwr-vendor" value="' + esc(r.vendor || '') + '" placeholder="Auto from Job Work" disabled>') +
     field('Warehouse (into) *', cbox('jwr-warehouse', { opts: db.masters.warehouses, value: r.warehouse || '', f: 'warehouse', placeholder: 'Select warehouse', addMaster: 'warehouses', addText: 'Warehouse', free: true })) +
     field('Challan No', '<input class="inp" id="jwr-challan" value="' + esc(r.challan || '') + '" placeholder="Job worker challan">') +
@@ -4728,12 +4728,12 @@ function saveJobWorkReturn(id) {
   };
   if (id) Object.assign(prev, data);
   else { data.id = uid(); data.no = nextNo('jobworkreturn', 'JWR'); data.createdAt = Date.now(); db.jobworkreturn.push(data); }
-  saveDB(); pageView = null; toast('Job Work Return saved — ' + (prev ? prev.no : data.no), 'green'); render();
+  saveDB(); pageView = null; toast('Job Work Return saved â€” ' + (prev ? prev.no : data.no), 'green'); render();
 }
 
 
 /* =====================================================================
-   PURCHASE ORDER — printable document
+   PURCHASE ORDER â€” printable document
    ===================================================================== */
 const PRINT_CO = new Proxy({}, {
   get: function (_, key) {
@@ -4752,7 +4752,7 @@ const PO_TERMS_PRINT = [
   'Delivery address: as above.',
   'Goods will be inspected at your factory as per our quality requirements. Packing list, invoice and L.R. copy are required by email after dispatch.'
 ];
-/* amount in words — Indian numbering */
+/* amount in words â€” Indian numbering */
 function amountWords(n) {
   n = Math.round(pf(n));
   if (!n) return 'ZERO RUPEES ONLY';
@@ -4777,7 +4777,7 @@ function toTitleCaseWords(str) {
     return w.charAt(0).toUpperCase() + w.slice(1);
   }).join(' ').replace(/\s+Rupees\s+Only/i, ' Only').replace(/Thousand\b/g, 'Thousands');
 }
-/* toolbar Print → the PO currently at the top of the filtered list */
+/* toolbar Print â†’ the PO currently at the top of the filtered list */
 function printFirstPO() {
   const rows = filtered('po');
   if (!rows.length) return toast('No purchase order to print', 'red');
@@ -4797,7 +4797,7 @@ function printPO(id) {
   };
   const addrBlock = function (title, nm, addr, gst, pan, st) {
     return '<div class="abox"><div class="atitle">' + title + '</div>' +
-      '<div class="aname">' + esc(nm || '—') + '</div>' +
+      '<div class="aname">' + esc(nm || 'â€”') + '</div>' +
       (addr ? '<div class="aline">' + esc(addr) + '</div>' : '') +
       '<table class="akv">' + line('GST NO', gst) + line('PAN NO', pan) + line('STATE', st) + '</table></div>';
   };
@@ -4824,7 +4824,7 @@ function printPO(id) {
   /* HSN-wise tax summary */
   const hsnMap = {};
   items.forEach(function (i) {
-    const k = i.hsn || '—';
+    const k = i.hsn || 'â€”';
     if (!hsnMap[k]) hsnMap[k] = { taxable: 0, cRate: pf(i.cgstPct), c: 0, sRate: pf(i.sgstPct), s: 0, iRate: pf(i.igstPct), i: 0 };
     hsnMap[k].taxable += pf(i.qty) * pf(i.rate);
     hsnMap[k].c += pf(i.camt); hsnMap[k].s += pf(i.samt); hsnMap[k].i += pf(i.iamt);
@@ -4843,7 +4843,7 @@ function printPO(id) {
   const grand = Math.round(afterTax);
   const roundOff = grand - afterTax;
 
-  const supplierTradeName = (trade && (trade.tradeName || trade.name)) || r.supplierTrade || (party && (party.tradeName || party.shortName)) || (party ? (party.tradeName || party.shortName || party.legalName) : (r.supplier || '—'));
+  const supplierTradeName = (trade && (trade.tradeName || trade.name)) || r.supplierTrade || (party && (party.tradeName || party.shortName)) || (party ? (party.tradeName || party.shortName || party.legalName) : (r.supplier || 'â€”'));
   const supplierAddr = trade ? [trade.address, trade.city, trade.state, trade.pin].filter(Boolean).join(', ')
     : (party ? [party.address, party.city, party.state, party.pin].filter(Boolean).join(', ') : '');
   const supplierGst = trade ? trade.gstNo : (party ? party.gstNo : '');
@@ -4870,21 +4870,21 @@ function printPO(id) {
     '.sign{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:12px;border:1px solid var(--line);border-radius:6px;overflow:hidden}.sign>div{min-height:76px;padding:7px 9px;text-align:center}.sign>div+div{border-left:1px solid var(--line)}.sign b{font-size:9px}.sign span{display:block;height:42px;border-bottom:1px solid #98a2b3;margin-bottom:4px}.foot{text-align:center;color:var(--muted);font-size:8px;margin-top:9px;letter-spacing:.35px}' +
     '@page{size:A4 portrait;margin:7mm}@media print{body{padding:0;background:#fff}.bar{display:none}.sheet{max-width:none;box-shadow:none;padding:0 8mm 5mm;border-top-width:5px}.items tr,.finance,.sign,.card{break-inside:avoid}}' +
     '</style></head><body><div class="bar"><button class="p" onclick="window.print()">Print Purchase Order</button><button onclick="window.close()">Close</button></div><main class="sheet">' +
-    '<header class="mast"><div class="company"><h1>' + esc(PRINT_CO.name) + '</h1><p>' + esc(PRINT_CO.reg) + '</p><p>' + esc(PRINT_CO.reg2) + '</p><p>' + esc(PRINT_CO.works) + '</p><p>' + esc(PRINT_CO.contact) + '</p><div class="gst">GSTIN: ' + esc(PRINT_CO.gstNo || 'Not configured') + ' &nbsp; | &nbsp; PAN: ' + esc(PRINT_CO.pan || '—') + ' &nbsp; | &nbsp; State: ' + esc(PRINT_CO.state || '') + ' (' + esc(PRINT_CO.stateCode || '') + ')</div></div>' +
+    '<header class="mast"><div class="company"><h1>' + esc(PRINT_CO.name) + '</h1><p>' + esc(PRINT_CO.reg) + '</p><p>' + esc(PRINT_CO.reg2) + '</p><p>' + esc(PRINT_CO.works) + '</p><p>' + esc(PRINT_CO.contact) + '</p><div class="gst">GSTIN: ' + esc(PRINT_CO.gstNo || 'Not configured') + ' &nbsp; | &nbsp; PAN: ' + esc(PRINT_CO.pan || 'â€”') + ' &nbsp; | &nbsp; State: ' + esc(PRINT_CO.state || '') + ' (' + esc(PRINT_CO.stateCode || '') + ')</div></div>' +
     '<div class="pohead"><div class="eyebrow">Procurement Document</div><h2>PURCHASE ORDER</h2><div class="pono">' + esc(r.no || '') + '</div><div class="status">' + esc(r.status || 'Draft') + '</div></div></header>' +
-    '<section class="meta"><div><span>PO Date</span><b>' + esc(dpToDisplay(r.date) || r.date || '—') + '</b></div><div><span>Delivery Date</span><b>' + esc(dpToDisplay(r.deliveryDate) || r.deliveryDate || '—') + '</b></div><div><span>Quotation / PI No.</span><b>' + esc(r.qtnNo || '—') + '</b></div><div><span>Quotation / PI Date</span><b>' + esc(dpToDisplay(r.qtnDate) || r.qtnDate || '—') + '</b></div></section>' +
-    '<section class="parties"><div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || '—') + '<br><strong>State:</strong> ' + esc(supplierState || '—') + '</div></div></div>' +
-    '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(PRINT_CO.works.replace(/^Works:\s*/i, '')) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || '—') + '<br><strong>PAN:</strong> ' + esc(PRINT_CO.pan || '—') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || '—') + '</div></div></div>' +
-    '<div class="card"><h3>Ship To / Delivery Address</h3><div class="body"><b>' + esc(shipName) + '</b><p>' + esc(shipAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(shipGst || '—') + '<br><strong>State:</strong> ' + esc(shipState || '—') + '</div></div></div></section>' +
-    '<section class="commercial"><div class="term"><span class="label">Payment Terms</span><b>' + esc(r.payTerms || '—') + '</b></div><div class="term"><span class="label">Freight Charges</span><b>' + esc(r.freightCharges || '—') + '</b></div><div class="term"><span class="label">Transport Mode</span><b>' + esc(r.transportMode || '—') + '</b></div><div class="term"><span class="label">Raised For</span><b>' + esc(r.raisedFor || '—') + '</b></div><div class="term"><span class="label">Transit Insurance</span><b>' + esc(r.transitInsurance || '—') + '</b></div><div class="term"><span class="label">P &amp; F</span><b>' + esc((r.pnf === '' || r.pnf == null) ? 'Nil' : r.pnf) + '</b></div><div class="term"><span class="label">GST Type</span><b>' + esc(r.gstType || '—') + '</b></div><div class="term"><span class="label">Currency</span><b>INR (₹)</b></div></section>' +
-    '<table class="items"><thead><tr><th class="ctr" style="width:32px">#</th><th>Classification</th><th>Item Code</th><th>Product / Specification</th><th>HSN</th><th class="rt">Qty</th><th>UOM</th><th class="rt">Rate (₹)</th><th class="rt">Amount (₹)</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr class="tot"><td colspan="5">Item Total</td><td class="rt">' + fmtNum(totQty) + '</td><td></td><td></td><td class="rt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr></tfoot></table>' +
+    '<section class="meta"><div><span>PO Date</span><b>' + esc(dpToDisplay(r.date) || r.date || 'â€”') + '</b></div><div><span>Delivery Date</span><b>' + esc(dpToDisplay(r.deliveryDate) || r.deliveryDate || 'â€”') + '</b></div><div><span>Quotation / PI No.</span><b>' + esc(r.qtnNo || 'â€”') + '</b></div><div><span>Quotation / PI Date</span><b>' + esc(dpToDisplay(r.qtnDate) || r.qtnDate || 'â€”') + '</b></div></section>' +
+    '<section class="parties"><div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || 'â€”') + '<br><strong>State:</strong> ' + esc(supplierState || 'â€”') + '</div></div></div>' +
+    '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(PRINT_CO.works.replace(/^Works:\s*/i, '')) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || 'â€”') + '<br><strong>PAN:</strong> ' + esc(PRINT_CO.pan || 'â€”') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || 'â€”') + '</div></div></div>' +
+    '<div class="card"><h3>Ship To / Delivery Address</h3><div class="body"><b>' + esc(shipName) + '</b><p>' + esc(shipAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(shipGst || 'â€”') + '<br><strong>State:</strong> ' + esc(shipState || 'â€”') + '</div></div></div></section>' +
+    '<section class="commercial"><div class="term"><span class="label">Payment Terms</span><b>' + esc(r.payTerms || 'â€”') + '</b></div><div class="term"><span class="label">Freight Charges</span><b>' + esc(r.freightCharges || 'â€”') + '</b></div><div class="term"><span class="label">Transport Mode</span><b>' + esc(r.transportMode || 'â€”') + '</b></div><div class="term"><span class="label">Raised For</span><b>' + esc(r.raisedFor || 'â€”') + '</b></div><div class="term"><span class="label">Transit Insurance</span><b>' + esc(r.transitInsurance || 'â€”') + '</b></div><div class="term"><span class="label">P &amp; F</span><b>' + esc((r.pnf === '' || r.pnf == null) ? 'Nil' : r.pnf) + '</b></div><div class="term"><span class="label">GST Type</span><b>' + esc(r.gstType || 'â€”') + '</b></div><div class="term"><span class="label">Currency</span><b>INR (â‚¹)</b></div></section>' +
+    '<table class="items"><thead><tr><th class="ctr" style="width:32px">#</th><th>Classification</th><th>Item Code</th><th>Product / Specification</th><th>HSN</th><th class="rt">Qty</th><th>UOM</th><th class="rt">Rate (â‚¹)</th><th class="rt">Amount (â‚¹)</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr class="tot"><td colspan="5">Item Total</td><td class="rt">' + fmtNum(totQty) + '</td><td></td><td></td><td class="rt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr></tfoot></table>' +
     '<section class="finance"><div class="taxbox"><div class="boxhead">HSN-wise Tax Summary</div><table class="hsn"><thead><tr><th rowspan="2">HSN</th><th rowspan="2">Taxable</th><th colspan="2">CGST</th><th colspan="2">SGST</th><th colspan="2">IGST</th><th rowspan="2">Tax</th></tr><tr><th>%</th><th>Amt</th><th>%</th><th>Amt</th><th>%</th><th>Amt</th></tr></thead><tbody>' + hsnRows + '</tbody><tfoot><tr class="tot"><td>Total</td><td class="rt">' + fmtNum(totAmt.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totC.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totS.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totI.toFixed(2)) + '</td><td class="rt">' + fmtNum((totC + totS + totI).toFixed(2)) + '</td></tr></tfoot></table></div>' +
-    '<div class="totalbox"><div class="boxhead">Order Value</div><table class="sum"><tr><td class="lbl">Taxable Value</td><td class="amt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr><tr><td class="lbl">CGST</td><td class="amt">' + fmtNum(totC.toFixed(2)) + '</td></tr><tr><td class="lbl">SGST</td><td class="amt">' + fmtNum(totS.toFixed(2)) + '</td></tr><tr><td class="lbl">IGST</td><td class="amt">' + fmtNum(totI.toFixed(2)) + '</td></tr>' + (pnf ? '<tr><td class="lbl">P &amp; F</td><td class="amt">' + fmtNum(pnf.toFixed(2)) + '</td></tr>' : '') + '<tr><td class="lbl">Round Off</td><td class="amt">' + fmtNum(roundOff.toFixed(2)) + '</td></tr><tr class="grand"><td>Grand Total</td><td class="rt">₹' + fmtNum(grand.toFixed(2)) + '</td></tr></table></div></section>' +
+    '<div class="totalbox"><div class="boxhead">Order Value</div><table class="sum"><tr><td class="lbl">Taxable Value</td><td class="amt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr><tr><td class="lbl">CGST</td><td class="amt">' + fmtNum(totC.toFixed(2)) + '</td></tr><tr><td class="lbl">SGST</td><td class="amt">' + fmtNum(totS.toFixed(2)) + '</td></tr><tr><td class="lbl">IGST</td><td class="amt">' + fmtNum(totI.toFixed(2)) + '</td></tr>' + (pnf ? '<tr><td class="lbl">P &amp; F</td><td class="amt">' + fmtNum(pnf.toFixed(2)) + '</td></tr>' : '') + '<tr><td class="lbl">Round Off</td><td class="amt">' + fmtNum(roundOff.toFixed(2)) + '</td></tr><tr class="grand"><td>Grand Total</td><td class="rt">â‚¹' + fmtNum(grand.toFixed(2)) + '</td></tr></table></div></section>' +
     '<div class="words">Amount in words: ' + esc(amountWords(grand)) + '</div>' +
     (r.narration ? '<div class="remark"><b>Remarks:</b> ' + esc(r.narration) + '</div>' : '') +
     poTermsPrintHtml(r) +
     '<section class="sign"><div><b>Prepared / Checked By</b><span></span>Name &amp; Signature</div><div><b>Supplier Acceptance</b><span></span>Stamp &amp; Signature</div><div><b>For ' + esc(PRINT_CO.name) + '</b><span></span>Authorized Signatory</div></section>' +
-    '<div class="foot">SYSTEM-GENERATED PURCHASE ORDER · SUBJECT TO ' + esc(PRINT_CO.jurisdiction.toUpperCase()) + ' JURISDICTION</div></main></body></html>';
+    '<div class="foot">SYSTEM-GENERATED PURCHASE ORDER Â· SUBJECT TO ' + esc(PRINT_CO.jurisdiction.toUpperCase()) + ' JURISDICTION</div></main></body></html>';
 
   const w = window.open('', '_blank');
   if (!w) return toast('Allow pop-ups to print the purchase order', 'red');
@@ -4893,7 +4893,7 @@ function printPO(id) {
 }
 
 /* =====================================================================
-   GOODS RECEIPT NOTE (GRN / INWARD) — printable document
+   GOODS RECEIPT NOTE (GRN / INWARD) â€” printable document
    ===================================================================== */
 function printFirstInward() {
   const rows = filtered('inward');
@@ -4908,23 +4908,23 @@ function printInward(id) {
   const po = r.poRef ? (db.po || []).find(function (p) { return p.no === r.poRef || p.id === r.poRef; }) : null;
   const party = partyByName(r.supplier);
   const trade = partyTradeByName(r.supplier, r.supplierTrade);
-  const supplierTradeName = (trade && (trade.tradeName || trade.name)) || r.supplierTrade || (party && (party.tradeName || party.shortName)) || (party ? (party.tradeName || party.shortName || party.legalName) : (r.supplier || '—'));
+  const supplierTradeName = (trade && (trade.tradeName || trade.name)) || r.supplierTrade || (party && (party.tradeName || party.shortName)) || (party ? (party.tradeName || party.shortName || party.legalName) : (r.supplier || 'â€”'));
   const supplierAddr = trade ? [trade.address, trade.city, trade.state, trade.pin].filter(Boolean).join(', ')
     : (party ? [party.address, party.city, party.state, party.pin].filter(Boolean).join(', ') : '');
   const supplierGst = trade ? (trade.gstNo || '') : (party ? (party.gstNo || '') : '');
   const supplierPan = trade ? (trade.pan || '') : (party ? (party.pan || '') : '');
   const supplierState = trade ? (trade.state || '') : (party ? (party.state || '') : '');
 
-  const buyerName = (po && (po.buyer || po.raisedFor)) || r.buyer || (r.items && r.items[0] && r.items[0].buyer) || '—';
-  const displayDocNo = r.grn ? (r.grn + (r.no && r.no !== r.grn ? ' (' + r.no + ')' : '')) : (r.no || '—');
-  const poNo = r.poRef || (r.jwRef ? ('JW: ' + r.jwRef) : '—');
-  const invoiceNo = r.invoiceNo || r.challan || '—';
-  const invoiceDate = dpToDisplay(r.invoiceDate) || r.invoiceDate || '—';
-  const inwardDate = dpToDisplay(r.date) || r.date || '—';
+  const buyerName = (po && (po.buyer || po.raisedFor)) || r.buyer || (r.items && r.items[0] && r.items[0].buyer) || 'â€”';
+  const displayDocNo = r.grn ? (r.grn + (r.no && r.no !== r.grn ? ' (' + r.no + ')' : '')) : (r.no || 'â€”');
+  const poNo = r.poRef || (r.jwRef ? ('JW: ' + r.jwRef) : 'â€”');
+  const invoiceNo = r.invoiceNo || r.challan || 'â€”';
+  const invoiceDate = dpToDisplay(r.invoiceDate) || r.invoiceDate || 'â€”';
+  const inwardDate = dpToDisplay(r.date) || r.date || 'â€”';
 
   const coWorks = (PRINT_CO.works || '').replace(/^Works:\s*/i, '');
   const shipParty = po ? partyByName(po.shipTo) : null;
-  const shipName = shipParty ? (shipParty.legalName || shipParty.shortName) : (r.warehouse ? (PRINT_CO.name + ' — ' + r.warehouse) : (po && po.shipTo ? po.shipTo : PRINT_CO.name));
+  const shipName = shipParty ? (shipParty.legalName || shipParty.shortName) : (r.warehouse ? (PRINT_CO.name + ' â€” ' + r.warehouse) : (po && po.shipTo ? po.shipTo : PRINT_CO.name));
   const shipAddr = shipParty ? [shipParty.address, shipParty.city, shipParty.state, shipParty.pin].filter(Boolean).join(', ')
     : (coWorks || PRINT_CO.reg);
   const shipGst = shipParty ? (shipParty.gstNo || PRINT_CO.gstNo) : PRINT_CO.gstNo;
@@ -4942,12 +4942,12 @@ function printInward(id) {
     const lookupName = leadingCode ? leadingCode[2].trim() : bareItemName(rawItemName);
     const poItem = (po && po.items) ? po.items.find(function (pi) { return pi.name === it.name || bareItemName(pi.name) === lookupName || (it.code && pi.code === it.code); }) : null;
     const im = itemByName(lookupName) || itemByName(rawItemName);
-    const itemCode = it.code || (leadingCode && leadingCode[1]) || (im && im.code) || (poItem && poItem.code) || it.item_id || '—';
-    const hsn = it.hsn || (im && im.hsn) || (poItem && poItem.hsn) || '—';
+    const itemCode = it.code || (leadingCode && leadingCode[1]) || (im && im.code) || (poItem && poItem.code) || it.item_id || 'â€”';
+    const hsn = it.hsn || (im && im.hsn) || (poItem && poItem.hsn) || 'â€”';
     const itemName = (leadingCode ? leadingCode[2].trim() : bareItemName(rawItemName)) || rawItemName;
     const specs = it.specs || (poItem && poItem.specs) || '';
     const qty = pf(it.recQty != null ? it.recQty : it.qty);
-    const uom = it.unit || (im && im.unit) || (poItem && poItem.unit) || '—';
+    const uom = it.unit || (im && im.unit) || (poItem && poItem.unit) || 'â€”';
     const rate = pf(it.poRate != null ? it.poRate : (it.rate != null ? it.rate : ((poItem && poItem.rate) || (im && im.purchaseRate) || 0)));
     const amt = qty * rate;
 
@@ -4968,7 +4968,7 @@ function printInward(id) {
 
     totQty += qty; totAmt += amt; totC += camt; totS += samt; totI += iamt;
 
-    const k = hsn || '—';
+    const k = hsn || 'â€”';
     if (!hsnMap[k]) hsnMap[k] = { taxable: 0, cRate: cRate, c: 0, sRate: sRate, s: 0, iRate: iRate, i: 0 };
     hsnMap[k].taxable += amt;
     hsnMap[k].c += camt;
@@ -5125,23 +5125,23 @@ function printInward(id) {
     '<div><span>Invoice / Challan Date</span><b>' + esc(invoiceDate) + '</b></div>' +
     '</section>' +
     '<section class="parties">' +
-    '<div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || '—') + '<br><strong>State:</strong> ' + esc(supplierState || '—') + '</div></div></div>' +
-    '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(coWorks) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || '—') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || '—') + '</div></div></div>' +
-    '<div class="card"><h3>Ship To / Delivery Address</h3><div class="body"><b>' + esc(shipName) + '</b><p>' + esc(shipAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(shipGst || '—') + '<br><strong>State:</strong> ' + esc(shipState || '—') + '</div></div></div>' +
+    '<div class="card"><h3>Supplier / Vendor</h3><div class="body"><b>' + esc(supplierTradeName) + '</b><p>' + esc(supplierAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(supplierGst || 'â€”') + '<br><strong>State:</strong> ' + esc(supplierState || 'â€”') + '</div></div></div>' +
+    '<div class="card"><h3>Bill To</h3><div class="body"><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(coWorks) + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(PRINT_CO.gstNo || 'â€”') + '<br><strong>State:</strong> ' + esc(PRINT_CO.state || 'â€”') + '</div></div></div>' +
+    '<div class="card"><h3>Ship To / Delivery Address</h3><div class="body"><b>' + esc(shipName) + '</b><p>' + esc(shipAddr || 'Address not available') + '</p><div class="mini"><strong>GSTIN:</strong> ' + esc(shipGst || 'â€”') + '<br><strong>State:</strong> ' + esc(shipState || 'â€”') + '</div></div></div>' +
     '</section>' +
     '<section class="commercial">' +
-    '<div class="term"><span class="label">Warehouse / Store</span><b>' + esc(r.warehouse || '—') + '</b></div>' +
-    '<div class="term"><span class="label">Vehicle No.</span><b>' + esc(r.vehicle || '—') + '</b></div>' +
-    '<div class="term"><span class="label">Received By</span><b>' + esc(r.receivedBy || '—') + '</b></div>' +
-    '<div class="term"><span class="label">Entry Type</span><b>' + esc(r.entryType || '—') + '</b></div>' +
-    '<div class="term"><span class="label">Bin / Rack Location</span><b>' + esc(r.bin || '—') + '</b></div>' +
+    '<div class="term"><span class="label">Warehouse / Store</span><b>' + esc(r.warehouse || 'â€”') + '</b></div>' +
+    '<div class="term"><span class="label">Vehicle No.</span><b>' + esc(r.vehicle || 'â€”') + '</b></div>' +
+    '<div class="term"><span class="label">Received By</span><b>' + esc(r.receivedBy || 'â€”') + '</b></div>' +
+    '<div class="term"><span class="label">Entry Type</span><b>' + esc(r.entryType || 'â€”') + '</b></div>' +
+    '<div class="term"><span class="label">Bin / Rack Location</span><b>' + esc(r.bin || 'â€”') + '</b></div>' +
     '<div class="term"><span class="label">Buyer / Style Ref</span><b>' + esc(buyerName) + '</b></div>' +
     '<div class="term"><span class="label">GST Type</span><b>' + esc(r.gstType || (isInterState ? 'IGST' : 'CGST & SGST')) + '</b></div>' +
-    '<div class="term"><span class="label">Currency</span><b>INR (₹)</b></div>' +
+    '<div class="term"><span class="label">Currency</span><b>INR (â‚¹)</b></div>' +
     '</section>' +
-    '<table class="items"><thead><tr><th class="ctr" style="width:32px">#</th><th>Classification</th><th>Item Code</th><th>Product / Specification</th><th>HSN</th><th class="rt">Qty</th><th>UOM</th><th class="rt">Rate (₹)</th><th class="rt">Amount (₹)</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr class="tot"><td colspan="5">Item Total</td><td class="rt">' + fmtNum(totQty) + '</td><td></td><td></td><td class="rt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr></tfoot></table>' +
+    '<table class="items"><thead><tr><th class="ctr" style="width:32px">#</th><th>Classification</th><th>Item Code</th><th>Product / Specification</th><th>HSN</th><th class="rt">Qty</th><th>UOM</th><th class="rt">Rate (â‚¹)</th><th class="rt">Amount (â‚¹)</th></tr></thead><tbody>' + rows + '</tbody><tfoot><tr class="tot"><td colspan="5">Item Total</td><td class="rt">' + fmtNum(totQty) + '</td><td></td><td></td><td class="rt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr></tfoot></table>' +
     '<section class="finance"><div class="taxbox"><div class="boxhead">HSN-wise Tax Summary</div><table class="hsn"><thead><tr><th rowspan="2">HSN</th><th rowspan="2">Taxable</th><th colspan="2">CGST</th><th colspan="2">SGST</th><th colspan="2">IGST</th><th rowspan="2">Tax</th></tr><tr><th>%</th><th>Amt</th><th>%</th><th>Amt</th><th>%</th><th>Amt</th></tr></thead><tbody>' + hsnRows + '</tbody><tfoot><tr class="tot"><td>Total</td><td class="rt">' + fmtNum(totTaxable.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totC.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totS.toFixed(2)) + '</td><td></td><td class="rt">' + fmtNum(totI.toFixed(2)) + '</td><td class="rt">' + fmtNum((totC + totS + totI).toFixed(2)) + '</td></tr></tfoot></table></div>' +
-    '<div class="totalbox"><div class="boxhead">Order Value</div><table class="sum"><tr><td class="lbl">Taxable Value</td><td class="amt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr>' + (freightVal ? '<tr><td class="lbl">Freight Charges</td><td class="amt">' + fmtNum(freightVal.toFixed(2)) + '</td></tr>' : '') + '<tr><td class="lbl">CGST</td><td class="amt">' + fmtNum(totC.toFixed(2)) + '</td></tr><tr><td class="lbl">SGST</td><td class="amt">' + fmtNum(totS.toFixed(2)) + '</td></tr><tr><td class="lbl">IGST</td><td class="amt">' + fmtNum(totI.toFixed(2)) + '</td></tr><tr><td class="lbl">Round Off</td><td class="amt">' + fmtNum(roundOff.toFixed(2)) + '</td></tr><tr class="grand"><td>Grand Total</td><td class="rt">₹' + fmtNum(grand.toFixed(2)) + '</td></tr></table></div></section>' +
+    '<div class="totalbox"><div class="boxhead">Order Value</div><table class="sum"><tr><td class="lbl">Taxable Value</td><td class="amt">' + fmtNum(totAmt.toFixed(2)) + '</td></tr>' + (freightVal ? '<tr><td class="lbl">Freight Charges</td><td class="amt">' + fmtNum(freightVal.toFixed(2)) + '</td></tr>' : '') + '<tr><td class="lbl">CGST</td><td class="amt">' + fmtNum(totC.toFixed(2)) + '</td></tr><tr><td class="lbl">SGST</td><td class="amt">' + fmtNum(totS.toFixed(2)) + '</td></tr><tr><td class="lbl">IGST</td><td class="amt">' + fmtNum(totI.toFixed(2)) + '</td></tr><tr><td class="lbl">Round Off</td><td class="amt">' + fmtNum(roundOff.toFixed(2)) + '</td></tr><tr class="grand"><td>Grand Total</td><td class="rt">â‚¹' + fmtNum(grand.toFixed(2)) + '</td></tr></table></div></section>' +
     '<div class="words">Amount in words: ' + esc(amountWords(grand)) + '</div>' +
     (r.openingRemark || r.remarks || r.narration || r.notes ? '<div class="remark"><b>Remarks:</b> ' + esc(r.openingRemark || r.remarks || r.narration || r.notes) + '</div>' : '') +
     '<section class="terms"><h4>AGREED TERMS &amp; CONDITIONS</h4><ol>' +
@@ -5156,7 +5156,7 @@ function printInward(id) {
     '<div><b>Store / Received By</b><span></span>Name &amp; Signature</div>' +
     '<div><b>For ' + esc(PRINT_CO.name) + '</b><span></span>Authorized Signatory</div>' +
     '</section>' +
-    '<div class="foot">SYSTEM-GENERATED GOODS RECEIPT NOTE · SUBJECT TO ' + esc(PRINT_CO.jurisdiction.toUpperCase()) + ' JURISDICTION</div></main></body></html>';
+    '<div class="foot">SYSTEM-GENERATED GOODS RECEIPT NOTE Â· SUBJECT TO ' + esc(PRINT_CO.jurisdiction.toUpperCase()) + ' JURISDICTION</div></main></body></html>';
 
   const w = window.open('', '_blank');
   if (!w) return toast('Allow pop-ups to print the Goods Receipt Note', 'red');
@@ -5174,7 +5174,7 @@ function mastersDefs() {
 
     {
       g: 'Product', k: 'categories', icon: 'order', title: 'Item Categories', ph: 'Category name',
-      hint: 'Top-level grouping — Fabric, Trims, Packaging.'
+      hint: 'Top-level grouping â€” Fabric, Trims, Packaging.'
     },
     {
       g: 'Product', k: 'classifications', icon: 'order', title: 'Classifications', ph: 'Classification name',
@@ -5182,10 +5182,10 @@ function mastersDefs() {
     },
     {
       g: 'Product', k: 'qualities', icon: 'check', title: 'Quality Master', ph: 'e.g. Premium, Standard',
-      hint: 'Quality options available in Item Master → Quality.'
+      hint: 'Quality options available in Item Master â†’ Quality.'
     },
     {
-      g: 'Product', k: 'sizes', icon: 'chart', title: 'Size Master', ph: 'Size (e.g. S, M, L…)',
+      g: 'Product', k: 'sizes', icon: 'chart', title: 'Size Master', ph: 'Size (e.g. S, M, Lâ€¦)',
       hint: 'Size set used for size-wise quantity entry.'
     },
 
@@ -5203,7 +5203,7 @@ function mastersDefs() {
     },
     {
       g: 'Product', k: 'washTypes', icon: 'sparkle', title: 'Wash Type', ph: 'e.g. Enzyme Softener',
-      hint: 'Wash processes used on Costing — Order Info → Wash Type.'
+      hint: 'Wash processes used on Costing â€” Order Info â†’ Wash Type.'
     },
     {
       g: 'Production', k: 'processTypes', icon: 'gear', title: 'Process Type', ph: 'e.g. Embroidery, Washing, Printing',
@@ -5262,7 +5262,7 @@ function mSearch(v) {
   mQuery = v;
   mPage = 1;
   const el = $('m-body'); if (!el) return;
-  /* the filter box lives inside #m-body — rebuilding it would drop focus,
+  /* the filter box lives inside #m-body â€” rebuilding it would drop focus,
      so restore the caret straight after the re-render */
   const active = document.activeElement;
   const wasFilter = !!(active && active.closest && active.closest('.msearch'));
@@ -5314,7 +5314,7 @@ function itemRecordsMasterPanelHtml() {
     '<input type="file" id="item-excel-file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="importItemExcel(this)">' +
     '<button class="btn btn-primary" onclick="openItemMasterPopup()">' + ic('plus', 15) + 'Add Item</button></div></div>' +
     '<div class="mtools"><div class="search msearch">' + ic('search', 16) +
-    '<input class="inp" placeholder="Search items…" value="' + esc(imState.q) + '" oninput="imSearch(this.value)"></div>' +
+    '<input class="inp" placeholder="Search itemsâ€¦" value="' + esc(imState.q) + '" oninput="imSearch(this.value)"></div>' +
     '<button class="btn btn-ghost btn-sm" id="im-clear-filters" onclick="clearItemMasterFilters()"' + (imState.q ? '' : ' disabled') + '>Clear filters</button></div>' +
     itemMasterListHtml();
 }
@@ -5332,7 +5332,7 @@ function openItemMasterPopup(id) {
   imEditId = id || null; MASTER_RECORD_POPUP = 'item';
   const rec = imEditId ? db.masters.items.find(function (x) { return x.id === imEditId; }) : null;
   openDialog({
-    itemSize: true, title: rec ? 'Edit Item — ' + rec.name : 'Add Item', confirmText: rec ? 'Update Item' : 'Add Item',
+    itemSize: true, title: rec ? 'Edit Item â€” ' + rec.name : 'Add Item', confirmText: rec ? 'Update Item' : 'Add Item',
     bodyHtml: itemMasterFormHtml(rec, true),
     after: function () { afterRenderItemForm(); const el = $('im-name'); if (el) el.focus(); },
     onConfirm: function () { return saveItemMasterForm(); }
@@ -5358,7 +5358,7 @@ function openPartyMasterPopup(id) {
   ptEditId = id || null; MASTER_RECORD_POPUP = 'party';
   const rec = ptEditId ? db.masters.parties.find(function (x) { return x.id === ptEditId; }) : null;
   openDialog({
-    wide: true, title: rec ? 'Edit Party onboarding — ' + rec.legalName : 'Add Party onboarding', confirmText: rec ? 'Update Party' : 'Add Party',
+    wide: true, title: rec ? 'Edit Party onboarding â€” ' + rec.legalName : 'Add Party onboarding', confirmText: rec ? 'Update Party' : 'Add Party',
     bodyHtml: partyFormHtml(rec, true),
     after: function () { dpSyncAll($('appDialogBox')); renumberSr($('pt-billtos')); qsa('#pt-billtos tr').forEach(function (tr) { const el = qs('[data-f="gstNo"]', tr); if (el) btValidateRow(el); }); const el = $('pt-legal'); if (el) el.focus(); },
     onConfirm: function () { return savePartyForm(); }
@@ -5371,14 +5371,14 @@ function refreshMasterRecords(kind) {
   renderMasters();
 }
 function saveLoginSettings(note) { auditPush('Login Page Master', 'Updated', 'Login Page', [note || 'Login slideshow settings updated']); saveDB(); renderMasters(); }
-function loginSlideChanged(id, field, value) { if (!userCanMaster('loginpage', 'edit')) return toast('Edit access denied', 'red'); const s = ((((db.masters || {}).loginSettings || {}).slides) || []).find(function (x) { return x.id === id; }); if (!s) return; s[field] = value; saveLoginSettings('Slide ' + s.name + ' — ' + field + ' changed to ' + value); }
+function loginSlideChanged(id, field, value) { if (!userCanMaster('loginpage', 'edit')) return toast('Edit access denied', 'red'); const s = ((((db.masters || {}).loginSettings || {}).slides) || []).find(function (x) { return x.id === id; }); if (!s) return; s[field] = value; saveLoginSettings('Slide ' + s.name + ' â€” ' + field + ' changed to ' + value); }
 function toggleLoginSlide(id) { if (!userCanMaster('loginpage', 'edit')) return toast('Edit access denied', 'red'); const s = db.masters.loginSettings.slides.find(function (x) { return x.id === id; }); if (!s) return; s.active = s.active === false; saveLoginSettings('Slide ' + s.name + ' marked ' + (s.active ? 'Active' : 'Inactive')); }
 function moveLoginSlide(id, dir) { if (!userCanMaster('loginpage', 'edit')) return toast('Edit access denied', 'red'); const a = db.masters.loginSettings.slides, i = a.findIndex(function (x) { return x.id === id; }), j = i + dir; if (i < 0 || j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; saveLoginSettings('Slide order changed'); }
 function deleteLoginSlide(id) { if (!userCanMaster('loginpage', 'delete')) return toast('Delete access denied', 'red'); const a = db.masters.loginSettings.slides, s = a.find(function (x) { return x.id === id; }); if (!s) return; if (a.length <= 1) return toast('At least one login image is required', 'red'); confirmDelete({ kind: 'login slide', name: s.name }, function () { db.masters.loginSettings.slides = a.filter(function (x) { return x.id !== id; }); saveLoginSettings('Deleted login slide ' + s.name); }); }
 function onLoginSlideFile(inp) { if (!userCanMaster('loginpage', 'create')) return toast('Create access denied', 'red'); const f = inp.files && inp.files[0]; if (!f) return; if (!/^image\//.test(f.type)) return toast('Choose an image file', 'red'); const rd = new FileReader(); rd.onload = function (e) { const img = new Image(); img.onload = function () { const max = 1800; let w = img.width, h = img.height; if (w > max) { h = Math.round(h * max / w); w = max; } const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h); const a = db.masters.loginSettings.slides; const n = a.length + 1; a.push({ id: 'LS-' + String(Date.now()).slice(-8), name: f.name.replace(/\.[^.]+$/, ''), image: cv.toDataURL('image/jpeg', .82), fit: 'cover', position: 'center', active: true }); saveLoginSettings('Added login slide ' + f.name); }; img.src = e.target.result; }; rd.readAsDataURL(f); }
 function onLoginSlideReplace(inp, id) { if (!userCanMaster('loginpage', 'edit')) return toast('Edit access denied', 'red'); const f = inp.files && inp.files[0]; if (!f) return; if (!/^image\//.test(f.type)) return toast('Choose an image file', 'red'); const rd = new FileReader(); rd.onload = function (e) { const img = new Image(); img.onload = function () { const max = 1800; let w = img.width, h = img.height; if (w > max) { h = Math.round(h * max / w); w = max; } const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h); const slide = db.masters.loginSettings.slides.find(function (x) { return x.id === id; }); if (!slide) return; slide.image = cv.toDataURL('image/jpeg', .82); slide.name = f.name.replace(/\.[^.]+$/, ''); saveLoginSettings('Replaced login slide image ' + slide.name); }; img.src = e.target.result; }; rd.readAsDataURL(f); }
 function setLoginInterval(v) { if (!userCanMaster('loginpage', 'edit')) return; db.masters.loginSettings.interval = Math.max(2, Math.min(30, pf(v) || 6)); saveLoginSettings('Slideshow interval changed to ' + db.masters.loginSettings.interval + ' seconds'); }
-function loginPageMasterHtml() { const cfg = db.masters.loginSettings || { slides: [], interval: 6 }, slides = cfg.slides || [], first = slides.find(function (x) { return x.active !== false; }) || slides[0]; return '<div class="mhead"><div><h3>Login Page Master <span class="c">' + slides.length + '</span></h3><p>Upload slideshow images and control how each image fits on the left side of the login page.</p></div><div style="margin-left:auto"><label class="btn btn-primary file-btn">' + ic('plus', 15) + 'Add Image<input type="file" accept="image/*" onchange="onLoginSlideFile(this)"></label></div></div>' + '<div class="mtools">' + field('Slideshow interval (seconds)', '<input class="inp" type="number" min="2" max="30" value="' + esc(cfg.interval || 6) + '" onchange="setLoginInterval(this.value)">') + '</div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Preview</th><th>Slide Name</th><th>Image Fit</th><th>Position</th><th>Status</th><th class="num">Actions</th></tr></thead><tbody>' + slides.map(function (s, i) { return '<tr><td><b>' + (i + 1) + '</b></td><td><label class="login-thumb-replace" title="Click to replace image"><img class="login-slide-thumb" src="' + loginImageSrc(s) + '"><span>Replace</span><input type="file" accept="image/*" onchange="onLoginSlideReplace(this,\'' + s.id + '\')"></label></td><td><input class="inp" value="' + esc(s.name || 'Slide') + '" onchange="loginSlideChanged(\'' + s.id + '\',\'name\',this.value)"></td><td><select class="inp" onchange="loginSlideChanged(\'' + s.id + '\',\'fit\',this.value)">' + ['cover', 'contain', 'fill'].map(function (v) { return '<option value="' + v + '"' + (s.fit === v ? ' selected' : '') + '>' + ({ cover: 'Cover (crop to fill)', contain: 'Contain (show full image)', fill: 'Stretch to fill' })[v] + '</option>'; }).join('') + '</select></td><td><select class="inp" onchange="loginSlideChanged(\'' + s.id + '\',\'position\',this.value)">' + ['center', 'top', 'bottom', 'left', 'right'].map(function (v) { return '<option' + ((s.position || 'center') === v ? ' selected' : '') + '>' + v + '</option>'; }).join('') + '</select></td><td><button class="sw' + (s.active === false ? '' : ' on') + '" onclick="toggleLoginSlide(\'' + s.id + '\')"><span class="sw-knob"></span></button> ' + (s.active === false ? 'Inactive' : 'Active') + '</td><td class="actions-cell"><button class="btn-icon" title="Move up" onclick="moveLoginSlide(\'' + s.id + '\',-1)">↑</button><button class="btn-icon" title="Move down" onclick="moveLoginSlide(\'' + s.id + '\',1)">↓</button><button class="btn-icon danger" onclick="deleteLoginSlide(\'' + s.id + '\')">' + ic('trash', 14) + '</button></td></tr>'; }).join('') + '</tbody></table></div><div class="hint">Fit options: Cover fills the area and may crop; Contain shows the complete image; Stretch fills the entire area. Position controls the image focal point.</div>'; }
+function loginPageMasterHtml() { const cfg = db.masters.loginSettings || { slides: [], interval: 6 }, slides = cfg.slides || [], first = slides.find(function (x) { return x.active !== false; }) || slides[0]; return '<div class="mhead"><div><h3>Login Page Master <span class="c">' + slides.length + '</span></h3><p>Upload slideshow images and control how each image fits on the left side of the login page.</p></div><div style="margin-left:auto"><label class="btn btn-primary file-btn">' + ic('plus', 15) + 'Add Image<input type="file" accept="image/*" onchange="onLoginSlideFile(this)"></label></div></div>' + '<div class="mtools">' + field('Slideshow interval (seconds)', '<input class="inp" type="number" min="2" max="30" value="' + esc(cfg.interval || 6) + '" onchange="setLoginInterval(this.value)">') + '</div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Preview</th><th>Slide Name</th><th>Image Fit</th><th>Position</th><th>Status</th><th class="num">Actions</th></tr></thead><tbody>' + slides.map(function (s, i) { return '<tr><td><b>' + (i + 1) + '</b></td><td><label class="login-thumb-replace" title="Click to replace image"><img class="login-slide-thumb" src="' + loginImageSrc(s) + '"><span>Replace</span><input type="file" accept="image/*" onchange="onLoginSlideReplace(this,\'' + s.id + '\')"></label></td><td><input class="inp" value="' + esc(s.name || 'Slide') + '" onchange="loginSlideChanged(\'' + s.id + '\',\'name\',this.value)"></td><td><select class="inp" onchange="loginSlideChanged(\'' + s.id + '\',\'fit\',this.value)">' + ['cover', 'contain', 'fill'].map(function (v) { return '<option value="' + v + '"' + (s.fit === v ? ' selected' : '') + '>' + ({ cover: 'Cover (crop to fill)', contain: 'Contain (show full image)', fill: 'Stretch to fill' })[v] + '</option>'; }).join('') + '</select></td><td><select class="inp" onchange="loginSlideChanged(\'' + s.id + '\',\'position\',this.value)">' + ['center', 'top', 'bottom', 'left', 'right'].map(function (v) { return '<option' + ((s.position || 'center') === v ? ' selected' : '') + '>' + v + '</option>'; }).join('') + '</select></td><td><button class="sw' + (s.active === false ? '' : ' on') + '" onclick="toggleLoginSlide(\'' + s.id + '\')"><span class="sw-knob"></span></button> ' + (s.active === false ? 'Inactive' : 'Active') + '</td><td class="actions-cell"><button class="btn-icon" title="Move up" onclick="moveLoginSlide(\'' + s.id + '\',-1)">â†‘</button><button class="btn-icon" title="Move down" onclick="moveLoginSlide(\'' + s.id + '\',1)">â†“</button><button class="btn-icon danger" onclick="deleteLoginSlide(\'' + s.id + '\')">' + ic('trash', 14) + '</button></td></tr>'; }).join('') + '</tbody></table></div><div class="hint">Fit options: Cover fills the area and may crop; Contain shows the complete image; Stretch fills the entire area. Position controls the image focal point.</div>'; }
 let MENU_DRAG = null, MENU_GROUP_DRAG = null;
 function menuGroupDragStart(e, list, section) { if (!userCanMaster('menumaster', 'edit')) { e.preventDefault(); return; } MENU_GROUP_DRAG = { list: list, section: section }; e.currentTarget.classList.add('dragging'); }
 function menuGroupDrop(e, list, target) { e.preventDefault(); e.stopPropagation(); qsa('.shop-menu-group.dragging').forEach(function (x) { x.classList.remove('dragging'); }); if (!MENU_GROUP_DRAG || MENU_GROUP_DRAG.list !== list || MENU_GROUP_DRAG.section === target) return; const key = list === 'main' ? 'mainGroupOrder' : 'masterGroupOrder', a = db.masters.menuSettings[key], from = a.indexOf(MENU_GROUP_DRAG.section), to = a.indexOf(target); if (from < 0 || to < 0) return; const moved = MENU_GROUP_DRAG.section; a.splice(from, 1); const nt = a.indexOf(target); a.splice(nt < 0 ? a.length : nt, 0, moved); MENU_GROUP_DRAG = null; saveMenuOrder(key, 'Moved menu group ' + moved + ' before ' + target); }
@@ -5399,7 +5399,7 @@ function deleteMenuItem(list, key) { if (!userCanMaster('menumaster', 'delete'))
 function deleteMenuGroup(list, section) { if (!userCanMaster('menumaster', 'delete')) return toast('Delete access denied', 'red'); const customKey = list === 'main' ? 'customMainGroups' : 'customMasterGroups', a = db.masters.menuSettings[customKey]; if (a.indexOf(section) < 0) return toast('Core menu groups cannot be deleted', 'red'); confirmDelete({ kind: 'menu group', name: section }, function () { const entries = (list === 'main' ? mainMenuEntries() : masterMenuEntries()).filter(function (x) { return x.section === section; }), mapKey = list === 'main' ? 'mainSections' : 'masterSections'; entries.forEach(function (x) { setMenuEntrySection(list, x.k, list === 'main' ? defaultMainSection(x.target || x.k) : defaultMasterSection(x.target || x.k)); }); db.masters.menuSettings[customKey] = a.filter(function (x) { return x !== section; }); const groupOrder = list === 'main' ? 'mainGroupOrder' : 'masterGroupOrder'; db.masters.menuSettings[groupOrder] = db.masters.menuSettings[groupOrder].filter(function (x) { return x !== section; }); saveMenuOrder(list === 'main' ? 'mainOrder' : 'masterOrder', 'Deleted menu group ' + section); }); }
 function menuDropToGroup(e, list, section) { e.preventDefault(); qsa('.shop-menu-child.dragging').forEach(function (x) { x.classList.remove('dragging'); }); if (!MENU_DRAG || MENU_DRAG.list !== list) return; const mapKey = list === 'main' ? 'mainSections' : 'masterSections', orderKey = list === 'main' ? 'mainOrder' : 'masterOrder', a = db.masters.menuSettings[orderKey], i = a.indexOf(MENU_DRAG.key); setMenuEntrySection(list, MENU_DRAG.key, section); if (i > -1) { a.splice(i, 1); a.push(MENU_DRAG.key); } const moved = MENU_DRAG.key; MENU_DRAG = null; saveMenuOrder(orderKey, 'Moved ' + moved + ' to ' + section); }
 function renameMenuSection(list, section) { if (!userCanMaster('menumaster', 'edit')) return toast('Edit access denied', 'red'); const key = 'section-' + list + '-' + section, old = menuLabel(key, section); openDialog({ title: 'Rename Menu Group', bodyHtml: '<div class="dlg-field"><label>Group label</label><input class="inp" id="menu-section-name" value="' + esc(old) + '"></div>', confirmText: 'Rename', onConfirm: function () { const v = (($('menu-section-name') || {}).value || '').trim(); if (!v) return reqBad('menu-section-name', 'Group name is required'); db.masters.menuSettings.labels[key] = v; saveMenuOrder(list === 'main' ? 'mainOrder' : 'masterOrder', 'Group ' + section + ' renamed to ' + v); } }); }
-function renameMenuItem(list, key) { if (!userCanMaster('menumaster', 'edit')) return toast('Edit access denied', 'red'); const entries = list === 'main' ? mainMenuEntries() : masterMenuEntries(), x = entries.find(function (i) { return i.k === key; }), old = menuLabel(key, x ? x.l : key); openDialog({ title: 'Rename Menu Item', bodyHtml: '<div class="dlg-field"><label>Menu label</label><input class="inp" id="menu-rename-value" value="' + esc(old) + '"></div><div class="dlg-note">This changes the navigation label only. The internal module key remains ' + esc(key) + '.</div>', confirmText: 'Rename', onConfirm: function () { const v = (($('menu-rename-value') || {}).value || '').trim(); if (!v) return reqBad('menu-rename-value', 'Menu label is required'); db.masters.menuSettings.labels[key] = v; auditPush('Menu Management', 'Updated', key, ['Menu label: ' + old + ' → ' + v]); saveDB(); renderMasters(); } }); }
+function renameMenuItem(list, key) { if (!userCanMaster('menumaster', 'edit')) return toast('Edit access denied', 'red'); const entries = list === 'main' ? mainMenuEntries() : masterMenuEntries(), x = entries.find(function (i) { return i.k === key; }), old = menuLabel(key, x ? x.l : key); openDialog({ title: 'Rename Menu Item', bodyHtml: '<div class="dlg-field"><label>Menu label</label><input class="inp" id="menu-rename-value" value="' + esc(old) + '"></div><div class="dlg-note">This changes the navigation label only. The internal module key remains ' + esc(key) + '.</div>', confirmText: 'Rename', onConfirm: function () { const v = (($('menu-rename-value') || {}).value || '').trim(); if (!v) return reqBad('menu-rename-value', 'Menu label is required'); db.masters.menuSettings.labels[key] = v; auditPush('Menu Management', 'Updated', key, ['Menu label: ' + old + ' â†’ ' + v]); saveDB(); renderMasters(); } }); }
 let MENU_EDITOR_TAB = 'main';
 function setMenuEditorTab(tab) { MENU_EDITOR_TAB = tab; renderMasters(); }
 function toggleShopMenuGroup(btn) { const g = btn.closest('.shop-menu-group'); if (g) g.classList.toggle('closed'); }
@@ -5407,9 +5407,9 @@ function menuGroupsFor(list) {
   if (list === 'main') return mainMenuSections().map(function (section) { return { section: section, entries: mainMenuEntries().filter(function (x) { return x.section === section; }) }; });
   return masterMenuSections().map(function (section) { return { section: section, entries: masterMenuEntries().filter(function (x) { return x.section === section; }) }; });
 }
-function shopMenuChildHtml(list, x) { return '<div class="shop-menu-child" draggable="true" ondragstart="menuDragStart(event,\'' + list + '\',\'' + x.k + '\',\'' + esc(x.section).replace(/'/g, "\\'") + '\')" ondragover="event.preventDefault()" ondrop="menuDrop(event,\'' + list + '\',\'' + x.k + '\',\'' + esc(x.section).replace(/'/g, "\\'") + '\')"><span class="handle">⋮⋮</span><span><b>' + esc(x.l) + '</b><small>' + esc(x.k) + '</small></span><span><button class="btn-icon" title="Rename" onclick="renameMenuItem(\'' + list + '\',\'' + x.k + '\')">' + ic('pencil', 13) + '</button><button class="btn-icon" title="Move up" onclick="moveMenuEntry(\'' + list + '\',\'' + x.k + '\',-1,\'' + esc(x.section).replace(/'/g, "\\'") + '\')">↑</button><button class="btn-icon" title="Move down" onclick="moveMenuEntry(\'' + list + '\',\'' + x.k + '\',1,\'' + esc(x.section).replace(/'/g, "\\'") + '\')">↓</button></span></div>'; }
-function shopMenuGroupsHtml(list) { const customs = (((db.masters || {}).menuSettings || {})[list === 'main' ? 'customMainGroups' : 'customMasterGroups'] || []); return menuGroupsFor(list).map(function (g) { return '<div class="shop-menu-group" draggable="true" ondragstart="menuGroupDragStart(event,\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')" ondragover="event.preventDefault()" ondrop="menuSmartGroupDrop(event,\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')"><div class="shop-menu-parent"><span class="drag">⋮⋮</span><button class="chev" onclick="toggleShopMenuGroup(this)">⌄</button><span>' + esc(menuLabel('section-' + list + '-' + g.section, g.section)) + '</span><button class="btn-icon" title="Rename group" onclick="renameMenuSection(\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')">' + ic('pencil', 12) + '</button>' + (customs.indexOf(g.section) > -1 ? '<button class="btn-icon danger" title="Delete menu group" onclick="deleteMenuGroup(\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')">' + ic('trash', 12) + '</button>' : '') + '<span class="count">' + g.entries.length + ' items</span></div><div class="shop-menu-children" ondragover="event.preventDefault()" ondrop="menuDropToGroup(event,\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')">' + g.entries.map(function (x) { return shopMenuChildHtml(list, x); }).join('') + '</div></div>'; }).join(''); }
-function menuManagementHtml() { return '<div class="shop-menu-page"><div class="shop-menu-head"><div><h3>Menu Management</h3><p class="sub-line">Main navigation with Masters submenus managed in one place</p></div><button class="btn btn-primary" onclick="createMenuGroup(\'main\')">' + ic('plus', 14) + 'Create Main Menu</button><button class="btn btn-ghost" onclick="createMenuGroup(\'master\')">' + ic('plus', 14) + 'Create Master Sub Menu</button></div><div class="shop-menu-name"><label>Name</label><input class="inp" value="Main Menu" disabled><div class="sub-line">Handle: main-navigation</div></div><div class="shop-menu-card"><h4>Main Menu</h4>' + shopMenuGroupsHtml('main') + '<div class="shop-menu-group" style="margin-top:14px"><div class="shop-menu-parent"><span class="drag">⋮⋮</span><button class="chev" onclick="toggleShopMenuGroup(this)">⌄</button><span>Masters Sub Menu</span><span class="count">' + masterMenuEntries().length + ' items</span></div><div class="shop-menu-children"><div class="sub-line" style="margin:4px 0 10px">These items appear inside the Masters module and are managed as part of the Main Menu structure.</div>' + shopMenuGroupsHtml('master') + '</div></div></div><div class="shop-menu-save"><button class="btn btn-primary" onclick="toast(\'Menu order is saved automatically\',\'green\')">Save</button></div><div class="hint">The same module or Master can be added to multiple menus with different labels. Main Menu and Masters Sub Menu are now maintained together on this page.</div></div>'; }
+function shopMenuChildHtml(list, x) { return '<div class="shop-menu-child" draggable="true" ondragstart="menuDragStart(event,\'' + list + '\',\'' + x.k + '\',\'' + esc(x.section).replace(/'/g, "\\'") + '\')" ondragover="event.preventDefault()" ondrop="menuDrop(event,\'' + list + '\',\'' + x.k + '\',\'' + esc(x.section).replace(/'/g, "\\'") + '\')"><span class="handle">â‹®â‹®</span><span><b>' + esc(x.l) + '</b><small>' + esc(x.k) + '</small></span><span><button class="btn-icon" title="Rename" onclick="renameMenuItem(\'' + list + '\',\'' + x.k + '\')">' + ic('pencil', 13) + '</button><button class="btn-icon" title="Move up" onclick="moveMenuEntry(\'' + list + '\',\'' + x.k + '\',-1,\'' + esc(x.section).replace(/'/g, "\\'") + '\')">â†‘</button><button class="btn-icon" title="Move down" onclick="moveMenuEntry(\'' + list + '\',\'' + x.k + '\',1,\'' + esc(x.section).replace(/'/g, "\\'") + '\')">â†“</button></span></div>'; }
+function shopMenuGroupsHtml(list) { const customs = (((db.masters || {}).menuSettings || {})[list === 'main' ? 'customMainGroups' : 'customMasterGroups'] || []); return menuGroupsFor(list).map(function (g) { return '<div class="shop-menu-group" draggable="true" ondragstart="menuGroupDragStart(event,\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')" ondragover="event.preventDefault()" ondrop="menuSmartGroupDrop(event,\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')"><div class="shop-menu-parent"><span class="drag">â‹®â‹®</span><button class="chev" onclick="toggleShopMenuGroup(this)">âŒ„</button><span>' + esc(menuLabel('section-' + list + '-' + g.section, g.section)) + '</span><button class="btn-icon" title="Rename group" onclick="renameMenuSection(\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')">' + ic('pencil', 12) + '</button>' + (customs.indexOf(g.section) > -1 ? '<button class="btn-icon danger" title="Delete menu group" onclick="deleteMenuGroup(\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')">' + ic('trash', 12) + '</button>' : '') + '<span class="count">' + g.entries.length + ' items</span></div><div class="shop-menu-children" ondragover="event.preventDefault()" ondrop="menuDropToGroup(event,\'' + list + '\',\'' + esc(g.section).replace(/'/g, "\\'") + '\')">' + g.entries.map(function (x) { return shopMenuChildHtml(list, x); }).join('') + '</div></div>'; }).join(''); }
+function menuManagementHtml() { return '<div class="shop-menu-page"><div class="shop-menu-head"><div><h3>Menu Management</h3><p class="sub-line">Main navigation with Masters submenus managed in one place</p></div><button class="btn btn-primary" onclick="createMenuGroup(\'main\')">' + ic('plus', 14) + 'Create Main Menu</button><button class="btn btn-ghost" onclick="createMenuGroup(\'master\')">' + ic('plus', 14) + 'Create Master Sub Menu</button></div><div class="shop-menu-name"><label>Name</label><input class="inp" value="Main Menu" disabled><div class="sub-line">Handle: main-navigation</div></div><div class="shop-menu-card"><h4>Main Menu</h4>' + shopMenuGroupsHtml('main') + '<div class="shop-menu-group" style="margin-top:14px"><div class="shop-menu-parent"><span class="drag">â‹®â‹®</span><button class="chev" onclick="toggleShopMenuGroup(this)">âŒ„</button><span>Masters Sub Menu</span><span class="count">' + masterMenuEntries().length + ' items</span></div><div class="shop-menu-children"><div class="sub-line" style="margin:4px 0 10px">These items appear inside the Masters module and are managed as part of the Main Menu structure.</div>' + shopMenuGroupsHtml('master') + '</div></div></div><div class="shop-menu-save"><button class="btn btn-primary" onclick="toast(\'Menu order is saved automatically\',\'green\')">Save</button></div><div class="hint">The same module or Master can be added to multiple menus with different labels. Main Menu and Masters Sub Menu are now maintained together on this page.</div></div>'; }
 function companyGstChanged(el) {
   if (!el) return;
   el.value = String(el.value || '').toUpperCase().replace(/\s+/g, '');
@@ -5429,8 +5429,8 @@ function companyDetailsMasterHtml() {
     field('State Code *', '<input class="inp" id="co-state-code" maxlength="2" inputmode="numeric" value="' + esc(c.stateCode || '') + '" placeholder="27" oninput="this.value=this.value.replace(/[^0-9]/g,\'\').slice(0,2)">') +
     field('Jurisdiction *', '<input class="inp" id="co-jurisdiction" value="' + esc(c.jurisdiction || '') + '" placeholder="e.g. Ichalkaranji">') +
     '</div><div class="sec">Registered Office</div><div class="grid-fixed">' +
-    field('Registered Office — Line 1 *', '<textarea class="inp" id="co-reg" rows="3" placeholder="Registered office address">' + esc(c.reg || '') + '</textarea>') +
-    field('Registered Office — Line 2', '<textarea class="inp" id="co-reg2" rows="3" placeholder="Additional address line">' + esc(c.reg2 || '') + '</textarea>') +
+    field('Registered Office â€” Line 1 *', '<textarea class="inp" id="co-reg" rows="3" placeholder="Registered office address">' + esc(c.reg || '') + '</textarea>') +
+    field('Registered Office â€” Line 2', '<textarea class="inp" id="co-reg2" rows="3" placeholder="Additional address line">' + esc(c.reg2 || '') + '</textarea>') +
     '</div><div class="sec">Works / Dispatch &amp; Contact</div><div class="grid-fixed">' +
     field('Works / Dispatch Address *', '<textarea class="inp" id="co-works" rows="3" placeholder="Works / dispatch address">' + esc(c.works || '') + '</textarea>') +
     field('Contact Details', '<textarea class="inp" id="co-contact" rows="3" placeholder="Telephone and email">' + esc(c.contact || '') + '</textarea>') +
@@ -5453,7 +5453,7 @@ function saveCompanyDetails() {
   const prev = Object.assign({}, db.masters.companyDetails || {});
   const next = { name: name, gstNo: gst, pan: pan, state: state, stateCode: stateCode, reg: reg, reg2: reg2, works: works, contact: contact, jurisdiction: jurisdiction };
   db.masters.companyDetails = next;
-  const changes = []; Object.keys(next).forEach(function (k) { if (String(prev[k] || '') !== String(next[k] || '')) changes.push(k + ': ' + String(prev[k] || '—') + ' → ' + String(next[k] || '—')); });
+  const changes = []; Object.keys(next).forEach(function (k) { if (String(prev[k] || '') !== String(next[k] || '')) changes.push(k + ': ' + String(prev[k] || 'â€”') + ' â†’ ' + String(next[k] || 'â€”')); });
   auditPush('Company Details', 'Updated', name, changes.length ? changes : ['Company details saved']);
   saveDB(); toast('Company Details saved', 'green'); renderMasters();
 }
@@ -5482,17 +5482,17 @@ function masterPanelHtml() {
       const ebtn = '<span class="mi-acts"><button class="btn-icon" title="Edit" onclick="editMaster(\'' + d.k + '\',' + r.i + ')">' + ic('pencil', 13) + '</button>';
       const btn = ebtn +
         (used.length
-          ? '<button class="btn-icon" disabled title="Cannot delete — used in ' + esc(used.join(', ')) + '">' + ic('lock', 13) + '</button>'
+          ? '<button class="btn-icon" disabled title="Cannot delete â€” used in ' + esc(used.join(', ')) + '">' + ic('lock', 13) + '</button>'
           : '<button class="btn-icon danger" title="Delete" onclick="delMaster(\'' + d.k + '\',' + r.i + ')">' + ic('trash', 13) + '</button>') +
         '</span>';
       const par = MASTER_PARENT[d.k] ? parentOf(d.k, r.v) : '';
       const addr = (d.k === 'warehouses') ? warehouseAddr(r.v) : '';
       return '<div class="master-item' + (used.length ? ' mi-locked' : '') + '"><span class="mi-sr">' + (pg.from + idx) + '</span><span class="mi-id">' + esc(masterIdFor(d.k, r.v)) + '</span><span>' + esc(r.v) +
-        (addr ? '<span class="meta"> · ' + esc(addr) + '</span>' : '') +
+        (addr ? '<span class="meta"> Â· ' + esc(addr) + '</span>' : '') +
         (par ? '<span class="inuse">' + esc(par) + '</span>' : '') +
-        (used.length ? '<span class="inuse">in use · ' + esc(used.join(', ')) + '</span>' : '') + '</span><span class="master-status-cell">' + masterToggleHtml(d.k, r.v) + '</span>' + btn + '</div>';
+        (used.length ? '<span class="inuse">in use Â· ' + esc(used.join(', ')) + '</span>' : '') + '</span><span class="master-status-cell">' + masterToggleHtml(d.k, r.v) + '</span>' + btn + '</div>';
     }).join('')
-    : '<div class="master-item mi-empty">' + (all.length ? 'No matches for “' + esc(mQuery) + '”' : 'Nothing added yet') + '</div>';
+    : '<div class="master-item mi-empty">' + (all.length ? 'No matches for â€œ' + esc(mQuery) + 'â€' : 'Nothing added yet') + '</div>';
 
   return '<div class="mhead">' +
     '<div><h3>' + esc(d.title) + '<span class="c">' + all.length + '</span></h3>' +
@@ -5532,14 +5532,14 @@ function styleMasterPanelHtml() {
     ? pg.rows.map(function (x, idx) {
       const s = x.s, i = x.i;
       const used = styleUsedIn(s.internal);
-      return '<div class="master-item"><span class="mi-sr">' + (pg.from + idx) + '</span><span class="mi-id">' + esc(s.id || '—') + '</span><span><b>' + esc(s.internal) + '</b>' +
+      return '<div class="master-item"><span class="mi-sr">' + (pg.from + idx) + '</span><span class="mi-id">' + esc(s.id || 'â€”') + '</span><span><b>' + esc(s.internal) + '</b>' +
         (s.portal ? ' <span class="meta">' + esc(s.portal) + '</span>' : '') +
         (s.desc ? ' <span class="meta">' + esc(s.desc) + '</span>' : '') +
         (s.buyer ? ' <span class="meta" style="color:#00527c">Buyer: ' + esc(s.buyer) + '</span>' : '') +
         '</span><span class="master-status-cell">' + styleToggleHtml(s) + '</span><span class="mi-acts">' +
         '<button class="btn-icon" title="Edit" onclick="editStyle(' + i + ')">' + ic('pencil', 13) + '</button>' +
         (used.length
-          ? '<button class="btn-icon" disabled title="Cannot delete — used in Job Work">' + ic('lock', 13) + '</button>'
+          ? '<button class="btn-icon" disabled title="Cannot delete â€” used in Job Work">' + ic('lock', 13) + '</button>'
           : '<button class="btn-icon danger" title="Delete" onclick="delStyle(' + i + ')">' + ic('trash', 13) + '</button>') +
         '</span></div>';
     }).join('')
@@ -5624,7 +5624,7 @@ function editStyle(i) {
         reqBad(qs('[data-cb-input="dlg-st-buyer"]'), 'Buyer is required');
         return false;
       }
-      // if a buyer was picked, confirm they really are a Buyer (defensive — the
+      // if a buyer was picked, confirm they really are a Buyer (defensive â€” the
       // dropdown only lists Buyers, but a stored value could be stale)
       const p = partyByName(bv);
       if (p && !partyHasType(p, 'Buyer')) {
@@ -5666,7 +5666,7 @@ function styleOpts(buyer) {
 }
 function styleToggleHtml(s) { const on = s.active !== false; return '<button type="button" class="sw master-status-sw' + (on ? ' on' : '') + '" onclick="toggleStyleActive(\'' + s.id + '\')"><span class="sw-knob"></span></button><span class="master-status-label ' + (on ? 'on' : 'off') + '">' + (on ? 'Active' : 'Inactive') + '</span>'; }
 function toggleStyleActive(id) { const s = db.masters.styles.find(function (x) { return x.id === id; }); if (!s) return; const old = s.active !== false; s.active = !old; saveDB(); toast(s.internal + ' marked ' + (s.active ? 'Active' : 'Inactive'), 'green'); renderMasters(); }
-/* full "CS-101 · MYN-44512 — Casual Shirt" label for a stored internal id */
+/* full "CS-101 Â· MYN-44512 â€” Casual Shirt" label for a stored internal id */
 function styleLabel(internal) {
   const clean = String(internal || '').trim().toLowerCase();
   const s = (db.masters && Array.isArray(db.masters.styles)) ? db.masters.styles.find(function (x) {
@@ -5683,7 +5683,7 @@ function masterIdPrefix(k) {
 function masterIdFor(k, v) {
   if (!db.masters.masterIds) db.masters.masterIds = {}; if (!db.masters.masterIdSeq) db.masters.masterIdSeq = {}; if (!db.masters.masterIds[k]) db.masters.masterIds[k] = {};
   const cleanV = String(v == null ? '' : v).replace(/^\[[^\]]*\]\s*/, '').trim();
-  const key = cleanV.toLowerCase(); if (!key) return '—';
+  const key = cleanV.toLowerCase(); if (!key) return 'â€”';
   if (!db.masters.masterIds[k][key]) { db.masters.masterIdSeq[k] = pf(db.masters.masterIdSeq[k]) + 1; db.masters.masterIds[k][key] = masterIdPrefix(k) + '-' + String(db.masters.masterIdSeq[k]).padStart(4, '0'); }
   return db.masters.masterIds[k][key];
 }
@@ -5734,7 +5734,7 @@ function masterToggleHtml(k, v) { const on = masterIsActive(k, v); return '<butt
 function toggleMasterActive(k, v, btn) {
   if (!userCanMaster(k, 'edit')) return toast('Edit access denied for this Master', 'red');
   if (!db.masters.masterStatus) db.masters.masterStatus = {}; if (!db.masters.masterStatus[k]) db.masters.masterStatus[k] = {}; const key = String(v).trim().toLowerCase(); const on = !masterIsActive(k, v); db.masters.masterStatus[k][key] = on;
-  auditPush('Master — ' + k, 'Updated', String(v), ['Status: ' + (!on ? 'Active' : 'Inactive') + ' → ' + (on ? 'Active' : 'Inactive')]); saveDB(); toast(String(v) + ' marked ' + (on ? 'Active' : 'Inactive'), 'green'); renderMasters();
+  auditPush('Master â€” ' + k, 'Updated', String(v), ['Status: ' + (!on ? 'Active' : 'Inactive') + ' â†’ ' + (on ? 'Active' : 'Inactive')]); saveDB(); toast(String(v) + ' marked ' + (on ? 'Active' : 'Inactive'), 'green'); renderMasters();
 }
 function addMaster(k) {
   if (!userCanMaster(k, 'create')) return toast('Create access denied for this Master', 'red');
@@ -6057,7 +6057,7 @@ function buildItemXlsx(rows, errorMode) {
   const dependent = [];
   cats.forEach(function (cat) {
     const values = allClass.filter(function (cls) { return String(parentOf('classifications', cls) || '').trim().toLowerCase() === String(cat).trim().toLowerCase(); });
-    const rangeName = xlsxRangeName(cat); masters.push(values); mh.push('Classification — ' + cat); dependent.push({ cat: cat, name: rangeName, index: masters.length - 1 });
+    const rangeName = xlsxRangeName(cat); masters.push(values); mh.push('Classification â€” ' + cat); dependent.push({ cat: cat, name: rangeName, index: masters.length - 1 });
   });
   const max = Math.max.apply(null, masters.map(function (a) { return Math.max(1, a.length); })); const mr = []; for (let i = 0; i < max; i++)mr.push(masters.map(function (a) { return a[i] || ''; }));
   const headers = errorMode ? ITEM_XLSX_HEADERS.concat(['Import Error']) : ITEM_XLSX_HEADERS;
@@ -6075,7 +6075,7 @@ function buildItemXlsx(rows, errorMode) {
   }; return xzip(files);
 }
 function downloadBytes(bytes, name) { const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000); }
-function exportItemExcelTemplate() { downloadBytes(buildItemXlsx(itemWorkbookRows(), false), 'Item_Master_Template_' + today() + '.xlsx'); toast('Excel template exported — yellow headers require manual input', 'green'); }
+function exportItemExcelTemplate() { downloadBytes(buildItemXlsx(itemWorkbookRows(), false), 'Item_Master_Template_' + today() + '.xlsx'); toast('Excel template exported â€” yellow headers require manual input', 'green'); }
 function triggerItemExcelImport() { if (!userCanMaster('items', 'create')) return toast('Item import access denied', 'red'); const el = $('item-excel-file'); if (el) { el.value = ''; el.click(); } }
 async function unzipEntry(buf, want) {
   const a = new Uint8Array(buf), dv = new DataView(buf); let eocd = -1; for (let i = a.length - 22; i >= 0 && i > a.length - 66000; i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } } if (eocd < 0) throw new Error('Invalid XLSX file'); let count = dv.getUint16(eocd + 10, true), pos = dv.getUint32(eocd + 16, true);
@@ -6129,8 +6129,8 @@ function renderItemMaster() {
   setTimeout(dpSyncAll, 0);
   $('content').innerHTML =
     '<div class="entry-page" style="max-width:1560px">' + itemMasterFormHtml(imEditId ? db.masters.items.find(i => i.id === imEditId) : null) + '</div>' +
-    '<div class="section-title" style="margin-top:26px">📦 All Items <span class="c">' + db.masters.items.length + '</span></div>' +
-    '<div class="filter-bar"><input class="inp" id="im-search" placeholder="🔍 Search items…" value="' + esc(imState.q) + '" oninput="imSearch(this.value)" style="max-width:320px"></div>' +
+    '<div class="section-title" style="margin-top:26px">ðŸ“¦ All Items <span class="c">' + db.masters.items.length + '</span></div>' +
+    '<div class="filter-bar"><input class="inp" id="im-search" placeholder="ðŸ” Search itemsâ€¦" value="' + esc(imState.q) + '" oninput="imSearch(this.value)" style="max-width:320px"></div>' +
     itemMasterListHtml();
   afterRenderItemForm();
 }
@@ -6142,31 +6142,31 @@ function itemMasterListHtml() {
   if (q) rows = rows.filter(it => (it.name + ' ' + it.code + ' ' + (it.category || '') + ' ' + (it.hsn || '')).toLowerCase().includes(q));
   rows.sort((a, b) => String(b.code || b.id || '').localeCompare(String(a.code || a.id || ''), undefined, { numeric: true, sensitivity: 'base' }));
   const pg = slicePage(rows, imState);
-  if (!pg.total) return '<div id="im-list" class="panel empty"><div class="big">📦</div><p>No items found.</p></div>';
+  if (!pg.total) return '<div id="im-list" class="panel empty"><div class="big">ðŸ“¦</div><p>No items found.</p></div>';
   return '<div id="im-list"><div class="table-wrap"><table class="recent"><thead><tr><th class="srcol">Sr. No.</th><th>Image</th><th>Item</th><th>ID</th><th>Category</th><th>Classification</th><th>UOM</th><th>HSN</th><th class="num">GST %</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody data-sr-start="' + pg.from + '">' +
     pg.rows.map((it, i) =>
       '<tr>' +
       '<td class="srcol">' + (pg.from + i) + '</td>' +
-      '<td class="im-image-col">' + (it.image ? '<button type="button" class="im-list-image" title="View image" onclick="event.stopPropagation();viewItemImage(\'' + it.id + '\')"><img src="' + it.image + '" alt="' + esc(it.name) + '"></button>' : '<span class="im-no-image">—</span>') + '</td>' +
-      '<td><b>' + esc(it.name) + '</b>' + (it.colorName ? '<div class="sub-line">🎨 ' + esc(it.colorName) + '</div>' : '') + '</td>' +
+      '<td class="im-image-col">' + (it.image ? '<button type="button" class="im-list-image" title="View image" onclick="event.stopPropagation();viewItemImage(\'' + it.id + '\')"><img src="' + it.image + '" alt="' + esc(it.name) + '"></button>' : '<span class="im-no-image">â€”</span>') + '</td>' +
+      '<td><b>' + esc(it.name) + '</b>' + (it.colorName ? '<div class="sub-line">ðŸŽ¨ ' + esc(it.colorName) + '</div>' : '') + '</td>' +
       '<td>' + esc(it.code) + '</td>' +
-      '<td>' + esc(it.category || '—') + '</td>' +
-      '<td>' + esc(it.classification || '—') + '</td>' +
-      '<td>' + esc(it.unit || '—') + '</td>' +
-      '<td>' + esc(it.hsn || '—') + '</td>' +
-      '<td class="num">' + ((it.gst !== '' && it.gst != null) ? fmtNum(it.gst) + '%' : '—') + '</td>' +
+      '<td>' + esc(it.category || 'â€”') + '</td>' +
+      '<td>' + esc(it.classification || 'â€”') + '</td>' +
+      '<td>' + esc(it.unit || 'â€”') + '</td>' +
+      '<td>' + esc(it.hsn || 'â€”') + '</td>' +
+      '<td class="num">' + ((it.gst !== '' && it.gst != null) ? fmtNum(it.gst) + '%' : 'â€”') + '</td>' +
       '<td onclick="event.stopPropagation()"><button type="button" class="sw master-status-sw' + (it.active !== false ? ' on' : '') + '" onclick="toggleItemRecordStatus(\'' + it.id + '\')"><span class="sw-knob"></span></button> <span class="master-status-label ' + (it.active !== false ? 'on">Active' : 'off">Inactive') + '</span></td>' +
       '<td class="actions-cell no-print">' +
       '<button class="btn-icon" title="Edit" onclick="editItemMaster(\'' + it.id + '\')">' + ic('pencil', 15) + '</button>' +
       ((itemUsedIn(it.name).length)
-        ? '<button class="btn-icon" disabled title="Cannot delete — used in ' + esc(itemUsedIn(it.name).join(', ')) + '">' + ic('lock', 15) + '</button>'
+        ? '<button class="btn-icon" disabled title="Cannot delete â€” used in ' + esc(itemUsedIn(it.name).join(', ')) + '">' + ic('lock', 15) + '</button>'
         : '<button class="btn-icon danger" title="Delete" onclick="deleteItemMasterRow(\'' + it.id + '\')">' + ic('trash', 15) + '</button>') +
       '</td>' +
       '</tr>'
     ).join('') + '</tbody></table></div>' + pagerBar(pg, 'item', 'items') + '</div>';
 }
 function closeItemImageViewer() { const el = $('itemImageViewer'); if (el) el.remove(); }
-function viewItemImage(id) { const it = (db.masters.items || []).find(function (x) { return x.id === id; }); if (!it || !it.image) return; closeItemImageViewer(); const el = document.createElement('div'); el.id = 'itemImageViewer'; el.className = 'item-image-viewer'; el.innerHTML = '<div class="item-image-viewer-card" onclick="event.stopPropagation()"><div class="item-image-viewer-head"><b>' + esc(it.name) + (it.code ? ' · ' + esc(it.code) : '') + '</b><button class="btn-icon" onclick="closeItemImageViewer()">' + ic('x', 16) + '</button></div><div class="item-image-viewer-body"><img src="' + it.image + '" alt="' + esc(it.name) + '"></div></div>'; el.onclick = closeItemImageViewer; document.body.appendChild(el); }
+function viewItemImage(id) { const it = (db.masters.items || []).find(function (x) { return x.id === id; }); if (!it || !it.image) return; closeItemImageViewer(); const el = document.createElement('div'); el.id = 'itemImageViewer'; el.className = 'item-image-viewer'; el.innerHTML = '<div class="item-image-viewer-card" onclick="event.stopPropagation()"><div class="item-image-viewer-head"><b>' + esc(it.name) + (it.code ? ' Â· ' + esc(it.code) : '') + '</b><button class="btn-icon" onclick="closeItemImageViewer()">' + ic('x', 16) + '</button></div><div class="item-image-viewer-body"><img src="' + it.image + '" alt="' + esc(it.name) + '"></div></div>'; el.onclick = closeItemImageViewer; document.body.appendChild(el); }
 function toggleItemRecordStatus(id) { const it = db.masters.items.find(function (x) { return x.id === id; }); if (!it) return; const old = it.active !== false; it.active = !old; saveDB(); toast(it.name + ' marked ' + (it.active ? 'Active' : 'Inactive'), 'green'); if (cur === 'masters') renderMasters(); else renderItemMaster(); }
 function editItemMaster(id) {
   if (cur === 'masters' && mTab === 'items') { openItemMasterPopup(id); return; }
@@ -6191,7 +6191,7 @@ function deleteItemMasterRow(id) {
 }
 function itemMasterFormHtml(it, popup) {
   it = it || {};
-  return '<div class="sec">' + (it.id ? 'Edit Item — ' + esc(it.name) : 'New Item') + '</div>' +
+  return '<div class="sec">' + (it.id ? 'Edit Item â€” ' + esc(it.name) : 'New Item') + '</div>' +
     '<div class="grid-auto im-equal-grid">' +
     field('Category *', cbox('im-category', { opts: db.masters.categories, value: it.category || '', f: 'category', placeholder: 'Select Category', addMaster: 'categories', addText: 'Item Categories', free: true, onSet: function (v) { imCategoryChanged(v); } })) +
     field('Classification *', cbox('im-classification', { opts: childValues('classifications', it.category), value: it.classification || '', f: 'classification', placeholder: '-Classification-', addMaster: 'classifications', addText: 'Classifications', free: true })) +
@@ -6207,7 +6207,7 @@ function itemMasterFormHtml(it, popup) {
     field('Item Image', '<div class="img-upload-row"><label class="btn btn-ghost btn-sm file-btn">Choose file<input type="file" accept="image/*" id="im-image-file" onchange="onItemImageFile(this)"></label><span id="im-image-name" class="sub-line">' + (it.image ? 'Image attached' : 'No file chosen') + '</span>' + (it.image ? '<img src="' + it.image + '" id="im-image-preview" class="im-thumb-lg">' : '<img id="im-image-preview" class="im-thumb-lg" style="display:none">') + '<button type="button" class="btn-icon danger" id="im-image-delete" title="Delete image" onclick="clearItemImage()" style="' + (it.image ? 'display:inline-flex' : 'display:none') + '">' + ic('trash', 14) + '</button></div>') +
     '</div>' +
     (popup ? '' : '<div style="margin-top:8px;display:flex;gap:10px">' +
-      '<button class="btn btn-primary" onclick="saveItemMasterForm()">💾 ' + (it.id ? 'Update Item' : 'Submit') + '</button>' +
+      '<button class="btn btn-primary" onclick="saveItemMasterForm()">ðŸ’¾ ' + (it.id ? 'Update Item' : 'Submit') + '</button>' +
       (it.id ? '<button class="btn btn-ghost" onclick="cancelEditItem()">Cancel Edit</button>' : '') +
       '</div>');
 }
@@ -6221,7 +6221,7 @@ function toggleItemActive() {
   sw.setAttribute('aria-pressed', String(on));
   if (lab) lab.textContent = on ? 'Active' : 'Inactive';
 }
-function clearItemImage() { imImageData = ''; const prev = $('im-image-preview'), name = $('im-image-name'), del = $('im-image-delete'), file = $('im-image-file'); if (prev) { prev.removeAttribute('src'); prev.style.display = 'none'; } if (name) name.textContent = 'No file chosen'; if (del) del.style.display = 'none'; if (file) file.value = ''; toast('Item image removed — save the Item to apply', 'green'); }
+function clearItemImage() { imImageData = ''; const prev = $('im-image-preview'), name = $('im-image-name'), del = $('im-image-delete'), file = $('im-image-file'); if (prev) { prev.removeAttribute('src'); prev.style.display = 'none'; } if (name) name.textContent = 'No file chosen'; if (del) del.style.display = 'none'; if (file) file.value = ''; toast('Item image removed â€” save the Item to apply', 'green'); }
 function onItemImageFile(inp) {
   const f = inp.files && inp.files[0]; if (!f) return;
   $('im-image-name').textContent = f.name;
@@ -6272,7 +6272,7 @@ function saveItemMasterForm() {
     unit: cboxGet('im-uom'), width: $('im-width').value.trim(), hsn: $('im-hsn').value.trim(),
     gst: gst, image: imImageData,
     active: activeVal === '1',
-    /* retired fields — preserved so existing records / exports stay intact */
+    /* retired fields â€” preserved so existing records / exports stay intact */
     hasColor: !!prev.hasColor, sizes: Array.isArray(prev.sizes) ? prev.sizes.slice() : [],
     colorName: prev.colorName || '', moq: prev.moq ?? '',
     itemRate: prev.itemRate ?? '', itemMRP: prev.itemMRP ?? '',
@@ -6285,13 +6285,13 @@ function saveItemMasterForm() {
     const ex = db.masters.items.find(i => i.id === imEditId);
     if (!ex.code) { db.seq.item = (db.seq.item || 0) + 1; ex.code = 'ITM-' + String(db.seq.item).padStart(4, '0'); }
     Object.assign(ex, data);
-    saveDB(); toast('Item updated — ' + name, 'green'); imEditId = null;
+    saveDB(); toast('Item updated â€” ' + name, 'green'); imEditId = null;
     if (MASTER_RECORD_POPUP === 'item') { MASTER_RECORD_POPUP = ''; refreshMasterRecords('item'); } else renderItemMaster();
   } else {
     db.seq.item = (db.seq.item || 0) + 1;
     data.id = uid(); data.code = 'ITM-' + String(db.seq.item).padStart(4, '0');
     db.masters.items.push(data);
-    saveDB(); toast('Item added — ' + name, 'green');
+    saveDB(); toast('Item added â€” ' + name, 'green');
     if (MASTER_RECORD_POPUP === 'item') { MASTER_RECORD_POPUP = ''; refreshMasterRecords('item'); } else renderItemMaster();
   }
 }
@@ -6307,8 +6307,8 @@ function exportItemsCSV() {
     a.href = URL.createObjectURL(blob);
     a.download = 'items_' + today() + '.csv';
     document.body.appendChild(a); a.click(); a.remove();
-    toast('CSV exported — ' + db.masters.items.length + ' items', 'green');
-  } catch (e) { toast('Download blocked in preview — open the file in a browser to export'); }
+    toast('CSV exported â€” ' + db.masters.items.length + ' items', 'green');
+  } catch (e) { toast('Download blocked in preview â€” open the file in a browser to export'); }
 }
 
 /* ---------------- Tables ---------------- */
@@ -6318,7 +6318,7 @@ function statusOpts(module) {
 function setStatus(m, id, v) {
   const r = db[m].find(x => x.id === id); if (!r) return;
   if (!userCanRecord(m, r, 'edit')) return toast('Status update access denied', 'red');
-  r.status = v; saveDB(); toast('Status → ' + v, 'green');
+  r.status = v; saveDB(); toast('Status â†’ ' + v, 'green');
   if (m === 'inward' && r.poRef) updatePOStatus(r.poRef);
   render();
 }
@@ -6360,18 +6360,18 @@ function closeStatusCell(m, r) {
   // v5: prepend warning pill(s) so user can see flagged records
   let warn = '';
   // v5: only show warning badges if the warning is still valid based on current data
-  if (m === 'po' && r.zeroRateWarning && (r.items || []).some(i => pf(i.rate) <= 0)) warn += '<span class="badge b-amber" style="margin-right:4px" title="This PO has one or more zero-rate items">⚠ Zero rate</span>';
+  if (m === 'po' && r.zeroRateWarning && (r.items || []).some(i => pf(i.rate) <= 0)) warn += '<span class="badge b-amber" style="margin-right:4px" title="This PO has one or more zero-rate items">âš  Zero rate</span>';
   if (m === 'inward' && r.overReceiptWarning && (r.items || []).length) {
     const po = (db.po || []).find(p => p.no === r.poRef);
     if (po) {
       const prior = {};
       (db.inward || []).forEach(rr => { if (rr.poRef === r.poRef && !/cancel|reject/i.test(rr.status || '')) (rr.items || []).forEach(i => { const k = lcName(bareItemName(i.name)); prior[k] = (prior[k] || 0) + pf(i.recQty); }); });
       const stillOver = (r.items || []).some(i => { const k = lcName(bareItemName(i.name)); const ordered = (po.items || []).filter(p => lcName(bareItemName(p.name)) === k).reduce((a, p) => a + pf(p.qty), 0); return ordered && prior[k] > ordered; });
-      if (stillOver) warn += '<span class="badge b-amber" style="margin-right:4px" title="This inward exceeds the related PO\'s ordered quantity">⚠ Over-receipt</span>';
+      if (stillOver) warn += '<span class="badge b-amber" style="margin-right:4px" title="This inward exceeds the related PO\'s ordered quantity">âš  Over-receipt</span>';
     }
   }
-  if (m === 'inward' && r.poNotApprovedWarning) warn += '<span class="badge b-amber" style="margin-right:4px" title="This inward was created against a PO that was not yet approved (' + esc(r.poNotApprovedWarning.status) + ')">⚠ PO ' + esc(r.poNotApprovedWarning.status) + '</span>';
-  if (m === 'jobworkreturn' && r.overBalanceWarning) warn += '<span class="badge b-amber" style="margin-right:4px" title="This return exceeds the issued balance for one or more items">⚠ Over-return</span>';
+  if (m === 'inward' && r.poNotApprovedWarning) warn += '<span class="badge b-amber" style="margin-right:4px" title="This inward was created against a PO that was not yet approved (' + esc(r.poNotApprovedWarning.status) + ')">âš  PO ' + esc(r.poNotApprovedWarning.status) + '</span>';
+  if (m === 'jobworkreturn' && r.overBalanceWarning) warn += '<span class="badge b-amber" style="margin-right:4px" title="This return exceeds the issued balance for one or more items">âš  Over-return</span>';
   if (m === 'jobwork' && r.fgOverReceiptWarning) {
     // v5: only show if receipts are STILL over the order
     const order = {};
@@ -6379,15 +6379,15 @@ function closeStatusCell(m, r) {
     const prior = {};
     (r.receipts || []).forEach(rx => { if (!/reject|fail/i.test(rx.qc || '')) { const k = qaStyleKey(rx.desc); prior[k] = (prior[k] || 0) + pf(rx.qty); } });
     const stillOver = Object.keys(order).some(k => prior[k] > order[k]);
-    if (stillOver) warn += '<span class="badge b-amber" style="margin-right:4px" title="Finished-goods receipts exceed the order qty for one or more styles">⚠ FG over-order</span>';
+    if (stillOver) warn += '<span class="badge b-amber" style="margin-right:4px" title="Finished-goods receipts exceed the order qty for one or more styles">âš  FG over-order</span>';
   }
   // v5: show rejection reason for rejected POs
   if (m === 'po' && r.status === 'Rejected' && r.rejectReason) {
     const reasonEsc = esc(r.rejectReason);
     const who = r.rejectedBy ? ' by ' + esc(r.rejectedBy) : '';
-    warn += '<span class="badge b-red" style="margin-right:4px;cursor:help" title="Rejection reason' + who + ': ' + reasonEsc + '">✗ Rejected</span>';
+    warn += '<span class="badge b-red" style="margin-right:4px;cursor:help" title="Rejection reason' + who + ': ' + reasonEsc + '">âœ— Rejected</span>';
   }
-  if (!userCan(m, 'edit')) return warn + badge(r.status || '—');
+  if (!userCan(m, 'edit')) return warn + badge(r.status || 'â€”');
   if (r.status === 'Closed') {
     return warn + '<button type="button" class="btn btn-ghost btn-sm" title="Reopen" onclick="event.stopPropagation();reopenRecord(\'' + m + '\',\'' + r.id + '\')">Reopen</button>';
   }
@@ -6538,15 +6538,15 @@ function pagerBar(pg, kind, key) {
     let a = Math.max(1, cur - 2), b = Math.min(pages, a + 4);
     a = Math.max(1, b - 4);
     if (a > 1) nums += '<button type="button" class="pager-num" onclick="' + go(1) + '">1</button>';
-    if (a > 2) nums += '<span class="pager-gap">…</span>';
+    if (a > 2) nums += '<span class="pager-gap">â€¦</span>';
     for (let i = a; i <= b; i++) {
       nums += '<button type="button" class="pager-num' + (i === cur ? ' on' : '') + '" onclick="' + go(i) + '">' + i + '</button>';
     }
-    if (b < pages - 1) nums += '<span class="pager-gap">…</span>';
+    if (b < pages - 1) nums += '<span class="pager-gap">â€¦</span>';
     if (b < pages) nums += '<button type="button" class="pager-num" onclick="' + go(pages) + '">' + pages + '</button>';
   }
   return '<div class="pager">' +
-    '<span class="rowcount" style="margin-left:0">' + (pg.total ? ('Showing ' + pg.from + '–' + pg.to + ' of ' + pg.total) : '0 records') + '</span>' +
+    '<span class="rowcount" style="margin-left:0">' + (pg.total ? ('Showing ' + pg.from + 'â€“' + pg.to + ' of ' + pg.total) : '0 records') + '</span>' +
     '<div class="pager-nav">' +
     (pages > 1 ? ('<button type="button" class="btn btn-ghost btn-sm" ' + (cur <= 1 ? 'disabled' : 'onclick="' + go(cur - 1) + '"') + '>Prev</button>' + nums +
       '<button type="button" class="btn btn-ghost btn-sm" ' + (cur >= pages ? 'disabled' : 'onclick="' + go(cur + 1) + '"') + '>Next</button>') : '') +
@@ -6590,7 +6590,7 @@ function listTabs(m) {
     ];
   }
   if (m === 'po') {
-    // v5: role-aware PO tabs — managers/admins see "Pending Approval" tab
+    // v5: role-aware PO tabs â€” managers/admins see "Pending Approval" tab
     const u = authUser();
     const isApprover = u && (u.role === 'Admin' || u.role === 'Manager' || (u.permissions && u.permissions.modules && u.permissions.modules.po && u.permissions.modules.po.approve));
     if (isApprover) {
@@ -6602,7 +6602,7 @@ function listTabs(m) {
         { v: 'Approved', l: 'Approved' }
       ];
     } else {
-      // Junior user (Store/Operator) tabs — show workflow states clearly
+      // Junior user (Store/Operator) tabs â€” show workflow states clearly
       return [
         { v: 'MyDrafts', l: 'My Drafts' },
         { v: 'MyPending', l: 'Awaiting Approval' },
@@ -6692,7 +6692,7 @@ function poApprovalCell(r) {
       html += '<button style="' + btnStyle + ';color:#1e293b;background:#f1f5f9" title="Re-open as Draft" onclick="event.stopPropagation();window.qaSetStatus(\'po\',\'' + r.id + '\',\'Draft\')">Re-open</button>';
     }
   }
-  if (html.indexOf('<button') < 0) html += '<span class="muted" style="color:#94a3b8">—</span>';
+  if (html.indexOf('<button') < 0) html += '<span class="muted" style="color:#94a3b8">â€”</span>';
   html += '</div>';
   return html;
 }
@@ -6707,7 +6707,7 @@ ORDER.forEach(m => selState[m] = {});
 function sortKeyVal(m, r, key) {
   const c = (TABLE_COLS[m] || []).find(x => x.h === key);
   if (!c) return '';
-  const raw = String(c.v(r)).replace(/<[^>]*>/g, '').replace(/[₹,\s]/g, '');
+  const raw = String(c.v(r)).replace(/<[^>]*>/g, '').replace(/[â‚¹,\s]/g, '');
   const n = parseFloat(raw);
   return (raw !== '' && !isNaN(n) && /^[-\d.]+$/.test(raw)) ? n : raw.toLowerCase();
 }
@@ -6756,7 +6756,7 @@ function bulkStatus(m, v) {
 }
 function clearFilters(m) { fState[m].q = ''; fState[m].st = ''; fState[m].page = 1; renderTable(m); }
 
-/* just the <tbody> rows — shared by renderTable() and tableSearch() */
+/* just the <tbody> rows â€” shared by renderTable() and tableSearch() */
 function tableBodyHtml(m) {
   const pg = pagedList(m);
   const rows = pg.rows;
@@ -6794,14 +6794,14 @@ function tableBodyHtml(m) {
       extra += '<button class="btn-icon" title="Duplicate Job Work" onclick="event.stopPropagation();duplicateJobWork(\'' + r.id + '\')">' + ic('copy', 15) + '</button>';
     }
     if (m === 'jobwork' || m === 'sample') {
-      /* always available — fully received entries still need their
+      /* always available â€” fully received entries still need their
          receipts opened for review / correction */
       const rcvd = jwTotalReceived(r), ordq = jwTotalOrder(r);
       const done = ordq > 0 && rcvd >= ordq;
       const what = m === 'sample' ? 'samples' : 'finished goods';
       if (r.status !== 'Closed' && userCan(m, 'edit')) {
         extra += '<button class="btn-icon recv" title="' +
-          (done ? 'Received ' + fmtNum(rcvd) + ' of ' + fmtNum(ordq) + ' — open to review or edit receipts'
+          (done ? 'Received ' + fmtNum(rcvd) + ' of ' + fmtNum(ordq) + ' â€” open to review or edit receipts'
             : 'Receive ' + what + ' (' + fmtNum(rcvd) + ' of ' + fmtNum(ordq) + ' received)') +
           '" onclick="event.stopPropagation();openReceive(\'' + r.id + '\',\'' + m + '\')">' + ic('receive', 15) + '</button>';
       }
@@ -6815,7 +6815,7 @@ function tableBodyHtml(m) {
       (canDeleteRow
         ? (delBlock
           ? '<button class="btn-icon" disabled title="' + esc(delBlock) + '">' + ic('lock', 15) + '</button>'
-          : '<button class="btn-icon danger" title="Delete' + (delBlock ? ' — Warning: ' + esc(delBlock) : '') + '" onclick="delEntry(\'' + m + '\',\'' + r.id + '\')">' + ic('trash', 15) + '</button>')
+          : '<button class="btn-icon danger" title="Delete' + (delBlock ? ' â€” Warning: ' + esc(delBlock) : '') + '" onclick="delEntry(\'' + m + '\',\'' + r.id + '\')">' + ic('trash', 15) + '</button>')
         : '') +
       '</td></tr>';
   });
@@ -6843,7 +6843,7 @@ function renderTable(m) {
     '<span class="rowcount" id="tblcount_' + m + '">' + rows.length + ' of ' + total + '</span>' +
     '</div>';
 
-  /* row selection was removed — no bulk bar */
+  /* row selection was removed â€” no bulk bar */
   const bulkBar = '';
 
   const cols = TABLE_COLS[m];
@@ -6863,7 +6863,7 @@ function renderTable(m) {
     '<div class="table-wrap"><table><thead>' + head + '</thead><tbody id="tblbody_' + m + '" data-sr-start="' + pg.from + '">' + body + '</tbody></table></div>' +
     pagerBar(pg, 'list', m) + '</div>';
 }
-/* Typing in the index search must NOT rebuild the panel — that would destroy
+/* Typing in the index search must NOT rebuild the panel â€” that would destroy
    the focused input after every keystroke. Only the rows + counters refresh. */
 function tableSearch(m, v) {
   fState[m].q = v;
@@ -6895,7 +6895,7 @@ const TABLE_COLS = {
           ? '<span class="badge b-pink">JW Return</span>'
           : '<span class="badge b-gray">Against PO</span>'
     },
-    { h: 'PO Ref', v: r => esc(r.poRef) || '—' },
+    { h: 'PO Ref', v: r => esc(r.poRef) || 'â€”' },
     { h: 'Supplier', v: r => esc(r.supplier) },
     { h: 'Recv Qty', v: r => fmtNum(sumBy(r.items, 'recQty')), cls: 'num' }
   ],
@@ -6903,10 +6903,10 @@ const TABLE_COLS = {
     { h: 'JW No', v: r => '<b>' + esc(r.no) + '</b>' },
     { h: 'Date', v: r => esc(dpToDisplay(r.date) || r.date) },
     { h: 'Job Worker / Vendor', v: r => esc(r.vendor) },
-    { h: 'Finished Styles', v: r => { const gs = jwGarments(r).filter(x => x.desc); if (!gs.length) return '—'; const f = gs[0]; return '<b>' + esc(styleLabel(f.desc)) + '</b>' + (f.colour ? '<div class="sub-line">🎨 ' + esc(f.colour) + '</div>' : '') + (f.sizes && Object.keys(f.sizes).length ? '<div class="sub-line">📐 ' + esc(Object.entries(f.sizes).map(([s, q]) => s + ':' + q).join(' ')) + '</div>' : '') + (gs.length > 1 ? '<div class="sub-line">+' + (gs.length - 1) + ' more style' + (gs.length > 2 ? 's' : '') + '</div>' : ''); } },
+    { h: 'Finished Styles', v: r => { const gs = jwGarments(r).filter(x => x.desc); if (!gs.length) return 'â€”'; const f = gs[0]; return '<b>' + esc(styleLabel(f.desc)) + '</b>' + (f.colour ? '<div class="sub-line">ðŸŽ¨ ' + esc(f.colour) + '</div>' : '') + (f.sizes && Object.keys(f.sizes).length ? '<div class="sub-line">ðŸ“ ' + esc(Object.entries(f.sizes).map(([s, q]) => s + ':' + q).join(' ')) + '</div>' : '') + (gs.length > 1 ? '<div class="sub-line">+' + (gs.length - 1) + ' more style' + (gs.length > 2 ? 's' : '') + '</div>' : ''); } },
     { h: 'Fabric Issued', v: r => fmtNum(jwFabricTotal(r)) + ' ' + esc(jwFabricUnit(r)), cls: 'num' },
-    { h: 'Trims Issued', v: r => { const t = jwTrimSummary(r); if (!t.length) return '—'; return '<span class="badge b-blue">' + t.length + ' item' + (t.length > 1 ? 's' : '') + '</span><div class="sub-line">' + esc(t.map(x => x.name + ': ' + fmtNum(x.qty) + (x.unit ? ' ' + x.unit : '')).join(', ').slice(0, 48)) + '</div>'; } },
-    { h: 'Order Qty', v: r => pf(jwTotalOrder(r)) ? fmtNum(jwTotalOrder(r)) : '—', cls: 'num' },
+    { h: 'Trims Issued', v: r => { const t = jwTrimSummary(r); if (!t.length) return 'â€”'; return '<span class="badge b-blue">' + t.length + ' item' + (t.length > 1 ? 's' : '') + '</span><div class="sub-line">' + esc(t.map(x => x.name + ': ' + fmtNum(x.qty) + (x.unit ? ' ' + x.unit : '')).join(', ').slice(0, 48)) + '</div>'; } },
+    { h: 'Order Qty', v: r => pf(jwTotalOrder(r)) ? fmtNum(jwTotalOrder(r)) : 'â€”', cls: 'num' },
     { h: 'Charges', v: r => fmtINR(jwTotalCharges(r)), cls: 'num' },
     { h: 'Received', v: r => '<b>' + fmtNum(jwTotalReceived(r)) + '</b>' + (pf(jwTotalOrder(r)) > 0 ? ' / ' + fmtNum(jwTotalOrder(r)) : ''), cls: 'num' },
     { h: 'Job Work status', v: r => closeStatusCell('jobwork', r), stop: true }
@@ -6915,28 +6915,28 @@ const TABLE_COLS = {
     { h: 'Outward No', v: r => '<b>' + esc(r.no) + '</b>' },
     { h: 'Date', v: r => esc(dpToDisplay(r.date) || r.date) },
     { h: 'Process', v: r => processTypeBadge(r.processType) },
-    { h: 'Processor', v: r => esc(r.processor || '—') },
-    { h: 'Job Work Ref', v: r => esc(r.jwRef || '—') },
-    { h: 'Style', v: r => { const list = (r.items || []).map(function (it) { return styleLabel(it.style) || it.style; }).filter(Boolean); return list.length ? '<b>' + esc(list[0]) + '</b>' + (list.length > 1 ? '<div class="sub-line">+' + (list.length - 1) + ' more</div>' : '') : '—'; } },
+    { h: 'Processor', v: r => esc(r.processor || 'â€”') },
+    { h: 'Job Work Ref', v: r => esc(r.jwRef || 'â€”') },
+    { h: 'Style', v: r => { const list = (r.items || []).map(function (it) { return styleLabel(it.style) || it.style; }).filter(Boolean); return list.length ? '<b>' + esc(list[0]) + '</b>' + (list.length > 1 ? '<div class="sub-line">+' + (list.length - 1) + ' more</div>' : '') : 'â€”'; } },
     { h: 'Outward Qty', v: r => fmtNum((r.items || []).reduce(function (a, it) { return a + pf(it.qty); }, 0)), cls: 'num' },
     { h: 'Process PO status', v: r => closeStatusCell('processoutward', r), stop: true }
   ],
   processinward: [
     { h: 'Inward No', v: r => '<b>' + esc(r.no) + '</b>' },
     { h: 'Date', v: r => esc(dpToDisplay(r.date) || r.date) },
-    { h: 'Outward Ref', v: r => esc(r.outwardRef || '—') },
+    { h: 'Outward Ref', v: r => esc(r.outwardRef || 'â€”') },
     { h: 'Process', v: r => processTypeBadge(r.processType) },
-    { h: 'Processor', v: r => esc(r.processor || '—') },
-    { h: 'Warehouse', v: r => esc(r.warehouse || '—') },
+    { h: 'Processor', v: r => esc(r.processor || 'â€”') },
+    { h: 'Warehouse', v: r => esc(r.warehouse || 'â€”') },
     { h: 'Received Qty', v: r => fmtNum((r.items || []).reduce(function (a, it) { return a + pf(it.qty); }, 0)), cls: 'num' },
     { h: 'Status', v: r => statusCell('processinward', r.id, r.status) }
   ],
   purchasereturn: [
     { h: 'Return No', v: r => '<b>' + esc(r.no) + '</b>' },
     { h: 'Date', v: r => esc(dpToDisplay(r.date) || r.date) },
-    { h: 'PO Ref', v: r => esc(r.poRef) || '—' },
-    { h: 'Inward No', v: r => esc(r.inwardNo) || '—' },
-    { h: 'Supplier', v: r => esc(r.supplier) || '—' },
+    { h: 'PO Ref', v: r => esc(r.poRef) || 'â€”' },
+    { h: 'Inward No', v: r => esc(r.inwardNo) || 'â€”' },
+    { h: 'Supplier', v: r => esc(r.supplier) || 'â€”' },
     { h: 'Items', v: r => (r.items || []).length, cls: 'num' },
     { h: 'Return Qty', v: r => fmtNum(sumBy(r.items, 'retQty')), cls: 'num' },
     { h: 'Value', v: r => fmtINR(prTotal(r)), cls: 'num' }
@@ -6944,9 +6944,9 @@ const TABLE_COLS = {
   jobworkreturn: [
     { h: 'Return No', v: r => '<b>' + esc(r.no) + '</b>' },
     { h: 'Date', v: r => esc(dpToDisplay(r.date) || r.date) },
-    { h: 'JW Ref', v: r => esc(r.jwRef) || '—' },
-    { h: 'Job Worker', v: r => esc(r.vendor) || '—' },
-    { h: 'Warehouse', v: r => esc(r.warehouse) || '—' },
+    { h: 'JW Ref', v: r => esc(r.jwRef) || 'â€”' },
+    { h: 'Job Worker', v: r => esc(r.vendor) || 'â€”' },
+    { h: 'Warehouse', v: r => esc(r.warehouse) || 'â€”' },
     { h: 'Items', v: r => (r.items || []).length, cls: 'num' },
     { h: 'Return Qty', v: r => fmtNum(sumBy(r.items, 'retQty')), cls: 'num' },
     { h: 'Status', v: r => statusCell('jobworkreturn', r.id, r.status) }
@@ -6957,19 +6957,19 @@ const TABLE_COLS = {
     { h: 'Job Worker / Vendor', v: r => esc(r.vendor) },
     {
       h: 'Style', v: r => {
-        const gs = jwGarments(r).filter(x => x.desc); if (!gs.length) return '—'; const f = gs[0];
+        const gs = jwGarments(r).filter(x => x.desc); if (!gs.length) return 'â€”'; const f = gs[0];
         return '<b>' + esc(styleLabel(f.desc)) + '</b>' +
-          (f.sizes && Object.keys(f.sizes).length ? '<div class="sub-line">📐 ' + esc(Object.entries(f.sizes).map(([s, q]) => s + ':' + q).join(' ')) + '</div>' : '') +
+          (f.sizes && Object.keys(f.sizes).length ? '<div class="sub-line">ðŸ“ ' + esc(Object.entries(f.sizes).map(([s, q]) => s + ':' + q).join(' ')) + '</div>' : '') +
           (gs.length > 1 ? '<div class="sub-line">+' + (gs.length - 1) + ' more</div>' : '');
       }
     },
     {
       h: 'Material Issued', v: r => {
-        const t = jwTrimSummary({ issues: r.extras || [] }); if (!t.length) return '—';
+        const t = jwTrimSummary({ issues: r.extras || [] }); if (!t.length) return 'â€”';
         return '<span class="badge b-blue">' + t.length + ' item' + (t.length > 1 ? 's' : '') + '</span>';
       }
     },
-    { h: 'Sample Qty', v: r => pf(jwTotalOrder(r)) ? fmtNum(jwTotalOrder(r)) : '—', cls: 'num' },
+    { h: 'Sample Qty', v: r => pf(jwTotalOrder(r)) ? fmtNum(jwTotalOrder(r)) : 'â€”', cls: 'num' },
     { h: 'Charges', v: r => fmtINR(jwTotalCharges(r)), cls: 'num' },
     { h: 'Received', v: r => '<b>' + fmtNum(jwTotalReceived(r)) + '</b>' + (pf(jwTotalOrder(r)) > 0 ? ' / ' + fmtNum(jwTotalOrder(r)) : ''), cls: 'num' },
     { h: 'Sample status', v: r => closeStatusCell('sample', r), stop: true }
@@ -6985,10 +6985,10 @@ const TABLE_COLS = {
   ],
   costing: [
     { h: 'Costing No', v: r => '<b>' + esc(r.no) + '</b>' },
-    { h: 'Brand', v: r => esc((r.order && r.order.brand) || '—') },
-    { h: 'Label', v: r => esc((r.order && r.order.label) || '—') },
-    { h: 'Style', v: r => esc((r.order && r.order.style) || '—') },
-    { h: 'Description', v: r => esc((r.order && r.order.styleDescription) || '—') },
+    { h: 'Brand', v: r => esc((r.order && r.order.brand) || 'â€”') },
+    { h: 'Label', v: r => esc((r.order && r.order.label) || 'â€”') },
+    { h: 'Style', v: r => esc((r.order && r.order.style) || 'â€”') },
+    { h: 'Description', v: r => esc((r.order && r.order.styleDescription) || 'â€”') },
     { h: 'Order Qty', v: r => fmtNum((r.order && r.order.totalQty) || 0), cls: 'num' },
     { h: 'FOB', v: r => fmtINR((r.order && r.order.fob) || 0), cls: 'num' },
     { h: 'Total Prod. Cost', v: r => fmtINR((r.totals && r.totals.totalProduction) || 0), cls: 'num' },
@@ -7021,10 +7021,10 @@ function renumberSr(root) {
 
 let formCtx = null;
 let PENDING_INWARD_INVOICE = null;
-function clearInwardInvoiceGate(e) { if (e) { e.preventDefault(); e.stopPropagation(); } PENDING_INWARD_INVOICE = null; const file = $('invoice-gate-file'), preview = $('invoice-gate-preview'), title = $('invoice-gate-title'), help = $('invoice-gate-help'), msg = $('invoice-gate-msg'), del = $('invoice-gate-delete'); if (file) file.value = ''; if (preview) preview.innerHTML = '<span class="pod-upload-plus">＋</span>'; if (title) title.textContent = 'Upload Invoice'; if (help) help.textContent = 'Image or PDF · max 5 MB'; if (msg) { msg.textContent = 'Invoice removed'; msg.className = 'fhint bad'; } if (del) del.style.display = 'none'; }
-function onInwardInvoiceGateFile(inp) { const f = inp.files && inp.files[0], msg = $('invoice-gate-msg'); PENDING_INWARD_INVOICE = null; if (!f) return; const resetPreview = $('invoice-gate-preview'), resetTitle = $('invoice-gate-title'), resetHelp = $('invoice-gate-help'); if (resetPreview) resetPreview.innerHTML = '<span class="pod-upload-plus">＋</span>'; if (resetTitle) resetTitle.textContent = 'Upload Invoice'; if (resetHelp) resetHelp.textContent = 'Image or PDF · max 5 MB'; const ok = /^image\//i.test(f.type) || /pdf/i.test(f.type) || /\.(pdf|png|jpe?g|webp)$/i.test(f.name); if (!ok) { if (msg) { msg.textContent = 'Upload a PDF or image invoice.'; msg.className = 'fhint bad'; } inp.value = ''; return; } if (f.size > 5 * 1024 * 1024) { if (msg) { msg.textContent = 'Invoice file must be 5 MB or smaller.'; msg.className = 'fhint bad'; } inp.value = ''; return; } const rd = new FileReader(); rd.onload = function (e) { PENDING_INWARD_INVOICE = { name: 'Supplier Invoice', fileName: f.name, data: e.target.result }; const preview = $('invoice-gate-preview'), title = $('invoice-gate-title'), help = $('invoice-gate-help'), del = $('invoice-gate-delete'), isPdf = /pdf/i.test(f.type) || /\.pdf$/i.test(f.name); if (preview) preview.innerHTML = isPdf ? '<div class="pdf">PDF</div>' : '<img src="' + e.target.result + '" alt="Invoice preview">'; if (title) title.textContent = f.name; if (help) help.textContent = 'Invoice attached · click to replace'; if (del) del.style.display = 'inline-flex'; if (msg) { msg.textContent = 'Ready to continue'; msg.className = 'fhint ok'; } }; rd.readAsDataURL(f); }
+function clearInwardInvoiceGate(e) { if (e) { e.preventDefault(); e.stopPropagation(); } PENDING_INWARD_INVOICE = null; const file = $('invoice-gate-file'), preview = $('invoice-gate-preview'), title = $('invoice-gate-title'), help = $('invoice-gate-help'), msg = $('invoice-gate-msg'), del = $('invoice-gate-delete'); if (file) file.value = ''; if (preview) preview.innerHTML = '<span class="pod-upload-plus">ï¼‹</span>'; if (title) title.textContent = 'Upload Invoice'; if (help) help.textContent = 'Image or PDF Â· max 5 MB'; if (msg) { msg.textContent = 'Invoice removed'; msg.className = 'fhint bad'; } if (del) del.style.display = 'none'; }
+function onInwardInvoiceGateFile(inp) { const f = inp.files && inp.files[0], msg = $('invoice-gate-msg'); PENDING_INWARD_INVOICE = null; if (!f) return; const resetPreview = $('invoice-gate-preview'), resetTitle = $('invoice-gate-title'), resetHelp = $('invoice-gate-help'); if (resetPreview) resetPreview.innerHTML = '<span class="pod-upload-plus">ï¼‹</span>'; if (resetTitle) resetTitle.textContent = 'Upload Invoice'; if (resetHelp) resetHelp.textContent = 'Image or PDF Â· max 5 MB'; const ok = /^image\//i.test(f.type) || /pdf/i.test(f.type) || /\.(pdf|png|jpe?g|webp)$/i.test(f.name); if (!ok) { if (msg) { msg.textContent = 'Upload a PDF or image invoice.'; msg.className = 'fhint bad'; } inp.value = ''; return; } if (f.size > 5 * 1024 * 1024) { if (msg) { msg.textContent = 'Invoice file must be 5 MB or smaller.'; msg.className = 'fhint bad'; } inp.value = ''; return; } const rd = new FileReader(); rd.onload = function (e) { PENDING_INWARD_INVOICE = { name: 'Supplier Invoice', fileName: f.name, data: e.target.result }; const preview = $('invoice-gate-preview'), title = $('invoice-gate-title'), help = $('invoice-gate-help'), del = $('invoice-gate-delete'), isPdf = /pdf/i.test(f.type) || /\.pdf$/i.test(f.name); if (preview) preview.innerHTML = isPdf ? '<div class="pdf">PDF</div>' : '<img src="' + e.target.result + '" alt="Invoice preview">'; if (title) title.textContent = f.name; if (help) help.textContent = 'Invoice attached Â· click to replace'; if (del) del.style.display = 'inline-flex'; if (msg) { msg.textContent = 'Ready to continue'; msg.className = 'fhint ok'; } }; rd.readAsDataURL(f); }
 function openInwardTypeForm(type) { closeDialog(); pageView = { kind: 'form', m: 'inward', id: null, inwardType: type }; render(); }
-function requestAgainstPoInvoice() { PENDING_INWARD_INVOICE = null; const alternatives = []; if (userCanInward('Opening Stock', 'create')) alternatives.push('<button type="button" class="btn btn-ghost btn-sm" onclick="PENDING_INWARD_INVOICE=null;openInwardTypeForm(\'Opening Stock\')">Opening Stock instead</button>'); if (userCanInward('Job Work Return', 'create')) alternatives.push('<button type="button" class="btn btn-ghost btn-sm" onclick="PENDING_INWARD_INVOICE=null;openInwardTypeForm(\'Job Work Return\')">Job Work Return instead</button>'); openDialog({ title: 'Against PO — Invoice Required', message: 'Attach the supplier invoice before creating an Against PO Inward entry.', bodyHtml: '<div class="dlg-field"><label>Supplier Invoice *</label><label class="pod-upload-box empty invoice-gate-upload" title="Upload supplier invoice"><button type="button" class="invoice-gate-delete" id="invoice-gate-delete" title="Delete invoice" onclick="clearInwardInvoiceGate(event)">' + ic('trash', 13) + '</button><input type="file" id="invoice-gate-file" accept="image/*,application/pdf,.pdf" onchange="onInwardInvoiceGateFile(this)"><span class="invoice-preview" id="invoice-gate-preview"><span class="pod-upload-plus">＋</span></span><span class="pod-upload-title" id="invoice-gate-title">Upload Invoice</span><span class="pod-upload-help" id="invoice-gate-help">Image or PDF · max 5 MB</span></label><div class="fhint" id="invoice-gate-msg"></div></div>' + (alternatives.length ? '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:14px">' + alternatives.join('') + '</div>' : ''), confirmText: 'Continue to Against PO', onConfirm: function () { if (!PENDING_INWARD_INVOICE) { reqBad('invoice-gate-file', 'Supplier Invoice is mandatory for Against PO Inward'); return false; } openInwardTypeForm('PO Receipt'); } }); }
+function requestAgainstPoInvoice() { PENDING_INWARD_INVOICE = null; const alternatives = []; if (userCanInward('Opening Stock', 'create')) alternatives.push('<button type="button" class="btn btn-ghost btn-sm" onclick="PENDING_INWARD_INVOICE=null;openInwardTypeForm(\'Opening Stock\')">Opening Stock instead</button>'); if (userCanInward('Job Work Return', 'create')) alternatives.push('<button type="button" class="btn btn-ghost btn-sm" onclick="PENDING_INWARD_INVOICE=null;openInwardTypeForm(\'Job Work Return\')">Job Work Return instead</button>'); openDialog({ title: 'Against PO â€” Invoice Required', message: 'Attach the supplier invoice before creating an Against PO Inward entry.', bodyHtml: '<div class="dlg-field"><label>Supplier Invoice *</label><label class="pod-upload-box empty invoice-gate-upload" title="Upload supplier invoice"><button type="button" class="invoice-gate-delete" id="invoice-gate-delete" title="Delete invoice" onclick="clearInwardInvoiceGate(event)">' + ic('trash', 13) + '</button><input type="file" id="invoice-gate-file" accept="image/*,application/pdf,.pdf" onchange="onInwardInvoiceGateFile(this)"><span class="invoice-preview" id="invoice-gate-preview"><span class="pod-upload-plus">ï¼‹</span></span><span class="pod-upload-title" id="invoice-gate-title">Upload Invoice</span><span class="pod-upload-help" id="invoice-gate-help">Image or PDF Â· max 5 MB</span></label><div class="fhint" id="invoice-gate-msg"></div></div>' + (alternatives.length ? '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:14px">' + alternatives.join('') + '</div>' : ''), confirmText: 'Continue to Against PO', onConfirm: function () { if (!PENDING_INWARD_INVOICE) { reqBad('invoice-gate-file', 'Supplier Invoice is mandatory for Against PO Inward'); return false; } openInwardTypeForm('PO Receipt'); } }); }
 function beginNewInward() { if (userCanInward('PO Receipt', 'create')) return requestAgainstPoInvoice(); if (userCanInward('Opening Stock', 'create')) return openInwardTypeForm('Opening Stock'); if (userCanInward('Job Work Return', 'create')) return openInwardTypeForm('Job Work Return'); toast('Create access denied', 'red'); }
 function openForm(m, id) {
   if (!id && m === 'inward') return beginNewInward();
@@ -7037,14 +7037,14 @@ function duplicateJobWork(id) {
   cur = 'jobwork';
   pageView = { kind: 'form', m: 'jobwork', id: null, duplicateFrom: id };
   render();
-  toast('Duplicated ' + (src.no || 'Job Work') + ' — review and save to generate a new JW number', 'green');
+  toast('Duplicated ' + (src.no || 'Job Work') + ' â€” review and save to generate a new JW number', 'green');
 }
 function saveForm() {
   const { m, id } = pageView;
   if (!userCan(m, id ? 'edit' : 'create')) return toast('Save access denied', 'red');
   if (id && (m === 'po' || m === 'jobwork' || m === 'sample')) {
     const rec = (db[m] || []).find(function (x) { return x.id === id; });
-    if (rec && rec.status === 'Closed') return toast((rec.no || MODULES[m].label) + ' is closed — reopen it to edit', 'red');
+    if (rec && rec.status === 'Closed') return toast((rec.no || MODULES[m].label) + ' is closed â€” reopen it to edit', 'red');
   }
   if (m === 'po') savePO(id);
   else if (m === 'inward') saveInward(id);
@@ -7067,7 +7067,7 @@ function removeRow(btn) {
   if (tb && (tb.id === 'jw-issues' || tb.id === 'jw-extras')) {
     const returnBlock = jwItemReturnBlockReason(rowItemName(row));
     if (returnBlock) return toast(returnBlock, 'red');
-    if (jwRowHasPod(row) && row.dataset.jwEditing !== '1') return toast('Cannot delete — POD already uploaded for this item', 'red');
+    if (jwRowHasPod(row) && row.dataset.jwEditing !== '1') return toast('Cannot delete â€” POD already uploaded for this item', 'red');
   }
   // v5: allow deletion of the last row in JW issues/extras and most tables
   // (only PO and Sale keep a minimum-one-row rule)
@@ -7076,7 +7076,7 @@ function removeRow(btn) {
   renumberSr(tb);
   recalc(tb.id.replace('-items', ''));
 }
-/* the item cell displays "Name (ITM-0001)" — store the bare name */
+/* the item cell displays "Name (ITM-0001)" â€” store the bare name */
 function bareItemName(v) {
   const s = String(v == null ? '' : v).trim();
   const out = s
@@ -7128,7 +7128,7 @@ function poItemRow(it) {
     '<td><button type="button" class="btn-icon danger" onclick="removeRow(this);calcPO()">' + ic('trash', 15) + '</button></td>' +
     '</tr>';
 }
-/* classification picked → restrict the item list on that row */
+/* classification picked â†’ restrict the item list on that row */
 function poClassChanged(clsId, nameId, cls) {
   const c = CBOX[nameId]; if (!c) return;
   c.opts = itemOptsFor(cls).map(function (o) { return normalizeOpt(o, 'items'); }).filter(function (o) { return masterValueAllowed(o.v); });
@@ -7176,7 +7176,7 @@ function poGstMismatch(i) {
   const master = pf(im.gst);
   const line = pf(i.cgstPct) + pf(i.sgstPct) + pf(i.igstPct);
   if (Math.abs(master - line) < 0.005) return '';
-  return 'GST mismatch — ' + bareItemName(i.name) + ' is configured at ' + fmtNum(master) +
+  return 'GST mismatch â€” ' + bareItemName(i.name) + ' is configured at ' + fmtNum(master) +
     '% in Item Master but this line totals ' + fmtNum(line) + '%. Re-select the item to reload the correct rate.';
 }
 /* recompute every line's GST from Item Master + the PO's GST type */
@@ -7206,7 +7206,7 @@ function poApplyItemDefaults(tr, name, unitId, clsId) {
   if (clsId && it && it.classification) cboxSet(clsId, it.classification);
   set('[data-f="hsn"]', it ? it.hsn : '');
   set('[data-f="unit"]', it ? (it.unit || itemUnit(name)) : '');
-  /* Item Master keeps ONE GST % — split it per the PO's GST type */
+  /* Item Master keeps ONE GST % â€” split it per the PO's GST type */
   const gstPct = it ? pf(it.gst) : 0;
   const gstType = String((($('f-gsttype') || {}).value) || '').toUpperCase();
   const hasGstType = !!gstType;
@@ -7218,7 +7218,7 @@ function poApplyItemDefaults(tr, name, unitId, clsId) {
 }
 
 /* =====================================================================
-   RICH TEXT EDITOR — Shopify-style toolbar for PO Terms & Conditions
+   RICH TEXT EDITOR â€” Shopify-style toolbar for PO Terms & Conditions
    ===================================================================== */
 function termsToHtml(raw) {
   const t = String(raw == null ? '' : raw);
@@ -7275,7 +7275,7 @@ function rteHtml(html) {
     '<span class="rte-sep"></span>' +
     '<button type="button" class="rte-btn" id="rte-code-btn" title="Show HTML" onclick="rteToggleCode()">&lt;/&gt;</button>' +
     '</div>' +
-    '<div class="rte-body" id="f-terms" contenteditable="true" spellcheck="true" data-ph="Write terms and conditions…">' + body + '</div>' +
+    '<div class="rte-body" id="f-terms" contenteditable="true" spellcheck="true" data-ph="Write terms and conditionsâ€¦">' + body + '</div>' +
     '</div>';
 }
 function rteCmd(cmd, val) {
@@ -7363,15 +7363,15 @@ function formPO(rec) {
   return '<div class="sec">Purchase Order</div><div class="grid-fixed">' +
     (isEdit ? field('PO No', '<input class="inp" id="f-no" value="' + esc(r.no || '') + '" disabled>') : '') +
     field('PO Date *', '<input class="inp" type="text" data-date autocomplete="off" disabled id="f-date" value="' + esc(r.date || today()) + '" title="Purchase orders are always dated today">') +
-    field('Supplier *', cbox('po-supplier', { opts: supplierPartyOptions(), value: r.supplier || '', f: 'supplier', placeholder: 'Type to search…', free: true, onSet: v => onPoSupplierChange(v) })) +
+    field('Supplier *', cbox('po-supplier', { opts: supplierPartyOptions(), value: r.supplier || '', f: 'supplier', placeholder: 'Type to searchâ€¦', free: true, onSet: v => onPoSupplierChange(v) })) +
     field('Supplier Trade Name *', cbox('po-trade', { opts: partyTradeOptions(r.supplier), value: r.supplierTrade || '', f: 'supplierTrade', placeholder: 'Select trade / branch', free: true, onSet: v => onPoTradeChange(v) })) +
-    field('Ship To *', cbox('po-shipto', { opts: partyOptions(), value: r.shipTo || '', f: 'shipTo', placeholder: 'Select party…', free: true })) +
+    field('Ship To *', cbox('po-shipto', { opts: partyOptions(), value: r.shipTo || '', f: 'shipTo', placeholder: 'Select partyâ€¦', free: true })) +
     field('GST Type', '<input class="inp" id="f-gsttype" value="' + esc(r.gstType || '') + '" placeholder="Auto after Supplier Trade Name" disabled title="Auto-filled from Supplier Trade Name"><div class="fhint" id="f-gsttype-hint">Select Supplier Trade Name to determine GST Type</div>') +
-    field('Buyer *', cbox('po-buyer', { opts: buyerPartyOptions(), value: r.buyer || '', f: 'buyer', placeholder: 'Type to search…', free: true, onSet: v => onPoBuyerChange(v) })) +
+    field('Buyer *', cbox('po-buyer', { opts: buyerPartyOptions(), value: r.buyer || '', f: 'buyer', placeholder: 'Type to searchâ€¦', free: true, onSet: v => onPoBuyerChange(v) })) +
     field('Style (Internal ID) *', mcbox('po-styles', {
       opts: styleOpts(r.buyer),
       selected: Array.isArray(r.styles) ? r.styles.slice() : (r.styles ? [r.styles] : []),
-      placeholder: 'Select one or more styles…'
+      placeholder: 'Select one or more stylesâ€¦'
     })) +
     '</div>' +
     '<div class="sec">Items</div>' +
@@ -7380,16 +7380,16 @@ function formPO(rec) {
     '<th>CGST%</th><th>CAMT</th><th>SGST%</th><th>SAMT</th><th>IGST%</th><th>IAMT</th><th>Amount</th><th>Total Amount</th><th></th>' +
     '</tr></thead>' +
     '<tbody id="po-items">' + (r.items && r.items.length ? r.items.map(poItemRow).join('') : poItemRow()) + '</tbody></table></div>' +
-    '<div class="po-add-item-bar"><button class="btn btn-ghost btn-sm" onclick="addRow(\'po-items\',poItemRow);calcPO()">＋ Add item</button></div>' +
+    '<div class="po-add-item-bar"><button class="btn btn-ghost btn-sm" onclick="addRow(\'po-items\',poItemRow);calcPO()">ï¼‹ Add item</button></div>' +
     '<div class="grid-fixed" style="margin-top:18px">' +
     field('Total Qty', '<input class="inp" id="po-sum-qty" value="0" disabled>') +
-    field('Gross Amount', '<input class="inp" id="po-sum-gross" value="₹0" disabled>') +
-    field('GST Amount', '<input class="inp" id="po-sum-gst" value="₹0" disabled>') +
-    field('Net Amount', '<input class="inp" id="po-sum-net" value="₹0" disabled>') +
+    field('Gross Amount', '<input class="inp" id="po-sum-gross" value="â‚¹0" disabled>') +
+    field('GST Amount', '<input class="inp" id="po-sum-gst" value="â‚¹0" disabled>') +
+    field('Net Amount', '<input class="inp" id="po-sum-net" value="â‚¹0" disabled>') +
     field('Delivery Date *', '<input class="inp" type="text" data-date autocomplete="off" readonly id="f-delivery-date" value="' + esc(r.deliveryDate || '') + '">') +
     field('Raised For *', cbox('po-raisedfor', { opts: db.masters.raisedForList, value: r.raisedFor || '', f: 'raisedFor', placeholder: 'Select raised for', addMaster: 'raisedForList', addText: 'Raised For', free: true })) +
     field('Qtn. / P.I. No.', '<input class="inp" id="f-qtn-no" value="' + esc(r.qtnNo || '') + '">') +
-    field('Qtn. / P.I. No. – Date', '<input class="inp" type="text" data-date autocomplete="off" readonly id="f-qtn-date" value="' + esc(r.qtnDate || '') + '">') +
+    field('Qtn. / P.I. No. â€“ Date', '<input class="inp" type="text" data-date autocomplete="off" readonly id="f-qtn-date" value="' + esc(r.qtnDate || '') + '">') +
     field('Payment Terms', cbox('po-payterms', { opts: db.masters.paymentTermsList, value: r.payTerms || '', f: 'payTerms', placeholder: 'Select payment terms', addMaster: 'paymentTermsList', addText: 'Payment Terms', free: true })) +
     field('Freight Charges', cbox('po-freightcharges', { opts: db.masters.freightChargesList, value: r.freightCharges || '', f: 'freightCharges', placeholder: '--Select--', addMaster: 'freightChargesList', addText: 'Freight Charges', free: true })) +
     field('P &amp; F', '<input class="inp" id="f-pnf" value="' + esc(r.pnf === '' || r.pnf == null ? 'Nil' : r.pnf) + '" placeholder="Nil" oninput="calcPO()" onfocus="if(this.value===\'Nil\')this.select()">') +
@@ -7432,7 +7432,7 @@ function pnfValue(v) {
   return pf(s);
 }
 /* mirror the supplier's GST type onto the PO and re-split every line's GST */
-/* supplier changed → refill its trades, clear the old pick, refresh GST */
+/* supplier changed â†’ refill its trades, clear the old pick, refresh GST */
 function onPoSupplierChange(supplier) {
   const c = CBOX['po-trade'];
   if (c) {
@@ -7456,7 +7456,7 @@ function onPoTradeChange(tradeName) {
   const el = $('f-gsttype'); if (el) el.value = gstType;
   const hint = $('f-gsttype-hint');
   if (hint) {
-    hint.textContent = t && gstType ? ('Auto from Supplier Trade Name' + (t.state ? ' — ' + t.state : '')) : 'Select a Supplier Trade Name with State / GST Type configured';
+    hint.textContent = t && gstType ? ('Auto from Supplier Trade Name' + (t.state ? ' â€” ' + t.state : '')) : 'Select a Supplier Trade Name with State / GST Type configured';
     hint.className = t && gstType ? 'fhint ok' : 'fhint';
   }
   qsa('#po-items tr').forEach(function (tr) {
@@ -7490,10 +7490,10 @@ function savePO(id) {
   /* validate in the same order the fields appear on screen */
   if (!cboxGet('po-supplier')) return reqBad('po-supplier', 'Supplier is required');
   if (!cboxGet('po-trade')) return reqBad('po-trade', 'Supplier Trade Name is required');
-  if (!(($('f-gsttype') || {}).value || '').trim()) return reqBad('f-gsttype', 'GST Type could not be determined — configure State / GST Type on the selected Supplier Trade Name');
+  if (!(($('f-gsttype') || {}).value || '').trim()) return reqBad('f-gsttype', 'GST Type could not be determined â€” configure State / GST Type on the selected Supplier Trade Name');
   if (!cboxGet('po-shipto')) return reqBad('po-shipto', 'Ship To is required');
   if (!cboxGet('po-buyer')) return reqBad('po-buyer', 'Buyer is required');
-  if (!mcboxGet('po-styles').length) return reqBad('po-styles', 'Style (Internal ID) is required — pick at least one style');
+  if (!mcboxGet('po-styles').length) return reqBad('po-styles', 'Style (Internal ID) is required â€” pick at least one style');
   const items = gatherRows('po-items', ['name']).map(i => {
     const amt = pf(i.qty) * pf(i.rate);
     i.camt = amt * pf(i.cgstPct) / 100; i.samt = amt * pf(i.sgstPct) / 100; i.iamt = amt * pf(i.igstPct) / 100;
@@ -7514,7 +7514,7 @@ function savePO(id) {
     seenPo[key] = 1;
   }
   const zeroIdx = items.findIndex(function (i) { return pf(i.qty) <= 0; });
-  if (zeroIdx > -1) return reqBadCell('po-items', zeroIdx, 'qty', 'Quantity must be more than zero — ' + (items[zeroIdx].name || 'item'));
+  if (zeroIdx > -1) return reqBadCell('po-items', zeroIdx, 'qty', 'Quantity must be more than zero â€” ' + (items[zeroIdx].name || 'item'));
   /* line GST must equal the rate configured on Item Master */
   for (let k = 0; k < items.length; k++) {
     const gerr = poGstMismatch(items[k]);
@@ -7554,7 +7554,7 @@ function savePO(id) {
 /* ================= INWARD ================= */
 function poOptions() {
   return db.po.filter(p => !isInactiveDoc(p)).sort((a, b) => b.date < a.date ? -1 : 1)
-    .map(p => ({ v: p.no, l: p.no + ' · ' + (p.supplier || '') + ' (' + (p.category || '') + ')' }));
+    .map(p => ({ v: p.no, l: p.no + ' Â· ' + (p.supplier || '') + ' (' + (p.category || '') + ')' }));
 }
 /* qty already received for this PO + item across earlier inwards (excluding the row being edited) */
 function inwardReceivedSoFar(poRef, itemName, colour, excludeId) {
@@ -7672,7 +7672,7 @@ function inwardItemHasOutward(rec, itemName) {
     return prUsesInward(r, no) && (r.items || []).some(function (i) { return lcName(i.name) === nm && pf(i.retQty) > 0; });
   });
 }
-/* why a whole record cannot be deleted — '' when it can */
+/* why a whole record cannot be deleted â€” '' when it can */
 function deleteBlockReason(m, r) {
   if (m === 'po' && poHasInward(r.no)) {
     const n = poInwardEntries(r.no).length;
@@ -7684,7 +7684,7 @@ function deleteBlockReason(m, r) {
   }
   if (m === 'jobwork') {
     const recv = jwTotalReceived(r);
-    if (recv > 0) return 'Finished goods already received (' + fmtNum(recv) + ') — delete the Receive FG entries first';
+    if (recv > 0) return 'Finished goods already received (' + fmtNum(recv) + ') â€” delete the Receive FG entries first';
     const direct = (db.jobworkreturn || []).filter(function (x) { return x.jwRef === r.no; });
     const inwardReturns = (db.inward || []).filter(function (x) { return x.entryType === 'Job Work Return' && x.jwRef === r.no; });
     const n = direct.length + inwardReturns.length;
@@ -7692,7 +7692,7 @@ function deleteBlockReason(m, r) {
   }
   if (m === 'sample') {
     const recv = jwTotalReceived(r);
-    if (recv > 0) return 'Samples already received (' + fmtNum(recv) + ') — delete the receive entries first';
+    if (recv > 0) return 'Samples already received (' + fmtNum(recv) + ') â€” delete the receive entries first';
   }
   if (m === 'processoutward') {
     const n = (db.processinward || []).filter(function (x) { return x.outwardRef === r.no && !/cancel/i.test(x.status || ''); }).length;
@@ -7704,7 +7704,7 @@ function deleteBlockReason(m, r) {
 function lockTableRow(tr, why) {
   if (!tr) return;
   tr.classList.add('row-locked');
-  tr.title = why || 'Locked — used by a later entry';
+  tr.title = why || 'Locked â€” used by a later entry';
   qsa('input,select,textarea,button', tr).forEach(function (el) {
     // v5: keep the Edit pencil button enabled so user can unlock the row to delete
     if (el.classList && (el.classList.contains('jw-row-edit') || el.classList.contains('po-row-edit'))) {
@@ -7712,7 +7712,7 @@ function lockTableRow(tr, why) {
       return;
     }
     el.disabled = true;
-    if (el.tagName === 'BUTTON') el.title = why || 'Cannot delete — used by a later entry';
+    if (el.tagName === 'BUTTON') el.title = why || 'Cannot delete â€” used by a later entry';
   });
 }
 function rowItemName(tr) {
@@ -7734,7 +7734,7 @@ function poLockReceivedRows() {
   if (!poNo && $('f-no')) poNo = ($('f-no').value || '').trim();
   if (!poNo) return;
   if (poHasInward(poNo)) {
-    ['po-supplier', 'po-trade'].forEach(function (id) { const box = qs('[data-cb="' + id + '"]'), inp = qs('[data-cb-input="' + id + '"]'); if (box) { box.classList.add('cbox-ro'); box.title = 'Locked — Inward is already booked against this PO'; } if (inp) inp.disabled = true; });
+    ['po-supplier', 'po-trade'].forEach(function (id) { const box = qs('[data-cb="' + id + '"]'), inp = qs('[data-cb-input="' + id + '"]'); if (box) { box.classList.add('cbox-ro'); box.title = 'Locked â€” Inward is already booked against this PO'; } if (inp) inp.disabled = true; });
   }
   let locked = 0;
   qsa('#po-items tr').forEach(function (tr) {
@@ -7743,13 +7743,13 @@ function poLockReceivedRows() {
     const code = codeEl ? String(codeEl.value || '').trim() : '';
     if (!nm && !code) return;
     if (poItemHasInward(poNo, nm, code)) {
-      lockTableRow(tr, 'Inward already exists for this item — delete is disabled');
+      lockTableRow(tr, 'Inward already exists for this item â€” delete is disabled');
       const del = qs('button.btn-icon.danger, button.btn-icon', tr);
-      if (del) { del.disabled = true; del.title = 'Cannot delete — inward exists for this item'; }
+      if (del) { del.disabled = true; del.title = 'Cannot delete â€” inward exists for this item'; }
       locked++;
     }
   });
-  showLockNote('po-items', locked, locked + ' item line' + (locked > 1 ? 's are' : ' is') + ' locked — inward is already booked against this item.');
+  showLockNote('po-items', locked, locked + ' item line' + (locked > 1 ? 's are' : ' is') + ' locked â€” inward is already booked against this item.');
 }
 /* Inward form: lock every item line already consumed by an outward document */
 function inwardLockConsumedRows() {
@@ -7758,9 +7758,9 @@ function inwardLockConsumedRows() {
   let locked = 0;
   qsa('#inward-items tr').forEach(function (tr) {
     const nm = rowItemName(tr);
-    if (nm && inwardItemHasOutward(rec, nm)) { lockTableRow(tr, 'Inward ' + rec.no + ' — this item is already used on a later entry and cannot be changed or deleted'); locked++; }
+    if (nm && inwardItemHasOutward(rec, nm)) { lockTableRow(tr, 'Inward ' + rec.no + ' â€” this item is already used on a later entry and cannot be changed or deleted'); locked++; }
   });
-  showLockNote('inward-items', locked, locked + ' item line' + (locked > 1 ? 's are' : ' is') + ' locked — Inward ' + rec.no + ' is already used (Job Work / Sample / Purchase Return).');
+  showLockNote('inward-items', locked, locked + ' item line' + (locked > 1 ? 's are' : ' is') + ' locked â€” Inward ' + rec.no + ' is already used (Job Work / Sample / Purchase Return).');
 }
 function showLockNote(tbodyId, count, msg) {
   const tb = $(tbodyId); if (!tb) return;
@@ -7783,7 +7783,7 @@ function inwardCheckQty(el) {
   if (bad && !tr.dataset.warned) {
     tr.dataset.warned = '1';
     const nm = tr.querySelector('[data-f="name"]');
-    toast('Over receipt on ' + ((nm && nm.value) || 'this item') + ' — PO ' + fmtNum(poQty) +
+    toast('Over receipt on ' + ((nm && nm.value) || 'this item') + ' â€” PO ' + fmtNum(poQty) +
       ', already received ' + fmtNum(prev) + ', entering ' + fmtNum(now) +
       ' (excess ' + fmtNum(over) + ')', 'red');
   }
@@ -7851,7 +7851,7 @@ function inwardAttRow(a) {
 const ATTDATA = {};
 function attCellHtml(id) {
   const a = ATTDATA[id], accept = ' accept="image/*,application/pdf,.pdf"', change = ' onchange="onAttFile(this,\'' + id + '\')"';
-  if (!(a && a.data)) return '<label class="pod-upload-box empty att-upload-box"><input type="file" data-f="attFile" data-attid="' + id + '"' + accept + change + '><span class="pod-upload-plus">＋</span><span class="pod-upload-title">Upload File</span><span class="pod-upload-help">Image or PDF · max 5 MB</span></label>';
+  if (!(a && a.data)) return '<label class="pod-upload-box empty att-upload-box"><input type="file" data-f="attFile" data-attid="' + id + '"' + accept + change + '><span class="pod-upload-plus">ï¼‹</span><span class="pod-upload-title">Upload File</span><span class="pod-upload-help">Image or PDF Â· max 5 MB</span></label>';
   const pdf = /pdf/i.test(a.fileName || '') || /^data:application\/pdf/i.test(a.data), img = /^data:image\//i.test(a.data), preview = pdf ? '<div class="pod-preview-pdf">PDF</div>' : img ? '<img class="pod-preview-img" src="' + a.data + '" alt="Attachment">' : '<div class="pod-preview-pdf">FILE</div>';
   return '<div class="pod-upload-box has att-upload-box">' + (a.locked ? '' : '<div class="pod-upload-actions"><button type="button" class="pod-del" title="Remove file" onclick="event.stopPropagation();clearAtt(\'' + id + '\')">' + ic('trash', 11) + '</button></div>') + preview + '<div class="pod-upload-name" title="' + esc(a.fileName || 'file') + '">' + esc(a.fileName || 'file') + '</div>' + (a.locked ? '' : '<label class="pod-replace">Replace<input type="file" data-f="attFile" data-attid="' + id + '"' + accept + change + '></label>') + '</div>';
 }
@@ -7865,7 +7865,7 @@ function clearAtt(id) {
 function onAttFile(inp, id) {
   const f = inp.files && inp.files[0]; if (!f) return;
   const valid = /^image\//i.test(f.type) || /pdf/i.test(f.type) || /\.(pdf|png|jpe?g|webp)$/i.test(f.name); if (!valid) { inp.value = ''; return toast('Upload an image or PDF attachment', 'red'); }
-  if (f.size > 5 * 1024 * 1024) return toast('File too large — keep attachments under 5 MB', 'red');
+  if (f.size > 5 * 1024 * 1024) return toast('File too large â€” keep attachments under 5 MB', 'red');
   const reader = new FileReader();
   reader.onload = function (e) {
     const locked = !!(ATTDATA[id] && ATTDATA[id].locked); ATTDATA[id] = { data: e.target.result, fileName: f.name, locked: locked };
@@ -7874,7 +7874,7 @@ function onAttFile(inp, id) {
   };
   reader.readAsDataURL(f);
 }
-function validateInwardAttachments() { const rows = qsa('#inward-atts tr'); for (let i = 0; i < rows.length; i++) { const tr = rows[i], nameEl = qs('[data-f="attName"]', tr), name = String((nameEl && nameEl.value) || '').trim(), cell = qs('[data-att]', tr), a = cell ? ATTDATA[cell.dataset.att] : null, hasFile = !!(a && a.data); if (hasFile && !name) return reqBad(nameEl, 'Attachment Name is required when a file is uploaded — row ' + (i + 1)); if (name && !hasFile) return reqBad(qs('.att-upload-box', tr) || cell, 'Attachment file is required when Attachment Name is entered — row ' + (i + 1)); } return true; }
+function validateInwardAttachments() { const rows = qsa('#inward-atts tr'); for (let i = 0; i < rows.length; i++) { const tr = rows[i], nameEl = qs('[data-f="attName"]', tr), name = String((nameEl && nameEl.value) || '').trim(), cell = qs('[data-att]', tr), a = cell ? ATTDATA[cell.dataset.att] : null, hasFile = !!(a && a.data); if (hasFile && !name) return reqBad(nameEl, 'Attachment Name is required when a file is uploaded â€” row ' + (i + 1)); if (name && !hasFile) return reqBad(qs('.att-upload-box', tr) || cell, 'Attachment file is required when Attachment Name is entered â€” row ' + (i + 1)); } return true; }
 function gatherAttachments() {
   const out = [];
   qsa('tr', $('inward-atts')).forEach(function (tr) {
@@ -7906,8 +7906,8 @@ function setInwardType(t) {
   });
   $('content').innerHTML = '<div class="entry-page">' + formInward(draft) + '</div>';
   dpSyncAll(); calcInward();
-  toast(opening ? 'Opening stock mode — enter physical stock on hand'
-    : jwret ? 'Job work return mode — material coming back from the job worker'
+  toast(opening ? 'Opening stock mode â€” enter physical stock on hand'
+    : jwret ? 'Job work return mode â€” material coming back from the job worker'
       : 'PO receipt mode', 'green');
 }
 /* a free-entry row: pick any item, type the quantity you physically hold */
@@ -7924,8 +7924,8 @@ function exportOpeningStockTemplate() {
     {
       name: 'Instructions', headers: ['Field', 'Required', 'Notes'], rows: [
         ['Item Code', 'Yes', 'Item Master ID, e.g. ITM-0012'],
-        ['Opening Qty', 'Yes', 'Physical quantity on hand — must be greater than 0'],
-        ['Rate', 'Yes', 'Rate per unit — 0 allowed'],
+        ['Opening Qty', 'Yes', 'Physical quantity on hand â€” must be greater than 0'],
+        ['Rate', 'Yes', 'Rate per unit â€” 0 allowed'],
         ['Tip', '', 'Fill Opening Qty and Rate only. Classification, Item Name and Unit come from Item Master on upload.']
       ]
     }
@@ -7949,7 +7949,7 @@ function exportOpeningStockTemplate() {
   files['xl/_rels/workbook.xml.rels'] = rels;
   files['xl/styles.xml'] = '<?xml version="1.0" encoding="UTF-8"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF303030"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="2"><xf/><xf fontId="1" fillId="2" applyFont="1" applyFill="1"/></cellXfs></styleSheet>';
   downloadBytes(xzip(files), 'Opening_Stock_Template_' + today() + '.xlsx');
-  toast('Opening Stock Excel template downloaded — fill Qty & Rate, then upload', 'green');
+  toast('Opening Stock Excel template downloaded â€” fill Qty & Rate, then upload', 'green');
 }
 function triggerOpeningStockImport() {
   const inp = $('open-xlsx-file'); if (!inp) return;
@@ -8001,7 +8001,7 @@ async function importOpeningStockExcel(inp) {
     const line = idx + 2;
     if (!String(code || '').trim() && qty <= 0 && rate <= 0) return;
     const it = resolveOpeningItem(code);
-    if (!it) { errors.push('Row ' + line + ': Item Code not found in Item Master — ' + (code || '(blank)')); return; }
+    if (!it) { errors.push('Row ' + line + ': Item Code not found in Item Master â€” ' + (code || '(blank)')); return; }
     if (!(qty > 0)) { errors.push('Row ' + line + ': Opening Qty must be greater than 0 for ' + (it.code || it.name)); return; }
     if (rate < 0) { errors.push('Row ' + line + ': Rate cannot be negative for ' + (it.code || it.name)); return; }
     const key = String(it.id || it.code || it.name).toLowerCase();
@@ -8026,8 +8026,8 @@ async function importOpeningStockExcel(inp) {
   loaded.forEach(function () { });
   if (typeof calcInward === 'function') calcInward();
   qsa('#inward-items [data-f="recQty"]').forEach(function (el) { if (typeof calcOpeningValue === 'function') calcOpeningValue(el); });
-  toast('Uploaded ' + loaded.length + ' opening stock item' + (loaded.length > 1 ? 's' : '') + (errors.length ? ' — ' + errors.length + ' row(s) skipped' : ''), 'green');
-  if (errors.length) toast(errors.slice(0, 4).join(' | ') + (errors.length > 4 ? ' …' : ''), 'amber');
+  toast('Uploaded ' + loaded.length + ' opening stock item' + (loaded.length > 1 ? 's' : '') + (errors.length ? ' â€” ' + errors.length + ' row(s) skipped' : ''), 'green');
+  if (errors.length) toast(errors.slice(0, 4).join(' | ') + (errors.length > 4 ? ' â€¦' : ''), 'amber');
   inp.value = '';
 }
 
@@ -8051,7 +8051,7 @@ function openItemRow(it) {
     '<td><button type="button" class="btn-icon danger" onclick="removeRow(this);calcInward()">' + ic('trash', 15) + '</button></td>' +
     '</tr>';
 }
-/* Opening Stock value updates immediately as Opening Qty × Rate. Keeping this
+/* Opening Stock value updates immediately as Opening Qty Ã— Rate. Keeping this
    row-level calculation separate makes the Value cell responsive even before
    the complete Inward totals are recalculated. */
 function calcOpeningValue(el) {
@@ -8077,7 +8077,7 @@ function openDupCheck(tr, name) {
     if (v === nm) dup = true;
   });
   if (!dup) return false;
-  toast('Already added — ' + name + ' is on another line. Update that quantity instead.', 'red');
+  toast('Already added â€” ' + name + ' is on another line. Update that quantity instead.', 'red');
   const el = qs('[data-f="name"]', tr);
   if (el && el.dataset.cbInput) { cboxSet(el.dataset.cbInput, ''); el.value = ''; }
   const u = qs('[data-f="unit"]', tr); if (u) u.value = '';
@@ -8106,7 +8106,7 @@ function inwardItemRow(it, poQty, excludeId) {
   const gstPct = pf(it.gst) || (im ? pf(im.gst) : 0);
   return '<tr data-poqty="' + pf(poQty) + '" data-recvd="' + done + '" data-gst="' + gstPct + '">' +
     srTd() +
-    '<td><input class="inp" data-f="classification" value="' + esc(it.classification || (im ? im.classification : '') || '') + '" placeholder="—" disabled></td>' +
+    '<td><input class="inp" data-f="classification" value="' + esc(it.classification || (im ? im.classification : '') || '') + '" placeholder="â€”" disabled></td>' +
     '<td><input class="inp" data-f="name" value="' + esc(itemDisplay(it.name) || it.name || '') + '" placeholder="From PO" disabled>' +
     '<input type="text" data-f="specs" value="' + esc(it.specs || '') + '" style="display:none" tabindex="-1" aria-hidden="true">' +
     '<input type="text" data-f="color" value="' + esc(it.color || '') + '" style="display:none" tabindex="-1" aria-hidden="true"></td>' +
@@ -8118,7 +8118,7 @@ function inwardItemRow(it, poQty, excludeId) {
     '<input type="text" data-f="gst" value="' + gstPct + '" style="display:none" tabindex="-1" aria-hidden="true">' +
     '</td>' +
     '<td class="num" data-val style="font-weight:650">0</td>' +
-    '<td><input class="inp" data-f="unit" value="' + esc(it.unit || '') + '" placeholder="—" disabled></td>' +
+    '<td><input class="inp" data-f="unit" value="' + esc(it.unit || '') + '" placeholder="â€”" disabled></td>' +
     '<td><button type="button" class="btn-icon danger" onclick="removeRow(this)">' + ic('trash', 15) + '</button></td>' +
     '</tr>';
 }
@@ -8129,13 +8129,13 @@ function formInward(rec) {
   const jwret = r.entryType === 'Job Work Return';
   const poMode = !opening && !jwret;
   return '<div class="sec" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
-    (isEdit ? 'Edit Inward (' + esc(r.no || '') + ' · ' + esc(r.entryType || '') + ')' : 'New Material Inward') +
+    (isEdit ? 'Edit Inward (' + esc(r.no || '') + ' Â· ' + esc(r.entryType || '') + ')' : 'New Material Inward') +
     '<span style="margin-left:auto;display:flex;gap:8px;align-items:center">' +
     '<button type="button" class="btn btn-ghost btn-sm" onclick="back()">' + ic('back', 14) + 'Back to Inwards</button>' +
-    (isEdit ? '<button type="button" class="btn btn-primary btn-sm" onclick="openForm(\'inward\')">＋ New Inward</button>' : '') +
+    (isEdit ? '<button type="button" class="btn btn-primary btn-sm" onclick="openForm(\'inward\')">ï¼‹ New Inward</button>' : '') +
     (opening
-      ? '<button type="button" class="btn btn-ghost btn-sm" onclick="exportOpeningStockTemplate()">⬇ Excel template</button>' +
-      '<button type="button" class="btn btn-ghost btn-sm" onclick="triggerOpeningStockImport()">⬆ Upload Excel</button>' +
+      ? '<button type="button" class="btn btn-ghost btn-sm" onclick="exportOpeningStockTemplate()">â¬‡ Excel template</button>' +
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="triggerOpeningStockImport()">â¬† Upload Excel</button>' +
       '<input type="file" id="open-xlsx-file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="importOpeningStockExcel(this)">'
       : '') +
     '</span>' +
@@ -8149,8 +8149,8 @@ function formInward(rec) {
     '</div>' +
     '<input type="hidden" id="f-entrytype" value="' + esc(r.entryType || 'PO Receipt') + '">' +
     '<div class="fhint" id="f-entrytype-hint">' +
-    (isEdit ? '<b>Notice:</b> You are editing existing record <b>' + esc(r.no || '') + '</b>. Entry type cannot be changed once saved. To inward new goods against a PO, click <a href="javascript:void(0)" onclick="openForm(\'inward\')" style="color:var(--primary);font-weight:600;text-decoration:underline">＋ New Inward</a>.' : (opening
-      ? 'Physical stock already on hand — no PO, no supplier invoice.'
+    (isEdit ? '<b>Notice:</b> You are editing existing record <b>' + esc(r.no || '') + '</b>. Entry type cannot be changed once saved. To inward new goods against a PO, click <a href="javascript:void(0)" onclick="openForm(\'inward\')" style="color:var(--primary);font-weight:600;text-decoration:underline">ï¼‹ New Inward</a>.' : (opening
+      ? 'Physical stock already on hand â€” no PO, no supplier invoice.'
       : jwret
         ? 'Material coming back from a job worker into your warehouse.'
         : 'Goods received against a purchase order.')) +
@@ -8160,7 +8160,7 @@ function formInward(rec) {
     field('Inward No', '<input class="inp" id="f-no" value="' + esc(r.no || 'Auto-generated') + '" disabled>', 'inj-no') +
     field('Date *', '<input class="inp" type="text" data-date autocomplete="off" readonly disabled id="f-date" value="' + esc(r.date || today()) + '">', 'inj-date') +
     '<div class="field po-only"' + (poMode ? '' : ' style="display:none"') + '><label class="lbl">PO Reference *</label>' +
-    cbox('in-po', { opts: poOptions(), value: r.poRef || '', f: 'poRef', placeholder: 'Search PO…', free: false, onSet: onPOSelect }) + '</div>' +
+    cbox('in-po', { opts: poOptions(), value: r.poRef || '', f: 'poRef', placeholder: 'Search POâ€¦', free: false, onSet: onPOSelect }) + '</div>' +
     '<div class="field po-only"' + (poMode ? '' : ' style="display:none"') + '><label class="lbl">Supplier</label>' +
     '<input class="inp" id="f-supplier" value="' + esc(r.supplier || '') + '" placeholder="Auto from PO" disabled></div>' +
     '<div class="field po-only"' + (poMode ? '' : ' style="display:none"') + '><label class="lbl">Invoice No. *</label>' +
@@ -8175,7 +8175,7 @@ function formInward(rec) {
     '<div class="field open-only"' + (opening ? '' : ' style="display:none"') + '><label class="lbl">Remarks</label>' +
     '<input class="inp" id="f-openremark" value="' + esc(r.openingRemark || '') + '" placeholder="e.g. Stock as on go-live"></div>' +
     '<div class="field jwr-only inj-jw"' + (jwret ? '' : ' style="display:none"') + '><label class="lbl">Job Work No. *</label>' +
-    cbox('in-jw', { opts: jwOptions(), value: r.jwRef || '', f: 'jwRef', placeholder: 'Search Job Work…', free: false, onSet: onInwardJWSelect }) + '</div>' +
+    cbox('in-jw', { opts: jwOptions(), value: r.jwRef || '', f: 'jwRef', placeholder: 'Search Job Workâ€¦', free: false, onSet: onInwardJWSelect }) + '</div>' +
     '<div class="field jwr-only inj-ven"' + (jwret ? '' : ' style="display:none"') + '><label class="lbl">Job Worker</label>' +
     '<input class="inp" id="f-jwvendor" value="' + esc(r.vendor || '') + '" placeholder="Auto from Job Work" disabled></div>' +
     '<div class="field jwr-only inj-ch"' + (jwret ? '' : ' style="display:none"') + '><label class="lbl">Challan No</label>' +
@@ -8215,7 +8215,7 @@ function formInward(rec) {
 
     '<div class="grid-even5" style="margin-top:18px">' +
     field('Total Quantity', '<input class="inp" id="in-sum-qty" value="0" disabled>') +
-    field('Total Amount', '<input class="inp" id="in-sum-amt" value="₹0" disabled>') +
+    field('Total Amount', '<input class="inp" id="in-sum-amt" value="â‚¹0" disabled>') +
     (poMode
       ? field('Freight Charges', '<input class="inp num" type="number" min="0" step="0.01" id="in-freight" value="' + esc(r.freight ?? 0) + '" oninput="calcInward()">') +
       field('Freight GST%', cbox('in-freight-gst-cb', { opts: db.masters.gstRates, value: (r.freightGst === '' || r.freightGst == null) ? '0' : String(r.freightGst), f: 'freightGst', placeholder: '--GST %--', addMaster: 'gstRates', addText: 'GST %', free: false, onSet: function () { calcInward(); } })) +
@@ -8250,7 +8250,7 @@ function onPOSelect(poNo) {
   if (!po) { if (sup) sup.value = ''; $('inward-items').innerHTML = inwardItemRow(); dpSyncAll(); calcInward(); return; }
   // Block further inward entry until the PO is Approved (or already in receipt).
   if (po && !['Approved', 'Partially Received', 'Received'].includes(po.status)) {
-    toast('Inward blocked: PO ' + po.no + ' is "' + (po.status || 'Draft') + '" — approve the PO before booking inward.', 'red');
+    toast('Inward blocked: PO ' + po.no + ' is "' + (po.status || 'Draft') + '" â€” approve the PO before booking inward.', 'red');
     if (typeof cboxSet === 'function') cboxSet('in-po', '');
     if (sup) sup.value = '';
     $('inward-items').innerHTML = inwardItemRow();
@@ -8281,9 +8281,9 @@ function saveInward(id) {
   if (poMode && !cboxGet('in-po')) return reqBad('in-po', 'PO Reference is required');
   if (poMode) {
     const poHit = db.po.find(function (p) { return p.no === cboxGet('in-po'); });
-    if (poHit && isInactiveDoc(poHit)) return reqBad('in-po', 'PO ' + poHit.no + ' is ' + String(poHit.status).toLowerCase() + ' — reopen it to book inward');
+    if (poHit && isInactiveDoc(poHit)) return reqBad('in-po', 'PO ' + poHit.no + ' is ' + String(poHit.status).toLowerCase() + ' â€” reopen it to book inward');
     if (poHit && !['Approved', 'Partially Received', 'Received'].includes(poHit.status)) {
-      return reqBad('in-po', 'PO ' + poHit.no + ' is "' + (poHit.status || 'Draft') + '" — approve the PO before booking inward');
+      return reqBad('in-po', 'PO ' + poHit.no + ' is "' + (poHit.status || 'Draft') + '" â€” approve the PO before booking inward');
     }
   }
   if (poMode) {
@@ -8301,16 +8301,16 @@ function saveInward(id) {
     const clash = db.inward.find(function (r) {
       return r.id !== id && r.poRef === poNo && String(r.invoiceNo || '').trim().toLowerCase() === invNo;
     });
-    if (clash) return reqBad('f-invno', 'Invoice ' + ($('f-invno').value || '').trim() + ' is already recorded against ' + poNo + ' in ' + clash.no + ' — duplicate invoice numbers are not allowed');
+    if (clash) return reqBad('f-invno', 'Invoice ' + ($('f-invno').value || '').trim() + ' is already recorded against ' + poNo + ' in ' + clash.no + ' â€” duplicate invoice numbers are not allowed');
   }
   const zeroIn = items.find(function (i) { return pf(i.recQty) <= 0; });
-  if (zeroIn) return reqBadCell('inward-items', reqFirstEmptyRow('inward-items', 'recQty'), 'recQty', 'Quantity must be more than zero — ' + (zeroIn.name || 'item'));
+  if (zeroIn) return reqBadCell('inward-items', reqFirstEmptyRow('inward-items', 'recQty'), 'recQty', 'Quantity must be more than zero â€” ' + (zeroIn.name || 'item'));
   if (!items.length) return reqBadCell('inward-items', 0, opening ? 'name' : 'recQty', (opening || jwret) ? 'Enter a quantity for at least one item' : 'Add at least one item row');
   if (opening) {
     const seen = {};
     for (let k = 0; k < items.length; k++) {
       const key = String(items[k].name || '').trim().toLowerCase();
-      if (key && seen[key]) return reqBadCell('inward-items', k, 'name', 'Duplicate item — ' + items[k].name + ' appears more than once');
+      if (key && seen[key]) return reqBadCell('inward-items', k, 'name', 'Duplicate item â€” ' + items[k].name + ' appears more than once');
       seen[key] = 1;
     }
   }
@@ -8406,7 +8406,7 @@ function processVendorOptions() {
 function processOutwardOptions() {
   return (db.processoutward || []).filter(function (r) { return !['Completed', 'Cancelled', 'Closed'].includes(r.status); })
     .sort(function (a, b) { return String(b.no).localeCompare(String(a.no), undefined, { numeric: true }); })
-    .map(function (r) { return { v: r.no, l: r.no + ' · ' + (r.processType || '') + ' · ' + (r.processor || '') }; });
+    .map(function (r) { return { v: r.no, l: r.no + ' Â· ' + (r.processType || '') + ' Â· ' + (r.processor || '') }; });
 }
 function processSizeHtml(values, pending, mode) {
   values = values || {}; pending = pending || {};
@@ -8419,13 +8419,13 @@ function processSizeHtml(values, pending, mode) {
       (mode === 'in' && max !== '' ? ' max="' + max + '" title="Pending ' + fmtNum(max) + '"' : '') +
       (isDis ? ' disabled style="opacity:0.4;background:var(--bg-subtle,#f1f5f9);cursor:not-allowed;"' : '') +
       ' oninput="' + (mode === 'in' ? 'calcProcessInward()' : 'calcProcessOutward()') + '">' +
-      (mode === 'in' ? '<span class="szbal">' + (max <= 0 ? '—' : 'bal ' + fmtNum(max)) + '</span>' : '') + '</span>';
+      (mode === 'in' ? '<span class="szbal">' + (max <= 0 ? 'â€”' : 'bal ' + fmtNum(max)) + '</span>' : '') + '</span>';
   }).join('') + '</div>';
 }
 function processOutwardRow(it) {
   it = it || {}; const style = it.style || '';
   return '<tr>' + srTd() +
-    '<td><b>' + esc(styleLabel(style) || style || '—') + '</b><input type="hidden" data-f="style" value="' + esc(style) + '"></td>' +
+    '<td><b>' + esc(styleLabel(style) || style || 'â€”') + '</b><input type="hidden" data-f="style" value="' + esc(style) + '"></td>' +
     '<td class="sizes-cell">' + processSizeHtml(it.sizes || {}, {}, 'out') + '</td>' +
     '<td class="num" data-ptotal>0</td>' +
     '<td><input class="inp num" type="number" min="0" step="0.01" data-f="rate" value="' + (it.rate ?? '') + '" oninput="calcProcessOutward()"></td>' +
@@ -8453,14 +8453,14 @@ function formProcessOutward(rec) {
     field('Date *', '<input class="inp" data-date readonly disabled id="f-date" value="' + esc(r.date || today()) + '">') +
     field('Process Type *', cbox('pro-type', { opts: db.masters.processTypes || PROCESS_TYPES, value: r.processType || '', placeholder: 'Select Process Type' })) +
     field('Processor / Vendor *', cbox('pro-vendor', { opts: processVendorOptions(), value: r.processor || '', placeholder: 'Select processor' })) +
-    field('Source Job Work *', cbox('pro-jw', { opts: (db.jobwork || []).map(function (j) { return { v: j.no, l: j.no + ' · ' + (j.vendor || '') }; }), value: r.jwRef || '', placeholder: 'Select Job Work', onSet: onProcessJWSelect })) +
+    field('Source Job Work *', cbox('pro-jw', { opts: (db.jobwork || []).map(function (j) { return { v: j.no, l: j.no + ' Â· ' + (j.vendor || '') }; }), value: r.jwRef || '', placeholder: 'Select Job Work', onSet: onProcessJWSelect })) +
     field('Expected Return Date', '<input class="inp" data-date readonly id="pro-expected" value="' + esc(r.expectedDate || '') + '">') +
     field('Status', cbox('pro-status', { opts: STATUSES.processoutward, value: r.status || 'Open' })) +
     field('Remarks', '<input class="inp" id="pro-remarks" value="' + esc(r.remarks || '') + '">') +
     '</div><div class="sec">Style / Size-wise Quantity Sent</div>' +
     '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Style</th><th>Size-wise Outward Qty</th><th class="num">Total Qty</th><th class="num">Rate / pc</th><th class="num">Amount</th><th></th></tr></thead>' +
     '<tbody id="pro-items">' + (rows.length ? rows.map(processOutwardRow).join('') : processOutwardRow()) + '</tbody>' +
-    '<tfoot><tr class="tot-row"><td></td><td>Total</td><td></td><td class="num" id="pro-total-qty">0</td><td></td><td class="num" id="pro-total-amt">₹0</td><td></td></tr></tfoot></table></div>' +
+    '<tfoot><tr class="tot-row"><td></td><td>Total</td><td></td><td class="num" id="pro-total-qty">0</td><td></td><td class="num" id="pro-total-amt">â‚¹0</td><td></td></tr></tfoot></table></div>' +
     '<div class="hint">Select a source Job Work to load its styles and size quantities. Adjust the quantities being sent for the selected process.</div>';
 }
 function processRowData(tr) {
@@ -8483,7 +8483,7 @@ function saveProcessOutward(id) {
   if (!items.length) return reqBad(qs('#pro-items [data-psz]'), 'Enter at least one size-wise outward quantity');
   const data = { date: dval('f-date') || today(), processType: cboxGet('pro-type'), processor: cboxGet('pro-vendor'), jwRef: cboxGet('pro-jw'), expectedDate: dval('pro-expected'), remarks: ($('pro-remarks').value || '').trim(), items: items, status: cboxGet('pro-status') || 'Open' };
   if (prev) Object.assign(prev, data); else { data.id = uid(); data.no = nextProcessOutwardNo(data.processType); data.createdAt = Date.now(); db.processoutward.push(data); }
-  updateProcessOutwardStatus(prev || data); saveDB(); pageView = null; toast('Process Outward saved — ' + (prev ? prev.no : data.no), 'green'); render();
+  updateProcessOutwardStatus(prev || data); saveDB(); pageView = null; toast('Process Outward saved â€” ' + (prev ? prev.no : data.no), 'green'); render();
 }
 function processReceivedMap(outNo, excludeId) {
   const map = {}; (db.processinward || []).forEach(function (r) { if (r.outwardRef !== outNo || r.id === excludeId || r.status === 'Cancelled') return; (r.items || []).forEach(function (it) { Object.keys(it.sizes || {}).forEach(function (sz) { const k = it.style + '|' + sz; map[k] = (map[k] || 0) + pf(it.sizes[sz]); }); }); }); return map;
@@ -8511,7 +8511,7 @@ function formProcessInward(rec) {
     field('Warehouse *', cbox('pri-wh', { opts: db.masters.warehouses, value: r.warehouse || '', placeholder: 'Select warehouse' })) +
     field('Status', cbox('pri-status', { opts: STATUSES.processinward, value: r.status || 'Received' })) +
     field('Remarks', '<input class="inp" id="pri-remarks" value="' + esc(r.remarks || '') + '">') +
-    '</div><div class="sec">Processed Garments Received — Partial Receipt</div><div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Style</th><th>Receive Now (size-wise)</th><th class="num">Receive Qty</th><th class="num">Pending Before Receipt</th></tr></thead><tbody id="pri-items">' +
+    '</div><div class="sec">Processed Garments Received â€” Partial Receipt</div><div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Style</th><th>Receive Now (size-wise)</th><th class="num">Receive Qty</th><th class="num">Pending Before Receipt</th></tr></thead><tbody id="pri-items">' +
     (rows.length ? rows.map(function (it) { const sv = (r.items || []).find(function (x) { return x.style === it.style; }) || {}; return processInwardRow(it, sv, r.outwardRef, r.id); }).join('') : '') +
     '</tbody><tfoot><tr class="tot-row"><td></td><td>Total</td><td></td><td class="num" id="pri-total">0</td><td></td></tr></tfoot></table></div>' +
     '<div class="hint">Multiple Process Inward entries may be saved against the same Process Outward until all size quantities are received.</div>';
@@ -8519,9 +8519,9 @@ function formProcessInward(rec) {
 function calcProcessInward() { let t = 0; qsa('#pri-items tr').forEach(function (tr) { const x = processRowData(tr); t += x.qty; const c = qs('[data-pri-total]', tr); if (c) c.textContent = fmtNum(x.qty); }); if ($('pri-total')) $('pri-total').textContent = fmtNum(t); renumberSr($('pri-items')); }
 function afterRenderProcessInward() { calcProcessInward(); }
 function updateProcessOutwardStatus(out) { if (!out) return; const sent = (out.items || []).reduce(function (a, it) { return a + Object.keys(it.sizes || {}).reduce(function (x, k) { return x + pf(it.sizes[k]); }, 0); }, 0); const got = (db.processinward || []).filter(function (r) { return r.outwardRef === out.no && r.status !== 'Cancelled'; }).reduce(function (a, r) { return a + (r.items || []).reduce(function (x, it) { return x + Object.keys(it.sizes || {}).reduce(function (y, k) { return y + pf(it.sizes[k]); }, 0); }, 0); }, 0); out.status = got <= 0 ? 'Open' : (got >= sent ? 'Completed' : 'Partially Received'); }
-function saveProcessInward(id) { clearReqMarks(); const prev = id ? (db.processinward || []).find(function (x) { return x.id === id; }) : null, no = cboxGet('pri-out'), out = (db.processoutward || []).find(function (x) { return x.no === no; }); if (!out) return reqBad('pri-out', 'Process Outward reference is required'); if (!cboxGet('pri-wh')) return reqBad('pri-wh', 'Warehouse is required'); const over = qsa('#pri-items [data-psz]').find(function (el) { return el.max !== '' && pf(el.value) > pf(el.max); }); if (over) return reqBad(over, 'Received quantity cannot exceed the pending size quantity (' + fmtNum(pf(over.max)) + ')'); const items = qsa('#pri-items tr').map(processRowData).filter(function (x) { return x.style && x.qty > 0; }); if (!items.length) return reqBad(qs('#pri-items [data-psz]'), 'Enter received quantity for at least one size'); const data = { date: dval('f-date') || today(), outwardRef: no, processType: out.processType, processor: out.processor, warehouse: cboxGet('pri-wh'), remarks: ($('pri-remarks').value || '').trim(), items: items, status: cboxGet('pri-status') || 'Received' }; if (prev) Object.assign(prev, data); else { data.id = uid(); data.no = nextNo('processinward', 'PRI'); data.createdAt = Date.now(); db.processinward.push(data); } updateProcessOutwardStatus(out); saveDB(); pageView = null; toast('Process Inward saved — ' + (prev ? prev.no : data.no), 'green'); render(); }
+function saveProcessInward(id) { clearReqMarks(); const prev = id ? (db.processinward || []).find(function (x) { return x.id === id; }) : null, no = cboxGet('pri-out'), out = (db.processoutward || []).find(function (x) { return x.no === no; }); if (!out) return reqBad('pri-out', 'Process Outward reference is required'); if (!cboxGet('pri-wh')) return reqBad('pri-wh', 'Warehouse is required'); const over = qsa('#pri-items [data-psz]').find(function (el) { return el.max !== '' && pf(el.value) > pf(el.max); }); if (over) return reqBad(over, 'Received quantity cannot exceed the pending size quantity (' + fmtNum(pf(over.max)) + ')'); const items = qsa('#pri-items tr').map(processRowData).filter(function (x) { return x.style && x.qty > 0; }); if (!items.length) return reqBad(qs('#pri-items [data-psz]'), 'Enter received quantity for at least one size'); const data = { date: dval('f-date') || today(), outwardRef: no, processType: out.processType, processor: out.processor, warehouse: cboxGet('pri-wh'), remarks: ($('pri-remarks').value || '').trim(), items: items, status: cboxGet('pri-status') || 'Received' }; if (prev) Object.assign(prev, data); else { data.id = uid(); data.no = nextNo('processinward', 'PRI'); data.createdAt = Date.now(); db.processinward.push(data); } updateProcessOutwardStatus(out); saveDB(); pageView = null; toast('Process Inward saved â€” ' + (prev ? prev.no : data.no), 'green'); render(); }
 
-/* ================= JOB WORK (multiple material issues → job-worker vendor → finished goods) ================= */
+/* ================= JOB WORK (multiple material issues â†’ job-worker vendor â†’ finished goods) ================= */
 const JW_EXTRA_REASONS = ['Wastage', 'Rework', 'Shortage', 'Damage', 'Top-up', 'Sample', 'Other'];
 function jwLinesByDate(arr) {
   return (arr || []).slice().sort(function (a, b) {
@@ -8646,7 +8646,7 @@ function jwGroupRowsByDate(tbodyId) {
           merged.colSpan = 2;
           merged.innerHTML =
             '<div class="jw-merge-date">' + ic('inbox', 13) + '<b>' + esc(dpToDisplay(g.date) || g.date) + '</b></div>' +
-            '<div class="jw-merge-dc">' + ((pageView && pageView.m === 'sample') ? 'Sample DC No. ' : 'DC No. ') + '<b>' + esc(g.dc || ((pageView && pageView.m === 'sample') ? 'SAM — generated on Save' : 'Pending — generated on Save')) + '</b></div>' +
+            '<div class="jw-merge-dc">' + ((pageView && pageView.m === 'sample') ? 'Sample DC No. ' : 'DC No. ') + '<b>' + esc(g.dc || ((pageView && pageView.m === 'sample') ? 'SAM â€” generated on Save' : 'Pending â€” generated on Save')) + '</b></div>' +
             '<div class="jw-merge-lines">' + g.rows.length + (g.rows.length === 1 ? ' line' : ' lines') + '</div>';
           const sr = qs('td.srcol', tr);
           if (sr && sr.parentNode) sr.parentNode.insertBefore(merged, sr.nextSibling);
@@ -8690,14 +8690,14 @@ function jwExtraRow(it) {
   return '<tr data-jw-saved="' + (it._saved ? '1' : '0') + '">' +
     srTd() +
     '<td><input class="inp" type="text" data-date autocomplete="off" readonly disabled data-f="date" value="' + esc(it.date || today()) + '"></td>' +
-    '<td><input class="inp" data-f="dcNo" value="' + esc(it.dcNo || '') + '" disabled title="System generated — one DC No. per date"></td>' +
+    '<td><input class="inp" data-f="dcNo" value="' + esc(it.dcNo || '') + '" disabled title="System generated â€” one DC No. per date"></td>' +
     '<td>' + cbox(clsId, { opts: db.masters.classifications, value: it.classification || (itemByName(it.item) || {}).classification || '', f: 'classification', placeholder: 'Classification', free: true, onSet: function () { jwClassChanged(clsId, itemId); } }) + '</td>' +
     '<td>' + cbox(itemId, { opts: itemOptsFor(it.classification || (itemByName(it.item) || {}).classification || ''), value: it.item || '', f: 'item', placeholder: 'Fabric / Trim', free: true, onSet: function (v) { const el = qs('[data-cb-input="' + itemId + '"]'); jwSetUnit(el, v); jwRowRefresh(el); calcJWExtras(); } }) +
     '</td>' +
     '<td>' + cbox(poId, { opts: inwardOptionsForItem(it.item), value: inwardNoForIssue(it), f: 'inwardNo', placeholder: 'Select Inward', free: false, onSet: function () { jwSyncPoRef(qs('[data-cb-input="' + poId + '"]').closest('tr')); jwRowRefresh(qs('[data-cb-input="' + poId + '"]')); } }) + '</td>' +
     '<td class="po-ref-cell"><input class="inp" data-f="poRef" value="' + esc(it.poRef || poRefFromInward(inwardNoForIssue(it))) + '" placeholder="Auto" disabled></td>' +
     '<td class="num" data-postock style="color:var(--muted);font-weight:600">' + fmtNum(inwardItemStock(inwardNoForIssue(it), it.item, stockExcept())) + '</td>' +
-    '<td><input class="inp num" type="number" min="0" step="0.01" data-f="qty" value="' + (it.qty ?? '') + '" placeholder="0" oninput="jwCheckActual(this)" title="Actually issued — cannot exceed stock"></td>' +
+    '<td><input class="inp num" type="number" min="0" step="0.01" data-f="qty" value="' + (it.qty ?? '') + '" placeholder="0" oninput="jwCheckActual(this)" title="Actually issued â€” cannot exceed stock"></td>' +
     '<td class="uom-cell"><input class="inp" data-f="unit" value="' + esc(it.unit || itemUnit(it.item) || '') + '" placeholder="Auto" disabled></td>' +
     '<td><input class="inp" data-f="reason" value="' + esc(it.reason || '') + '" placeholder="Reason *" oninput="jwReasonCheck(this)"></td>' +
     '<td class="pod-cell" data-jw-group-pod>' + ((it.date || '') ? podCellHtml(podId) : '<span class="att-none">Select date</span>') + '</td>' +
@@ -8724,7 +8724,7 @@ function calcJWExtras() {
     return esc(p[0]) + ': <b>' + fmtNum(map[k]) + '</b>' + (p[1] ? ' ' + esc(p[1]) : '');
   });
   const el = $('jw-extra-totals');
-  if (el) el.innerHTML = parts.length ? parts.join(' &nbsp;·&nbsp; ') : '—';
+  if (el) el.innerHTML = parts.length ? parts.join(' &nbsp;Â·&nbsp; ') : 'â€”';
 }
 function afterRenderExtras() {
   dpSyncAll($('jw-extras'));
@@ -8833,7 +8833,7 @@ function stockExcept(skipTr) {
   }
   return ex;
 }
-/* Stock = Inward − Job Work − Sample − Purchase Return (this inward + item) */
+/* Stock = Inward âˆ’ Job Work âˆ’ Sample âˆ’ Purchase Return (this inward + item) */
 function inwardItemStock(inwardNo, itemName, except) {
   const rec = inwardByNo(inwardNo);
   if (!rec) return 0;
@@ -8908,16 +8908,16 @@ function poOptionsForItem(itemName) {
         (p.items || []).some(function (i) { return String(i.name || '').trim().toLowerCase() === nm; });
     })
     .sort(function (a, b) { return b.date < a.date ? -1 : 1; })
-    .map(function (p) { return { v: p.no, l: p.no + ' · ' + (p.supplier || '') }; });
-  /* opening stock behaves like a source document — issue against it too */
+    .map(function (p) { return { v: p.no, l: p.no + ' Â· ' + (p.supplier || '') }; });
+  /* opening stock behaves like a source document â€” issue against it too */
   db.inward
     .filter(function (r) {
       return r.entryType === 'Opening Stock' &&
         (r.items || []).some(function (i) { return String(i.name || '').trim().toLowerCase() === nm; });
     })
     .sort(function (a, b) { return b.date < a.date ? -1 : 1; })
-    .forEach(function (r) { const ref = r.poRef || osRefFor(r.no); opts.push({ v: ref, l: ref + ' · Opening Stock' }); });
-  /* material returned by a job worker is back in stock — re-issue it against its JWR ref */
+    .forEach(function (r) { const ref = r.poRef || osRefFor(r.no); opts.push({ v: ref, l: ref + ' Â· Opening Stock' }); });
+  /* material returned by a job worker is back in stock â€” re-issue it against its JWR ref */
   db.inward
     .filter(function (r) {
       return r.entryType === 'Job Work Return' &&
@@ -8928,12 +8928,12 @@ function poOptionsForItem(itemName) {
     .sort(function (a, b) { return b.date < a.date ? -1 : 1; })
     .forEach(function (r) {
       const ref = r.poRef || osRefFor(r.no).replace('OS-', 'JWR-');
-      opts.push({ v: ref, l: ref + ' · Job Work Return' + (r.vendor ? ' · ' + r.vendor : '') });
+      opts.push({ v: ref, l: ref + ' Â· Job Work Return' + (r.vendor ? ' Â· ' + r.vendor : '') });
     });
   return opts;
 }
 /* PO Actual Stock, per PO + item:
-      Inward received − Purchase Return + Job Work Return */
+      Inward received âˆ’ Purchase Return + Job Work Return */
 function poItemStock(poNo, itemName) {
   const nm = String(itemName || '').trim().toLowerCase();
   if (!nm) return 0;
@@ -9013,7 +9013,7 @@ function jwDupPoCheck(anyEl) {
   if (dup) {
     const nm = qs('[data-f="item"]', tr);
     const pn = qs('[data-f="inwardNo"]', tr);
-    toast('Already added — ' + ((nm && nm.value) || 'item') + ' on ' + ((pn && pn.value) || 'this Inward') +
+    toast('Already added â€” ' + ((nm && nm.value) || 'item') + ' on ' + ((pn && pn.value) || 'this Inward') +
       '. Edit the existing line instead.', 'red');
     const inEl = qs('[data-f="inwardNo"]', tr);
     if (inEl && inEl.dataset.cbInput) { cboxSet(inEl.dataset.cbInput, ''); inEl.value = ''; }
@@ -9043,7 +9043,7 @@ function jwItemReturnBlockReason(itemName) {
     });
     if (used) refs.push(r.no || 'Job Work Return Inward');
   });
-  return refs.length ? 'Item is locked — used in ' + refs.join(', ') : '';
+  return refs.length ? 'Item is locked â€” used in ' + refs.join(', ') : '';
 }
 function jwSyncReturnItemDeleteLock(tr) {
   if (!tr) return;
@@ -9054,7 +9054,7 @@ function jwSyncReturnItemDeleteLock(tr) {
     if (reason) {
       btn.disabled = true;
       btn.dataset.returnLocked = '1';
-      btn.title = reason + ' — editing and deletion are disabled';
+      btn.title = reason + ' â€” editing and deletion are disabled';
     } else if (btn.dataset.returnLocked === '1') {
       delete btn.dataset.returnLocked;
       btn.title = btn.classList.contains('jw-row-edit') ? 'Edit this saved row' : 'Remove this row';
@@ -9103,7 +9103,7 @@ function jwRowRefresh(anyEl) {
       jwSyncPoRef(tr);
     }
   }
-  /* classification drives the row — only back-fill it when it is still empty,
+  /* classification drives the row â€” only back-fill it when it is still empty,
      never overwrite or blank a value the user picked */
   const im = itemByName(item);
   const clsEl = g('classification');
@@ -9122,7 +9122,7 @@ function jwRowRefresh(anyEl) {
   jwSyncReturnItemDeleteLock(tr);
   jwRefreshSharedStock();
 }
-/* classification picked on a JW row → restrict its item list */
+/* classification picked on a JW row â†’ restrict its item list */
 function jwClassChanged(clsId, itemId) {
   const cls = cboxGet(clsId);
   const c = CBOX[itemId]; if (!c) return;
@@ -9179,7 +9179,7 @@ function jwCheckActual(el) {
     if (!tr.dataset.warnedAct) {
       tr.dataset.warnedAct = '1';
       const nm = qs('[data-f="item"]', tr);
-      toast('Actual issue exceeds stock — ' + ((nm && nm.value) || 'item') +
+      toast('Actual issue exceeds stock â€” ' + ((nm && nm.value) || 'item') +
         ' has only ' + fmtNum(avail) + ' available', 'red');
     }
     el.value = avail > 0 ? avail : '';
@@ -9210,7 +9210,7 @@ function jwIssueRow(it) {
   return '<tr data-jw-saved="' + (it._saved ? '1' : '0') + '">' +
     srTd() +
     '<td><input class="inp" type="text" data-date autocomplete="off" readonly disabled data-f="date" value="' + esc(it.date || today()) + '"></td>' +
-    '<td><input class="inp" data-f="dcNo" value="' + esc(it.dcNo || '') + '" disabled title="System generated — one DC No. per date"></td>' +
+    '<td><input class="inp" data-f="dcNo" value="' + esc(it.dcNo || '') + '" disabled title="System generated â€” one DC No. per date"></td>' +
     '<td>' + cbox(clsId, { opts: db.masters.classifications, value: it.classification || (itemByName(it.item) || {}).classification || '', f: 'classification', placeholder: 'Classification', free: true, onSet: function () { jwClassChanged(clsId, itemId); } }) + '</td>' +
     '<td>' + cbox(itemId, { opts: itemOptsFor(it.classification || (itemByName(it.item) || {}).classification || ''), value: it.item || '', f: 'item', placeholder: 'Fabric / Trim', free: true, onSet: function (v) { const el = qs('[data-cb-input="' + itemId + '"]'); jwSetUnit(el, v); jwRowRefresh(el); calcJWIssues(); } }) +
     '<input type="text" data-f="colour" value="' + esc(it.colour || '') + '" style="display:none" tabindex="-1" aria-hidden="true">' +
@@ -9219,11 +9219,11 @@ function jwIssueRow(it) {
     '<td class="po-ref-cell"><input class="inp" data-f="poRef" value="' + esc(it.poRef || poRefFromInward(inwardNoForIssue(it))) + '" placeholder="Auto" disabled></td>' +
     '<td class="num" data-postock style="color:var(--muted);font-weight:600">' + fmtNum(inwardItemStock(inwardNoForIssue(it), it.item, stockExcept())) + '</td>' +
     '<td class="sizes-cell">' +
-    mcbox(szId, { opts: db.masters.sizes, selected: selSizes, placeholder: 'Select sizes…', onSet: function () { calcIssueQtyById(szId); } }) +
+    mcbox(szId, { opts: db.masters.sizes, selected: selSizes, placeholder: 'Select sizesâ€¦', onSet: function () { calcIssueQtyById(szId); } }) +
     '</td>' +
     '<td><input class="inp num" type="number" min="0" step="0.01" data-f="cons" value="' + (it.cons ?? '') + '" placeholder="e.g. 1.2" oninput="calcIssueQtyById(\'' + szId + '\')" title="Consumption per garment"></td>' +
-    '<td><input class="inp num" type="number" min="0" step="0.01" data-f="qty" value="' + (it.qty ?? '') + '" readonly style="color:var(--muted);font-weight:700" title="Auto-calculated = Order Qty (selected sizes) × Cons./Gmt"></td>' +
-    '<td><input class="inp num" type="number" min="0" step="0.01" data-f="actualQty" value="' + (it.actualQty ?? it.qty ?? '') + '" placeholder="0" oninput="this.dataset.touched=1;jwCheckActual(this)" title="Actually issued — cannot exceed stock"></td>' +
+    '<td><input class="inp num" type="number" min="0" step="0.01" data-f="qty" value="' + (it.qty ?? '') + '" readonly style="color:var(--muted);font-weight:700" title="Auto-calculated = Order Qty (selected sizes) Ã— Cons./Gmt"></td>' +
+    '<td><input class="inp num" type="number" min="0" step="0.01" data-f="actualQty" value="' + (it.actualQty ?? it.qty ?? '') + '" placeholder="0" oninput="this.dataset.touched=1;jwCheckActual(this)" title="Actually issued â€” cannot exceed stock"></td>' +
     '<td class="uom-cell"><input class="inp" data-f="unit" value="' + esc(it.unit || itemUnit(it.item) || '') + '" placeholder="Auto" disabled></td>' +
     '<td class="pod-cell" data-jw-group-pod>' + ((it.date || '') ? podCellHtml(jwPodIdFor('jw-issues', it.date || '')) : '<span class="att-none">Select date</span>') + '</td>' +
     '<td class="actions-cell">' +
@@ -9245,7 +9245,7 @@ function jwDomSizeOrder(colour) {
   return map;
 }
 function jwStyleSizesUsed(colour) {
-  // sizes that actually have order qty entered in Finished Garments — Styles (optionally filtered to a colour)
+  // sizes that actually have order qty entered in Finished Garments â€” Styles (optionally filtered to a colour)
   const used = jwDomSizeOrder(colour);
   return db.masters.sizes.filter(s => (used[s] || 0) > 0);
 }
@@ -9255,7 +9255,7 @@ function refreshIssueSizeOptsForRow(tr) {
   const colInp = qs('[data-f="colour"]', tr);
   const colour = colInp ? colInp.value.trim() : '';
   let used = jwStyleSizesUsed(colour);
-  if (!used.length) used = db.masters.sizes.slice();   // nothing entered in Styles yet → don't block the user
+  if (!used.length) used = db.masters.sizes.slice();   // nothing entered in Styles yet â†’ don't block the user
   c.opts = used.map(s => ({ v: s, l: s }));
   c.sel = c.sel.filter(s => used.indexOf(s) > -1);
   updateMcboxInput(mcb.dataset.mcb); renderMcboxList(mcb.dataset.mcb);
@@ -9310,7 +9310,7 @@ function jwDisableEditIfPod(tr) {
   if (!edit) return false;
   if (!jwRowHasGroupPod(tr)) return false;
   edit.disabled = true;
-  edit.title = 'Edit locked — POD (Proof of Delivery) is uploaded for this DC';
+  edit.title = 'Edit locked â€” POD (Proof of Delivery) is uploaded for this DC';
   tr.dataset.jwEditing = '';
   return true;
 }
@@ -9330,12 +9330,12 @@ function jwLockSavedRows(tbodyId) {
 }
 function jwEditIssueRow(btn) {
   const tr = btn && btn.closest ? btn.closest('tr') : null; if (!tr) return;
-  if (jwRowHasGroupPod(tr)) return toast('Edit locked — POD is already uploaded for this DC', 'red');
+  if (jwRowHasGroupPod(tr)) return toast('Edit locked â€” POD is already uploaded for this DC', 'red');
   const returnBlock = jwItemReturnBlockReason(rowItemName(tr));
-  if (returnBlock) return toast(returnBlock + ' — it cannot be edited', 'red');
+  if (returnBlock) return toast(returnBlock + ' â€” it cannot be edited', 'red');
   const mod = (pageView && pageView.m === 'sample') ? 'sample' : 'jobwork';
   const rec = (pageView && pageView.id) ? (db[mod] || []).find(function (x) { return x.id === pageView.id; }) : null;
-  if (rec && rec.status === 'Closed') return toast((rec.no || (mod === 'sample' ? 'Sample' : 'Job Work')) + ' is closed — reopen it before editing', 'red');
+  if (rec && rec.status === 'Closed') return toast((rec.no || (mod === 'sample' ? 'Sample' : 'Job Work')) + ' is closed â€” reopen it before editing', 'red');
   tr.dataset.jwEditing = '1';
   tr.classList.remove('jw-edit-locked', 'row-locked');
   tr.removeAttribute('title');
@@ -9348,10 +9348,10 @@ function jwEditIssueRow(btn) {
   btn.disabled = true;
   jwSyncReturnItemDeleteLock(tr);
   const docName = (pageView && pageView.m === 'sample') ? 'Sample' : 'Job Work';
-  btn.title = 'Editing enabled — save the ' + docName + ' to apply changes';
+  btn.title = 'Editing enabled â€” save the ' + docName + ' to apply changes';
   const first = qs('[data-f="classification"]', tr) || qs('[data-f="item"]', tr) || qs('[data-f="reason"]', tr);
   if (first) { try { first.focus(); } catch (e) { } }
-  toast('Row enabled for editing — press Save ' + docName + ' when finished', 'green');
+  toast('Row enabled for editing â€” press Save ' + docName + ' when finished', 'green');
 }
 function jwRowHasPod(tr) {
   if (!tr) return false;
@@ -9374,7 +9374,7 @@ function jwUnlockPodRow(tr) {
 }
 function jwSyncPodDelete(tr) {
   if (!tr) return;
-  const why = 'POD already uploaded — this line is locked';
+  const why = 'POD already uploaded â€” this line is locked';
   if (jwRowHasPod(tr)) {
     lockTableRow(tr, why);
     qsa('.pod-cell .pod-del, .pod-cell .pod-view', tr).forEach(function (el) { el.disabled = false; });
@@ -9393,7 +9393,7 @@ function jwLockPodRows() {
       const d = dval(qs('[data-f="date"]', tr)) || '';
       const pd = PODDATA[jwPodIdFor(tid, d)];
       if (pd && pd.pod) {
-        lockTableRow(tr, 'POD already uploaded for DC ' + (((qs('[data-f="dcNo"]', tr) || {}).value) || '') + ' — this DC group is locked');
+        lockTableRow(tr, 'POD already uploaded for DC ' + (((qs('[data-f="dcNo"]', tr) || {}).value) || '') + ' â€” this DC group is locked');
         jwDisableEditIfPod(tr);
         qsa('.pod-cell .pod-del, .pod-cell .pod-view', tr).forEach(function (el) { el.disabled = false; });
         qsa('.pod-cell input[data-pod]', tr).forEach(function (el) { el.disabled = false; });
@@ -9424,9 +9424,9 @@ function podCellHtml(podId) {
   if (!(pd && pd.pod)) {
     return '<label class="pod-upload-box empty" title="Upload proof of delivery">' +
       '<input type="file"' + accept + ' data-pod="' + podId + '"' + change + '>' +
-      '<span class="pod-upload-plus">＋</span>' +
+      '<span class="pod-upload-plus">ï¼‹</span>' +
       '<span class="pod-upload-title">Upload POD</span>' +
-      '<span class="pod-upload-help">Image or PDF · max 5 MB</span></label>';
+      '<span class="pod-upload-help">Image or PDF Â· max 5 MB</span></label>';
   }
   const preview = podIsPdf(pd)
     ? '<div class="pod-preview-pdf">PDF</div>'
@@ -9535,12 +9535,12 @@ function removeIssueRow(btn) {
   const returnBlock = jwItemReturnBlockReason(rowItemName(tr));
   if (returnBlock) return toast(returnBlock, 'red');
   // v5: allow delete after user has clicked Edit pencil (jwEditing=1)
-  if (jwRowGroupHasPod(tr) && tr.dataset.jwEditing !== '1') return toast('Cannot delete — POD already uploaded for this date. Click the Edit pencil first to unlock the row.', 'red');
+  if (jwRowGroupHasPod(tr) && tr.dataset.jwEditing !== '1') return toast('Cannot delete â€” POD already uploaded for this date. Click the Edit pencil first to unlock the row.', 'red');
   const mcb = qs('.mcbox', tr);
   if (mcb && mcb.dataset.mcb) delete MCBOX[mcb.dataset.mcb];
   tr.remove(); calcJWIssues(); jwGroupRowsByDate('jw-issues'); jwRefreshSharedStock();
 }
-/* styles chosen on a job work — the header multi-select is the source of truth */
+/* styles chosen on a job work â€” the header multi-select is the source of truth */
 function jwStyleList(r) {
   if (r && Array.isArray(r.styles) && r.styles.length) return r.styles.slice();
   const out = [];
@@ -9559,7 +9559,7 @@ function jwGarmentRowsHtml(r) {
     return jwGarmentRow(Object.assign({}, g, { style: s }));
   }).join('');
 }
-/* header selection changed — rebuild the row without clearing its size selection.
+/* header selection changed â€” rebuild the row without clearing its size selection.
    Changing only the Style ID must not discard sizes/quantities already entered. */
 function jwStylesChanged() {
   const tb = $('jw-garments'); if (!tb) return;
@@ -9617,7 +9617,7 @@ function jwGarmentRow(g) {
     mcbox(szId, {
       opts: db.masters.sizes, selected: sel, locked: lockedSizes,
       lockMsg: 'This size already has a saved quantity on this Job Work and cannot be removed',
-      placeholder: 'Select sizes…', onSet: function () { renderSzInputs(szId); }
+      placeholder: 'Select sizesâ€¦', onSet: function () { renderSzInputs(szId); }
     }) +
     '</td>' +
     '<td class="sizes-cell">' +
@@ -9652,7 +9652,7 @@ function renderSzInputs(szId) {
 }
 function afterRenderGarments() {
   renumberSr();
-  // called after the form HTML is injected — populates size inputs for every style row
+  // called after the form HTML is injected â€” populates size inputs for every style row
   qsa('#jw-garments tr').forEach(tr => {
     const m = qs('.mcbox', tr);
     if (m && m.dataset.mcb) { renderMcboxList(m.dataset.mcb); renderSzInputs(m.dataset.mcb); }
@@ -9694,7 +9694,7 @@ function calcJWIssues() {
   const el = $('jw-totals'); if (!el) return;
   let h = 'Fabric: <b>' + fmtNum(fab) + ' ' + fabUnit + '</b>';
   const names = Object.keys(trims);
-  if (names.length) h += ' &nbsp;·&nbsp; Trims: ' + names.map(n => '<b>' + esc(n) + ': ' + fmtNum(trims[n]) + '</b>').join(' &nbsp; ');
+  if (names.length) h += ' &nbsp;Â·&nbsp; Trims: ' + names.map(n => '<b>' + esc(n) + ': ' + fmtNum(trims[n]) + '</b>').join(' &nbsp; ');
   el.innerHTML = h;
 }
 
@@ -9703,29 +9703,29 @@ function formJobWork(rec) {
   return '<div class="sec">Job Worker</div><div class="grid-fixed">' +
     (rec && rec.id ? field('JW No', '<input class="inp" id="f-no" value="' + esc(r.no || '') + '" disabled>') : '') +
     field('Date *', '<input class="inp" type="text" data-date autocomplete="off" readonly disabled id="f-date" value="' + esc(r.date || today()) + '">') +
-    field('Job Worker / Vendor *', cbox('jw-vendor', { opts: jobWorkVendorOptions(), value: r.vendor || '', f: 'vendor', placeholder: 'Search Vendor parties…', free: false })) +
+    field('Job Worker / Vendor *', cbox('jw-vendor', { opts: jobWorkVendorOptions(), value: r.vendor || '', f: 'vendor', placeholder: 'Search Vendor partiesâ€¦', free: false })) +
     field('Style (Internal ID) *', cbox('jw-style', {
       opts: styleOpts(),
       value: jwStyleList(r)[0] || '', display: styleLabel(jwStyleList(r)[0] || ''),
-      f: 'style', placeholder: 'Search & select a style…', free: false,
+      f: 'style', placeholder: 'Search & select a styleâ€¦', free: false,
       onSet: function () { jwStylesChanged(); }
     })) +
     '</div>' +
-    '<div class="sec">Finished Garments — Styles <span style="text-transform:none;color:var(--muted);font-weight:600">(the style picked above · select sizes &amp; enter size-wise qty)</span></div>' +
-    '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Style</th><th>Size Selection *</th><th>Size-wise Qty</th><th>Order Qty</th><th>Job Work CM (₹/pc)</th><th>Charges</th></tr></thead>' +
+    '<div class="sec">Finished Garments â€” Styles <span style="text-transform:none;color:var(--muted);font-weight:600">(the style picked above Â· select sizes &amp; enter size-wise qty)</span></div>' +
+    '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Style</th><th>Size Selection *</th><th>Size-wise Qty</th><th>Order Qty</th><th>Job Work CM (â‚¹/pc)</th><th>Charges</th></tr></thead>' +
     '<tbody id="jw-garments">' + jwGarmentRowsHtml(r) + '</tbody>' +
-    '<tfoot><tr class="tot-row"><td></td><td>Totals</td><td></td><td></td><td class="num" id="jw-gtot-oqty">0</td><td></td><td class="num" id="jw-gtot-chg">₹0</td></tr></tfoot></table></div>' +
+    '<tfoot><tr class="tot-row"><td></td><td>Totals</td><td></td><td></td><td class="num" id="jw-gtot-oqty">0</td><td></td><td class="num" id="jw-gtot-chg">â‚¹0</td></tr></tfoot></table></div>' +
     '<div class="sec">Material Issues to Job Worker <span style="text-transform:none;color:var(--muted);font-weight:600">(one DC No. = one POD upload)</span></div>' +
     '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Issue Date</th><th>DC No.</th><th>Classification *</th><th>Item Name *</th><th>Inward No. *</th><th>PO No.</th><th class="num">Stock</th><th>Size Selection *</th><th>Cons./Gmt (Mtr/Nos) *</th><th>Qty (auto)</th><th class="num">Actual Issue Qty</th><th>UOM</th><th>POD (Proof of Delivery)</th><th></th></tr></thead>' +
     '<tbody id="jw-issues">' + ((r.issues && r.issues.length) ? jwLinesByDate(r.issues).map(function (x) { return jwIssueRow(Object.assign({}, x, { _saved: !!r.id })); }).join('') : jwIssueRow({ date: today() })) + '</tbody>' +
     '</table></div>' +
-    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addJwIssue()">＋ Add Issue Record</button>' +
+    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addJwIssue()">ï¼‹ Add Issue Record</button>' +
 
     '<div class="sec">Extra Quantity Issued <span style="text-transform:none;color:var(--muted);font-weight:600">(one DC No. = one POD upload)</span></div>' +
     '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Issue Date</th><th>DC No.</th><th>Classification *</th><th>Item Name *</th><th>Inward No. *</th><th>PO No.</th><th class="num">Stock</th><th class="num">Actual Issue Qty</th><th>UOM</th><th>Reason *</th><th>POD (Proof of Delivery)</th><th></th></tr></thead>' +
     '<tbody id="jw-extras">' + ((r.extras && r.extras.length) ? jwLinesByDate(r.extras).map(function (x) { return jwExtraRow(Object.assign({}, x, { _saved: !!r.id })); }).join('') : jwExtraRow({ date: today() })) + '</tbody>' +
     '</table></div>' +
-    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addJwExtra()">＋ Add Extra Issue</button>' +
+    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addJwExtra()">ï¼‹ Add Extra Issue</button>' +
     '';
 }
 function calcJW() {
@@ -9742,7 +9742,7 @@ function calcJW() {
   });
   $('jw-gtot-oqty').textContent = fmtNum(tq);
   $('jw-gtot-chg').textContent = fmtINR(tc);
-  // refresh issue size options + Qty (auto-calculated from selected sizes' order qty × consumption)
+  // refresh issue size options + Qty (auto-calculated from selected sizes' order qty Ã— consumption)
   qsa('#jw-issues tr').forEach(tr => { refreshIssueSizeOptsForRow(tr); calcIssueRowQty(tr); });
 }
 /* ---------------- SAMPLE (Job Work without material issues) -------------
@@ -9772,7 +9772,7 @@ function smpIssueRow(it) {
     '<button type="button" class="btn-icon danger jw-row-delete" onclick="removeRow(this);calcJWExtras();jwGroupRowsByDate(\'jw-extras\');jwRefreshSharedStock()">' + ic('trash', 15) + '</button></td>' +
     '</tr>';
 }
-/* Sample allows several styles — rebuild one garment row per picked style */
+/* Sample allows several styles â€” rebuild one garment row per picked style */
 function smpStylesChanged() {
   const tb = $('jw-garments'); if (!tb) return;
   const chosen = mcboxGet('smp-styles');
@@ -9802,34 +9802,34 @@ function formSample(rec) {
   return '<div class="sec">Sample</div><div class="grid-fixed">' +
     (rec && rec.id ? field('Sample No', '<input class="inp" id="f-no" value="' + esc(r.no || '') + '" disabled>') : '') +
     field('Date *', '<input class="inp" type="text" data-date autocomplete="off" readonly disabled id="f-date" value="' + esc(r.date || today()) + '">') +
-    field('Job Worker / Vendor *', cbox('jw-vendor', { opts: jobWorkVendorOptions(), value: r.vendor || '', f: 'vendor', placeholder: 'Search Vendor parties…', free: false })) +
+    field('Job Worker / Vendor *', cbox('jw-vendor', { opts: jobWorkVendorOptions(), value: r.vendor || '', f: 'vendor', placeholder: 'Search Vendor partiesâ€¦', free: false })) +
     field('Style (Internal ID) *', mcbox('smp-styles', {
       opts: styleOpts(),
       selected: jwStyleList(r), disabled: !!(rec && rec.id),
-      placeholder: 'Search & select styles…', onSet: function () { smpStylesChanged(); }
+      placeholder: 'Search & select stylesâ€¦', onSet: function () { smpStylesChanged(); }
     })) +
     '</div>' +
-    '<div class="sec">Sample Garments — Styles <span style="text-transform:none;color:var(--muted);font-weight:600">(one row per style picked above · select sizes &amp; enter size-wise qty)</span></div>' +
-    '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Style</th><th>Size Selection *</th><th>Size-wise Qty</th><th>Sample Qty</th><th>Rate (₹/pc)</th><th>Charges</th><th></th></tr></thead>' +
+    '<div class="sec">Sample Garments â€” Styles <span style="text-transform:none;color:var(--muted);font-weight:600">(one row per style picked above Â· select sizes &amp; enter size-wise qty)</span></div>' +
+    '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Style</th><th>Size Selection *</th><th>Size-wise Qty</th><th>Sample Qty</th><th>Rate (â‚¹/pc)</th><th>Charges</th><th></th></tr></thead>' +
     '<tbody id="jw-garments">' + jwGarmentRowsHtml(r) + '</tbody>' +
-    '<tfoot><tr class="tot-row"><td></td><td>Totals</td><td></td><td></td><td class="num" id="jw-gtot-oqty">0</td><td></td><td class="num" id="jw-gtot-chg">₹0</td><td></td></tr></tfoot></table></div>' +
+    '<tfoot><tr class="tot-row"><td></td><td>Totals</td><td></td><td></td><td class="num" id="jw-gtot-oqty">0</td><td></td><td class="num" id="jw-gtot-chg">â‚¹0</td><td></td></tr></tfoot></table></div>' +
 
-    '<div class="sec">Material Issues to Job Worker <span style="text-transform:none;color:var(--muted);font-weight:600">(one Sample DC No. = one POD upload · SAM number generated after Save)</span></div>' +
+    '<div class="sec">Material Issues to Job Worker <span style="text-transform:none;color:var(--muted);font-weight:600">(one Sample DC No. = one POD upload Â· SAM number generated after Save)</span></div>' +
     '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Issue Date *</th><th>Sample DC No.</th><th>Classification *</th><th>Item Name *</th><th>Inward No. *</th><th>PO No.</th><th class="num">Inward Stock</th><th>Qty *</th><th>UOM</th><th>POD (Proof of Delivery)</th><th></th></tr></thead>' +
     '<tbody id="jw-extras">' + ((r.extras && r.extras.length) ? jwLinesByDate(r.extras).map(function (x) { return smpIssueRow(Object.assign({}, x, { _saved: true })); }).join('') : smpIssueRow({ date: today() })) + '</tbody>' +
     '</table></div>' +
-    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addRow(\'jw-extras\',smpIssueRow);afterRenderExtras()">＋ Add Issue Record</button>' +
+    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addRow(\'jw-extras\',smpIssueRow);afterRenderExtras()">ï¼‹ Add Issue Record</button>' +
     '';
 }
 function saveSample(id) {
   clearReqMarks();
   if (!cboxGet('jw-vendor')) return reqBad('jw-vendor', 'Job worker / vendor is required');
-  if (!mcboxGet('smp-styles').length) return reqBad('smp-styles', 'Style (Internal ID) is required — pick at least one style');
+  if (!mcboxGet('smp-styles').length) return reqBad('smp-styles', 'Style (Internal ID) is required â€” pick at least one style');
   if (!requireRowFields('jw-garments', [
     { f: '__sizes', label: 'Size Selection' }
   ], 'style row')) return false;
   const garmentRows = gatherGarmentRows();
-  if (!garmentRows.length) return reqBad('smp-styles', 'Style (Internal ID) is required — pick at least one style');
+  if (!garmentRows.length) return reqBad('smp-styles', 'Style (Internal ID) is required â€” pick at least one style');
   if (!garmentRows.some(g => g.orderQty > 0)) {
     const grow = qsa('#jw-garments tr')[0];
     const szEl = grow ? (qs('.sz-inputs input', grow) || qs('.mcbox-input', grow)) : null;
@@ -9842,7 +9842,7 @@ function saveSample(id) {
     orderQty: g.orderQty, rate: g.rate,
     receivedQty: receipts.filter(r => r.desc === g.style && r.colour === g.colour).reduce((a, r) => a + pf(r.qty), 0)
   }));
-  /* Extra Quantity Issued — same rules as Job Work */
+  /* Extra Quantity Issued â€” same rules as Job Work */
   const extrasRaw = gatherRows('jw-extras', ['item']);
   let xi = 0;
   qsa('#jw-extras tr').forEach(tr => {
@@ -9874,15 +9874,15 @@ function saveSample(id) {
     }
     if (pf(rowVal(tr, 'qty')) <= 0) {
       return reqBadIn(tr, 'qty', 'Qty must be more than zero on material issue row ' + (i + 1) +
-        (rowVal(tr, 'item') ? ' — ' + bareItemName(rowVal(tr, 'item')) : ''));
+        (rowVal(tr, 'item') ? ' â€” ' + bareItemName(rowVal(tr, 'item')) : ''));
     }
   }
   if (!xFilled) {
     const first = xRows[0];
     if (first) return reqBadIn(first, 'classification',
-      'Material Issues to Job Worker is required — complete at least one issue line');
+      'Material Issues to Job Worker is required â€” complete at least one issue line');
     return reqBadCell('jw-extras', 0, 'classification',
-      'Material Issues to Job Worker is required — complete at least one issue line');
+      'Material Issues to Job Worker is required â€” complete at least one issue line');
   }
   if (!jwValidateCombinedStock([], extras, id, 'sample')) return false;
   /* Generate the sample challan only after validation and Save. */
@@ -9906,8 +9906,8 @@ function saveSample(id) {
   else { data.id = uid(); data.no = nextNo('sample', 'SMP'); data.createdAt = Date.now(); data.receipts = []; db.sample.push(data); }
   const saved = saveDB();
   const savedNo = id ? (rec ? rec.no : '') : data.no;
-  pageView = null; toast('Sample saved — ' + savedNo, 'green'); render();
-  if (!saved) setTimeout(function () { toast('⚠️ Storage full — POD images may not be saved. Remove some images.', 'red'); }, 400);
+  pageView = null; toast('Sample saved â€” ' + savedNo, 'green'); render();
+  if (!saved) setTimeout(function () { toast('âš ï¸ Storage full â€” POD images may not be saved. Remove some images.', 'red'); }, 400);
 }
 function nextSampleDcNo() {
   let max = pf(db.seq.sampledc);
@@ -9953,11 +9953,11 @@ function saveJobWork(id) {
     const nm = lcName(bareItemName(issues[k].item));
     const ik = nm + '|' + lcName(issues[k].inwardNo);
     if (nm && issues[k].inwardNo && dupKey[ik]) {
-      return reqBadCell('jw-issues', k, 'inwardNo', 'Duplicate — ' + bareItemName(issues[k].item) + ' on ' + issues[k].inwardNo + ' appears more than once under Material Issues.');
+      return reqBadCell('jw-issues', k, 'inwardNo', 'Duplicate â€” ' + bareItemName(issues[k].item) + ' on ' + issues[k].inwardNo + ' appears more than once under Material Issues.');
     }
     dupKey[ik] = 1;
   }
-  /* 3. Material Issues — every used row needs these */
+  /* 3. Material Issues â€” every used row needs these */
   // v5: skip the per-row validation when there are 0 rows AND we are editing (allow deleting all)
   if (qsa('#jw-issues tr').length > 0 && !requireRowFields('jw-issues', [
     { f: 'classification', label: 'Classification' },
@@ -9996,7 +9996,7 @@ function saveJobWork(id) {
   });
   extrasRaw.forEach(function (row) { if (row.inwardNo) row.poRef = poRefFromInward(row.inwardNo); });
   const extras = extrasRaw.filter(i => pf(i.qty) > 0);
-  /* 4. Extra Quantity Issued — classification / item / Inward on every used row.
+  /* 4. Extra Quantity Issued â€” classification / item / Inward on every used row.
      Blank spare rows are ignored, so this table stays optional as a whole. */
   const xRows = qsa('#jw-extras tr');
   for (let i = 0; i < xRows.length; i++) {
@@ -10017,7 +10017,7 @@ function saveJobWork(id) {
      (separate top-ups, each with its own reason) */
   for (let k = 0; k < extras.length; k++) {
     if (!String(extras[k].reason || '').trim()) {
-      return reqBadCell('jw-extras', k, 'reason', 'Reason is required for every Extra Quantity Issued line — ' + (bareItemName(extras[k].item) || 'item ' + (k + 1)));
+      return reqBadCell('jw-extras', k, 'reason', 'Reason is required for every Extra Quantity Issued line â€” ' + (bareItemName(extras[k].item) || 'item ' + (k + 1)));
     }
   }
   if (!jwValidateCombinedStock(issues, extras, id, 'jobwork')) return false;
@@ -10047,12 +10047,12 @@ function saveJobWork(id) {
   else { data.id = uid(); data.no = nextNo('jobwork', 'JW'); data.createdAt = Date.now(); data.receipts = []; db.jobwork.push(data); }
   const saved = saveDB();
   const savedNo = id ? (rec ? rec.no : '') : data.no;
-  pageView = null; toast('Job Work saved — ' + savedNo, 'green'); render();
-  if (!saved) setTimeout(function () { toast('⚠️ Storage full — POD images may not be saved. Remove some images.', 'red'); }, 400);
+  pageView = null; toast('Job Work saved â€” ' + savedNo, 'green'); render();
+  if (!saved) setTimeout(function () { toast('âš ï¸ Storage full â€” POD images may not be saved. Remove some images.', 'red'); }, 400);
 }
 
 /* =====================================================================
-   JOB WORK DELIVERY CHALLAN — one printable document per DC number
+   JOB WORK DELIVERY CHALLAN â€” one printable document per DC number
    ===================================================================== */
 function dcGroupsForJobWork(rec, mod) {
   const map = {};
@@ -10063,7 +10063,7 @@ function dcGroupsForJobWork(rec, mod) {
     const qty = pf(line.actualQty != null && line.actualQty !== '' ? line.actualQty : line.qty);
     if (qty <= 0) return;
     const date = String(line.date || '').trim();
-    const dc = String(line.dcNo || '').trim() || ('Unnumbered · ' + (dpToDisplay(date) || date || 'No date'));
+    const dc = String(line.dcNo || '').trim() || ('Unnumbered Â· ' + (dpToDisplay(date) || date || 'No date'));
     if (!map[dc]) map[dc] = { dcNo: dc, date: date, issues: [], extras: [], pod: false, podName: '' };
     const g = map[dc];
     if (!g.date && date) g.date = date;
@@ -10137,7 +10137,7 @@ function renderDCPrintPage() {
   if (!rec) { pageView = null; render(); return; }
   const groups = dcGroupsForJobWork(rec, mod);
   $('tb-title').textContent = isSample ? 'Print Sample Delivery Challans' : 'Print Delivery Challans';
-  $('tb-sub').textContent = (rec.no || (isSample ? 'Sample' : 'Job Work')) + ' · ' + (rec.vendor || '') + ' · one DC per print page';
+  $('tb-sub').textContent = (rec.no || (isSample ? 'Sample' : 'Job Work')) + ' Â· ' + (rec.vendor || '') + ' Â· one DC per print page';
   $('tb-actions').innerHTML =
     '<button class="btn btn-ghost" onclick="closeDCPrintPage()">' + ic('back', 16) + (isSample ? 'Back to Sample' : 'Back to Job Work') + '</button>' +
     '<button class="btn btn-ghost" onclick="printAllDCs(\'' + rec.id + '\',\'' + mod + '\')">' + ic('print', 16) + 'Print all DCs</button>' +
@@ -10153,7 +10153,7 @@ function renderDCPrintPage() {
     return '<tr>' +
       '<td class="selcol"><label class="cbx"><input type="checkbox" data-dc-check value="' + esc(g.dcNo) + '" onchange="dcSelectionChanged()"></label></td>' +
       '<td><b>' + esc(g.dcNo) + '</b></td>' +
-      '<td>' + esc(dpToDisplay(g.date) || g.date || '—') + '</td>' +
+      '<td>' + esc(dpToDisplay(g.date) || g.date || 'â€”') + '</td>' +
       '<td class="num">' + g.issues.length + '</td>' +
       (isSample ? '' : '<td class="num">' + g.extras.length + '</td>') +
       '<td class="num"><b>' + (g.issues.length + g.extras.length) + '</b></td>' +
@@ -10199,10 +10199,10 @@ function printJobWorkDCs(jobId, dcNos, mod) {
       const x = a.x;
       const q = pf(x.actualQty != null && x.actualQty !== '' ? x.actualQty : x.qty);
       return '<tr><td class="ctr">' + (i + 1) + '</td><td>' + esc(a.section) + '</td>' +
-        '<td>' + esc(x.classification || '—') + '</td><td><b>' + esc(bareItemName(x.item) || x.item || '') + '</b>' +
+        '<td>' + esc(x.classification || 'â€”') + '</td><td><b>' + esc(bareItemName(x.item) || x.item || '') + '</b>' +
         (x.colour ? '<div class="sub">Colour: ' + esc(x.colour) + '</div>' : '') + '</td>' +
-        '<td>' + esc(x.inwardNo || '—') + '</td><td class="rt">' + fmtNum(q) + '</td><td>' + esc(x.unit || '') + '</td>' +
-        '<td>' + esc(a.section === 'Extra Issue' ? (x.reason || '—') : '—') + '</td></tr>';
+        '<td>' + esc(x.inwardNo || 'â€”') + '</td><td class="rt">' + fmtNum(q) + '</td><td>' + esc(x.unit || '') + '</td>' +
+        '<td>' + esc(a.section === 'Extra Issue' ? (x.reason || 'â€”') : 'â€”') + '</td></tr>';
     }).join('');
   }
   function totals(g) {
@@ -10228,10 +10228,10 @@ function printJobWorkDCs(jobId, dcNos, mod) {
   }
   function sheet(g) {
     return '<section class="sheet">' +
-      '<div class="copytag">ORIGINAL — SEND WITH MATERIAL · RETURN STAMPED ACKNOWLEDGEMENT</div>' +
+      '<div class="copytag">ORIGINAL â€” SEND WITH MATERIAL Â· RETURN STAMPED ACKNOWLEDGEMENT</div>' +
       '<div class="hd"><h1>' + esc(PRINT_CO.name) + '</h1><div>' + esc(PRINT_CO.reg) + '</div><div>' + esc(PRINT_CO.reg2) + '</div>' +
       '<div>' + esc(PRINT_CO.works) + '</div><div>' + esc(PRINT_CO.contact) + '</div></div>' +
-      '<div class="title">DELIVERY CHALLAN — ' + (isSample ? 'SAMPLE MATERIAL ISSUE' : 'JOB WORK MATERIAL ISSUE') + '</div>' +
+      '<div class="title">DELIVERY CHALLAN â€” ' + (isSample ? 'SAMPLE MATERIAL ISSUE' : 'JOB WORK MATERIAL ISSUE') + '</div>' +
       '<div class="meta"><div><table class="kv">' +
       '<tr><td class="k">DC No.</td><td class="c">:</td><td class="v bigv">' + esc(g.dcNo) + '</td></tr>' +
       '<tr><td class="k">Issue Date</td><td class="c">:</td><td class="v">' + esc(dpToDisplay(g.date) || g.date || '') + '</td></tr>' +
@@ -10239,9 +10239,9 @@ function printJobWorkDCs(jobId, dcNos, mod) {
       '<tr><td class="k">' + (isSample ? 'Sample Date' : 'Job Work Date') + '</td><td class="c">:</td><td class="v">' + esc(dpToDisplay(rec.date) || rec.date || '') + '</td></tr>' +
       '</table></div><div><table class="kv">' +
       '<tr><td class="k">Deliver To</td><td class="c">:</td><td class="v">' + esc(vendorName || '') + '</td></tr>' +
-      '<tr><td class="k">Address</td><td class="c">:</td><td>' + esc(vendorAddr || '—') + '</td></tr>' +
-      '<tr><td class="k">GST No.</td><td class="c">:</td><td class="v">' + esc((party && party.gstNo) || '—') + '</td></tr>' +
-      '<tr><td class="k">Style(s)</td><td class="c">:</td><td class="v">' + esc(styles || '—') + '</td></tr>' +
+      '<tr><td class="k">Address</td><td class="c">:</td><td>' + esc(vendorAddr || 'â€”') + '</td></tr>' +
+      '<tr><td class="k">GST No.</td><td class="c">:</td><td class="v">' + esc((party && party.gstNo) || 'â€”') + '</td></tr>' +
+      '<tr><td class="k">Style(s)</td><td class="c">:</td><td class="v">' + esc(styles || 'â€”') + '</td></tr>' +
       '</table></div></div>' +
       '<table class="items"><thead><tr><th class="ctr">Sr.</th><th>Issue Type</th><th>Classification</th><th>Item</th>' +
       '<th>Inward No.</th><th class="rt">Actual Issue Qty</th><th>UOM</th><th>Reason</th></tr></thead><tbody>' + itemRows(g) + '</tbody></table>' +
@@ -10251,7 +10251,7 @@ function printJobWorkDCs(jobId, dcNos, mod) {
       '<div class="dc-sign"><div><b>Prepared / Checked By</b><span></span>Name &amp; Signature</div>' +
       '<div><b>For ' + esc(PRINT_CO.name) + '</b><span></span>Authorized Signatory</div></div>' +
 
-      '<div class="cut"><span>✂</span> DETACH / RETURN THIS STAMPED SECTION AS PROOF OF DELIVERY <span>✂</span></div>' +
+      '<div class="cut"><span>âœ‚</span> DETACH / RETURN THIS STAMPED SECTION AS PROOF OF DELIVERY <span>âœ‚</span></div>' +
       '<div class="podack">' +
       '<div class="podtitle"><div><b>PROOF OF DELIVERY (POD)</b><small>JOB WORKER MATERIAL RECEIPT ACKNOWLEDGEMENT</small></div>' +
       '<div class="podref">DC No. <b>' + esc(g.dcNo) + '</b><br>Date <b>' + esc(dpToDisplay(g.date) || g.date || '') + '</b></div></div>' +
@@ -10260,7 +10260,7 @@ function printJobWorkDCs(jobId, dcNos, mod) {
       '<div class="ackstatement">I/We acknowledge receipt of the materials listed below. Quantities were physically checked at the time of delivery.</div>' +
       '<table class="ack"><thead><tr><th>Sr.</th><th>Type</th><th>Item</th><th class="rt">DC Qty</th><th>UOM</th>' +
       '<th>Qty Received</th><th>Short / Excess</th><th>Condition / Remarks</th></tr></thead><tbody>' + podAckRows(g) + '</tbody></table>' +
-      '<div class="checks">Condition: &nbsp; □ Received in full and good condition &nbsp;&nbsp; □ Short / Excess &nbsp;&nbsp; □ Damaged &nbsp;&nbsp; □ Subject to detailed verification</div>' +
+      '<div class="checks">Condition: &nbsp; â–¡ Received in full and good condition &nbsp;&nbsp; â–¡ Short / Excess &nbsp;&nbsp; â–¡ Damaged &nbsp;&nbsp; â–¡ Subject to detailed verification</div>' +
       '<div class="receiver"><div><b>Receiver Name &amp; Designation</b><span></span></div><div><b>Mobile No.</b><span></span></div>' +
       '<div><b>Actual Receipt Date &amp; Time</b><span></span></div><div class="stamp"><b>Job Worker Stamp &amp; Authorized Signature</b><span></span></div></div>' +
       '<div class="podnote">Job worker: stamp and sign this acknowledgement after confirming received quantities. Return the signed copy to the sender for POD upload.</div>' +
@@ -10292,7 +10292,7 @@ function printJobWorkDCs(jobId, dcNos, mod) {
 }
 
 
-/* GST / E-Way Bill support copy — valuation is taken from the source PO where
+/* GST / E-Way Bill support copy â€” valuation is taken from the source PO where
    available, otherwise from Item Master. This is a delivery challan, not a tax invoice. */
 function printJobWorkGSTDCs(jobId, dcNos) {
   const rec = (db.jobwork || []).find(function (x) { return x.id === jobId; });
@@ -10336,21 +10336,21 @@ function printJobWorkGSTDCs(jobId, dcNos) {
     let taxable = 0, cgst = 0, sgst = 0, igst = 0, qty = 0;
     const rows = lines.map(function (x, i) {
       taxable += x.taxable; cgst += x.cgst; sgst += x.sgst; igst += x.igst; qty += x.qty;
-      return '<tr><td class="ctr">' + (i + 1) + '</td><td><b>' + esc(x.item) + '</b></td><td>' + esc(x.hsn || '—') + '</td>' +
-        '<td>' + esc(x.inwardNo || '—') + '<small>PO: ' + esc(x.poNo || '—') + '</small></td><td class="rt">' + fmtNum(x.qty) + '</td><td>' + esc(x.unit) + '</td>' +
+      return '<tr><td class="ctr">' + (i + 1) + '</td><td><b>' + esc(x.item) + '</b></td><td>' + esc(x.hsn || 'â€”') + '</td>' +
+        '<td>' + esc(x.inwardNo || 'â€”') + '<small>PO: ' + esc(x.poNo || 'â€”') + '</small></td><td class="rt">' + fmtNum(x.qty) + '</td><td>' + esc(x.unit) + '</td>' +
         '<td class="rt">' + fmtNum(x.rate) + '</td><td class="rt">' + fmtNum(x.taxable) + '</td><td class="ctr">' + fmtNum(x.gstRate) + '%</td>' +
-        '<td class="rt">' + (x.cgstRate ? fmtNum(x.cgst) + '<small>' + fmtNum(x.cgstRate) + '%</small>' : '—') + '</td>' +
-        '<td class="rt">' + (x.sgstRate ? fmtNum(x.sgst) + '<small>' + fmtNum(x.sgstRate) + '%</small>' : '—') + '</td>' +
-        '<td class="rt">' + (x.igstRate ? fmtNum(x.igst) + '<small>' + fmtNum(x.igstRate) + '%</small>' : '—') + '</td></tr>';
+        '<td class="rt">' + (x.cgstRate ? fmtNum(x.cgst) + '<small>' + fmtNum(x.cgstRate) + '%</small>' : 'â€”') + '</td>' +
+        '<td class="rt">' + (x.sgstRate ? fmtNum(x.sgst) + '<small>' + fmtNum(x.sgstRate) + '%</small>' : 'â€”') + '</td>' +
+        '<td class="rt">' + (x.igstRate ? fmtNum(x.igst) + '<small>' + fmtNum(x.igstRate) + '%</small>' : 'â€”') + '</td></tr>';
     }).join('');
     const taxTotal = cgst + sgst + igst, grand = taxable + taxTotal;
     return '<section class="sheet"><div class="copytag">ORIGINAL FOR CONSIGNEE / E-WAY BILL SUPPORTING DOCUMENT</div>' +
       '<div class="hd"><h1>' + esc(PRINT_CO.name) + '</h1><div>' + esc(PRINT_CO.reg) + '</div><div>' + esc(PRINT_CO.reg2) + '</div><div>' + esc(PRINT_CO.works) + '</div><div>' + esc(PRINT_CO.contact) + '</div></div>' +
-      '<div class="title">DELIVERY CHALLAN FOR JOB WORK — GST / E-WAY BILL COPY</div>' +
-      '<div class="docgrid"><div><table class="kv"><tr><td>Document No.</td><td>:</td><td><b>' + esc(g.dcNo) + '</b></td></tr><tr><td>Document Date</td><td>:</td><td><b>' + esc(dpToDisplay(g.date) || g.date || '') + '</b></td></tr><tr><td>Job Work No.</td><td>:</td><td>' + esc(rec.no || '') + '</td></tr><tr><td>Supply Type</td><td>:</td><td><b>Outward — Job Work</b></td></tr></table></div>' +
-      '<div><table class="kv"><tr><td>Transaction Type</td><td>:</td><td>Regular</td></tr><tr><td>Document Type</td><td>:</td><td>Delivery Challan</td></tr><tr><td>Place of Dispatch</td><td>:</td><td>' + esc(senderState) + '</td></tr><tr><td>Place of Delivery</td><td>:</td><td>' + esc(vendorState || '—') + '</td></tr></table></div></div>' +
+      '<div class="title">DELIVERY CHALLAN FOR JOB WORK â€” GST / E-WAY BILL COPY</div>' +
+      '<div class="docgrid"><div><table class="kv"><tr><td>Document No.</td><td>:</td><td><b>' + esc(g.dcNo) + '</b></td></tr><tr><td>Document Date</td><td>:</td><td><b>' + esc(dpToDisplay(g.date) || g.date || '') + '</b></td></tr><tr><td>Job Work No.</td><td>:</td><td>' + esc(rec.no || '') + '</td></tr><tr><td>Supply Type</td><td>:</td><td><b>Outward â€” Job Work</b></td></tr></table></div>' +
+      '<div><table class="kv"><tr><td>Transaction Type</td><td>:</td><td>Regular</td></tr><tr><td>Document Type</td><td>:</td><td>Delivery Challan</td></tr><tr><td>Place of Dispatch</td><td>:</td><td>' + esc(senderState) + '</td></tr><tr><td>Place of Delivery</td><td>:</td><td>' + esc(vendorState || 'â€”') + '</td></tr></table></div></div>' +
       '<div class="parties"><div><h3>Consignor / From</h3><b>' + esc(PRINT_CO.name) + '</b><p>' + esc(PRINT_CO.works.replace('Works: ', '')) + '</p><table class="kv"><tr><td>GSTIN</td><td>:</td><td><b>' + esc(senderGst || '________________') + '</b></td></tr><tr><td>State / Code</td><td>:</td><td>' + esc(senderState) + ' / ' + esc(senderStateCode) + '</td></tr></table></div>' +
-      '<div><h3>Consignee / Ship To</h3><b>' + esc(vendorName || '') + '</b><p>' + esc(vendorAddr || '—') + '</p><table class="kv"><tr><td>GSTIN</td><td>:</td><td><b>' + esc(vendorGst || 'Unregistered / Not available') + '</b></td></tr><tr><td>State / Code</td><td>:</td><td>' + esc(vendorState || '—') + ' / ' + esc(vendorStateCode || '—') + '</td></tr></table></div></div>' +
+      '<div><h3>Consignee / Ship To</h3><b>' + esc(vendorName || '') + '</b><p>' + esc(vendorAddr || 'â€”') + '</p><table class="kv"><tr><td>GSTIN</td><td>:</td><td><b>' + esc(vendorGst || 'Unregistered / Not available') + '</b></td></tr><tr><td>State / Code</td><td>:</td><td>' + esc(vendorState || 'â€”') + ' / ' + esc(vendorStateCode || 'â€”') + '</td></tr></table></div></div>' +
       '<table class="items"><thead><tr><th>Sr.</th><th>Description of Goods</th><th>HSN</th><th>Inward / PO Ref.</th><th class="rt">Qty</th><th>UOM</th><th class="rt">Rate</th><th class="rt">Taxable Value</th><th>GST %</th><th class="rt">CGST</th><th class="rt">SGST</th><th class="rt">IGST</th></tr></thead><tbody>' + rows + '</tbody>' +
       '<tfoot><tr><td colspan="4"><b>Total</b></td><td class="rt"><b>' + fmtNum(qty) + '</b></td><td colspan="2"></td><td class="rt"><b>' + fmtNum(taxable) + '</b></td><td></td><td class="rt"><b>' + fmtNum(cgst) + '</b></td><td class="rt"><b>' + fmtNum(sgst) + '</b></td><td class="rt"><b>' + fmtNum(igst) + '</b></td></tr></tfoot></table>' +
       '<div class="value"><span>Taxable Value <b>' + fmtINR(taxable) + '</b></span><span>Indicative GST <b>' + fmtINR(taxTotal) + '</b></span><span>E-Way Bill Value <b>' + fmtINR(grand) + '</b></span></div>' +
@@ -10372,11 +10372,11 @@ function jwAutoStatus(d) {
   const ord = jwTotalOrder(d), rec = jwTotalReceived(d);
   if (ord > 0 && rec >= ord) return 'Completed';
   if (rec > 0) return 'Partially Received';
-  // No FG left — do not keep Completed / Partially Received
+  // No FG left â€” do not keep Completed / Partially Received
   return d.status === 'In Progress' ? 'In Progress' : 'Issued';
 }
 
-/* ---- Receive Finished Goods — full page, multiple receipts (each with own date + consumption) ---- */
+/* ---- Receive Finished Goods â€” full page, multiple receipts (each with own date + consumption) ---- */
 /* ---------- size-wise receiving ----------------------------------
    RCSZ holds the per-row size boxes so a re-render never loses typing. */
 const RCSZ = {};
@@ -10407,7 +10407,7 @@ function rcOrderedSizes(rec, style) {
     });
   });
   if (keys.length) return sortKeys(keys).map(function (k) { return { size: k, ordered: pf(sz[k]) }; });
-  /* style not size-ordered here — offer the full Size Master */
+  /* style not size-ordered here â€” offer the full Size Master */
   return sortKeys(order).map(function (k) { return { size: k, ordered: pf(sz[k]) }; });
 }
 /* qty already received for a style/size across saved receipts */
@@ -10420,7 +10420,7 @@ function rcReceivedBySize(rec, style, size, excludeRid) {
   });
   return tot;
 }
-/* the Receive Now cell — one box per ordered size, or a single box when the
+/* the Receive Now cell â€” one box per ordered size, or a single box when the
    style has no size breakdown */
 function rcSizeCellHtml(rowId, style, vals, excludeRid) {
   const rec = rcRecord();
@@ -10491,7 +10491,7 @@ function rcRowSizes(tr) {
   });
   return out;
 }
-/* style picked / changed — rebuild that row's size boxes */
+/* style picked / changed â€” rebuild that row's size boxes */
 function rcStyleChanged(rowId, style, excludeRid) {
   const cell = qs('[data-rcrow="' + rowId + '"]');
   if (!cell) return;
@@ -10555,7 +10555,7 @@ function rcSavedRow(r) {
   }
   RCSZ[rowId] = { sizes: saved ? Object.assign({}, saved) : {}, flat: saved ? '' : (r.qty ?? '') };
   const qcId = rid('rcsqc'), whId = rid('rcswh');
-  /* saved receipts open locked — the Edit button unlocks the row */
+  /* saved receipts open locked â€” the Edit button unlocks the row */
   return '<tr class="rc-hist rc-locked" data-rid="' + esc(r.rid || '') + '">' +
     srTd() +
     '<td><input class="inp" type="text" data-date autocomplete="off" readonly data-f="date" value="' + esc(r.date || '') + '" disabled></td>' +
@@ -10584,10 +10584,10 @@ function rcEditSaved(btn) {
   /* re-enable the comboboxes in this row */
   qsa('.cbox,.mcbox', tr).forEach(function (bx) { bx.classList.remove('cbox-ro'); });
   btn.disabled = true;
-  btn.title = 'Editing — change the values, then Save receipt';
+  btn.title = 'Editing â€” change the values, then Save receipt';
   const first = qs('input[data-f^="sz"]', tr) || qs('[data-f="recv"]', tr);
   if (first) { try { first.focus(); first.select(); } catch (e) { } }
-  toast('Row unlocked — edit it, then press Save receipt', 'green');
+  toast('Row unlocked â€” edit it, then press Save receipt', 'green');
 }
 /* removing a saved receipt asks first, then drops the row (applied on save) */
 function rcDeleteSaved(btn) {
@@ -10595,11 +10595,11 @@ function rcDeleteSaved(btn) {
   const qtyEl = qs('[data-f="qty"]', tr);
   const nameEl = qs('[data-f="desc"]', tr);
   const nm = nameEl ? (nameEl.dataset.cbInput ? cboxGet(nameEl.dataset.cbInput) : nameEl.value) : '';
-  confirmDelete({ kind: 'receipt', name: (nm || 'this style') + ' — ' + fmtNum(qtyEl ? qtyEl.value : 0) + ' pcs' }, function () {
+  confirmDelete({ kind: 'receipt', name: (nm || 'this style') + ' â€” ' + fmtNum(qtyEl ? qtyEl.value : 0) + ' pcs' }, function () {
     tr.remove();
     renumberSr();
     calcReceive();
-    toast('Receipt removed — save to apply', 'green');
+    toast('Receipt removed â€” save to apply', 'green');
   });
 }
 function rcGarmentRow(g) {
@@ -10668,7 +10668,7 @@ function calcReceive() {
   qsa('.rc-unit-f').forEach(function (e) { e.textContent = fUnit === 'm' ? 'meter' : fUnit; });
   renumberSr();
 }
-/* the record behind the receive page — Job Work or Sample */
+/* the record behind the receive page â€” Job Work or Sample */
 function rcModule() { return (pageView && pageView.rcMod) ? pageView.rcMod : 'jobwork'; }
 function rcRecord() {
   if (!pageView || pageView.kind !== 'receive') return null;
@@ -10679,7 +10679,7 @@ function openReceive(jwId, mod) {
   mod = mod || 'jobwork'; if (!userCan(mod, 'edit')) return toast('Receive/Edit access denied', 'red');
   const list = db[mod] || [];
   const rec = list.find(function (r) { return r.id === jwId; });
-  if (rec && rec.status === 'Closed') return toast((rec.no || 'This entry') + ' is closed — reopen it to receive', 'red');
+  if (rec && rec.status === 'Closed') return toast((rec.no || 'This entry') + ' is closed â€” reopen it to receive', 'red');
   pageView = { kind: 'receive', jwId: jwId, rcMod: mod || 'jobwork' };
   render();
 }
@@ -10688,7 +10688,7 @@ function renderReceivePage() {
   const rec = rcRecord(); if (!rec) { back(); return; }
   rcEnsureIds(rec);
   $('tb-title').textContent = rcModule() === 'sample' ? 'Receive samples' : 'Receive finished goods';
-  $('tb-sub').textContent = rec.no + ' · ' + rec.vendor + (rec.status === 'Closed' ? ' · Closed' : '');
+  $('tb-sub').textContent = rec.no + ' Â· ' + rec.vendor + (rec.status === 'Closed' ? ' Â· Closed' : '');
   $('tb-actions').innerHTML =
     '<button class="btn btn-ghost" onclick="back()">' + ic('back', 16) + 'Back</button>' +
     (rec.status === 'Closed'
@@ -10705,13 +10705,13 @@ function renderReceivePage() {
   const fUnitRaw = jwFabricUnit(rec);
   const fUnit = fUnitRaw === 'm' ? 'meter' : (fUnitRaw || 'meter');
   const chips =
-    '<div class="stock-chip">🧵 <b>' + esc(rec.no) + '</b> · ' + esc(rec.vendor) +
-    (jwStyleList(rec).length ? ' &nbsp;·&nbsp; Style: <b>' + esc(jwStyleList(rec).map(styleLabel).join(', ')) + '</b>' : '') +
-    ' &nbsp;·&nbsp; Order: <b>' + fmtNum(jwTotalOrder(rec)) + '</b>' +
-    ' &nbsp;·&nbsp; Received: <b>' + fmtNum(jwTotalReceived(rec)) + '</b>' +
-    ' &nbsp;·&nbsp; Pending: <b>' + fmtNum(pending) + '</b></div>';
+    '<div class="stock-chip">ðŸ§µ <b>' + esc(rec.no) + '</b> Â· ' + esc(rec.vendor) +
+    (jwStyleList(rec).length ? ' &nbsp;Â·&nbsp; Style: <b>' + esc(jwStyleList(rec).map(styleLabel).join(', ')) + '</b>' : '') +
+    ' &nbsp;Â·&nbsp; Order: <b>' + fmtNum(jwTotalOrder(rec)) + '</b>' +
+    ' &nbsp;Â·&nbsp; Received: <b>' + fmtNum(jwTotalReceived(rec)) + '</b>' +
+    ' &nbsp;Â·&nbsp; Pending: <b>' + fmtNum(pending) + '</b></div>';
 
-  /* receipts already booked — editable, each keyed to its stored entry */
+  /* receipts already booked â€” editable, each keyed to its stored entry */
   const histRows = receipts.map(function (r) { return rcSavedRow(r); }).join('');
 
   /* the metric block from the spec */
@@ -10750,7 +10750,7 @@ function renderReceivePage() {
       }).join('')
       : '<button class="btn btn-ghost btn-sm" onclick="rcAddDateRow(\'\')">' + ic('plus', 15) + 'Add date</button>') +
     '</div>' +
-    '<div class="hint">💡 Each line is one dated receipt \u2014 one row per style, and <b>Add date</b> books that style again on another day. <b>Receive Now</b> shows a box for each size that style was ordered in — the small grey figure under each box is the pending quantity for that size (\u2014 when the size was not part of the order). Set <b>QC</b> and the receiving <b>Warehouse</b> on each line. Saved receipts are locked: press ✎ to edit one or 🗑 to delete it, then press Save receipt. <b>Actual Fabric Issued</b> = Fabric Issued − Fabric Return, and <b>Actual Consumption</b> = Total received ÷ Actual Fabric Issued. <b>Difference</b> compares it with the Cons./Gmt planned on the job work.</div>' +
+    '<div class="hint">ðŸ’¡ Each line is one dated receipt \u2014 one row per style, and <b>Add date</b> books that style again on another day. <b>Receive Now</b> shows a box for each size that style was ordered in â€” the small grey figure under each box is the pending quantity for that size (\u2014 when the size was not part of the order). Set <b>QC</b> and the receiving <b>Warehouse</b> on each line. Saved receipts are locked: press âœŽ to edit one or ðŸ—‘ to delete it, then press Save receipt. <b>Actual Fabric Issued</b> = Fabric Issued âˆ’ Fabric Return, and <b>Actual Consumption</b> = Total received Ã· Actual Fabric Issued. <b>Difference</b> compares it with the Cons./Gmt planned on the job work.</div>' +
     '</div>';
   rcLockRows();
   calcReceive();
@@ -10758,8 +10758,8 @@ function renderReceivePage() {
 function saveReceivePage() {
   clearReqMarks();
   const rec = rcRecord(); if (!rec) return;
-  if (rec.status === 'Closed') return toast((rec.no || 'This entry') + ' is closed — reopen it to receive', 'red');
-  /* new entry rows — read directly so the dynamic size boxes are included */
+  if (rec.status === 'Closed') return toast((rec.no || 'This entry') + ' is closed â€” reopen it to receive', 'red');
+  /* new entry rows â€” read directly so the dynamic size boxes are included */
   const rows = [];
   qsa('#rc-garments tr').forEach(function (tr) {
     const nameEl = qs('[data-f="desc"]', tr);
@@ -10869,7 +10869,7 @@ function saveReceivePage() {
   if (rows.length) rec.receiveDate = rows[rows.length - 1].date || today();
   rec.status = jwAutoStatus(rec);
   saveDB(); pageView = null;
-  toast('Receipt saved — total received ' + fmtNum(jwTotalReceived(rec)) + ' pcs' +
+  toast('Receipt saved â€” total received ' + fmtNum(jwTotalReceived(rec)) + ' pcs' +
     (removedCount > 0 ? ' (' + removedCount + ' removed)' : ''), 'green');
   render();
 }
@@ -10902,16 +10902,16 @@ function formSale(rec) {
     field('Customer *', cbox('sl-cust', { opts: db.masters.customers, value: r.customer || 'Myntra D2C', f: 'customer', addMaster: 'customers', addText: 'Customers', free: true })) +
     field('Channel', cbox('sl-chan', { opts: CHANNELS, value: r.channel || 'Myntra D2C', f: 'channel', free: false })) +
     field('Payment Status', cbox('sl-pay', { opts: PAY_STATUSES, value: r.payStatus || 'Unpaid', f: 'payStatus', free: false })) +
-    field('Payment Mode', cbox('sl-paymode', { opts: [{ v: '', l: '— None —' }].concat(PAY_MODES), value: r.payMode || '', f: 'payMode', free: false })) +
-    field('Invoice No', '<input class="inp" id="f-invoice" value="' + esc(r.invoiceNo || '') + '" placeholder="INV-…">') +
+    field('Payment Mode', cbox('sl-paymode', { opts: [{ v: '', l: 'â€” None â€”' }].concat(PAY_MODES), value: r.payMode || '', f: 'payMode', free: false })) +
+    field('Invoice No', '<input class="inp" id="f-invoice" value="' + esc(r.invoiceNo || '') + '" placeholder="INV-â€¦">') +
     field('Notes', '<input class="inp" id="f-notes" value="' + esc(r.notes || '') + '" placeholder="Optional">') +
     '</div>' +
     '<datalist id="sale-sku-list">' + styleDatalist + '</datalist>' +
-    '<div class="sec">Sale Items (qty × rate − disc% + tax%)</div>' +
-    '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Garment / SKU</th><th>Qty</th><th>Rate (₹)</th><th>Disc %</th><th>GST %</th><th>Amount</th><th></th></tr></thead>' +
+    '<div class="sec">Sale Items (qty Ã— rate âˆ’ disc% + tax%)</div>' +
+    '<div class="table-wrap"><table class="mini-table"><thead><tr>' + srTh() + '<th>Garment / SKU</th><th>Qty</th><th>Rate (â‚¹)</th><th>Disc %</th><th>GST %</th><th>Amount</th><th></th></tr></thead>' +
     '<tbody id="sale-items">' + (r.items && r.items.length ? r.items.map(saleItemRow).join('') : saleItemRow()) + '</tbody>' +
-    '<tfoot><tr class="tot-row"><td></td><td>Total</td><td class="num" id="sale-tqty">0</td><td></td><td></td><td></td><td class="num" id="sale-tamt">₹0</td><td></td></tr></tfoot></table></div>' +
-    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addRow(\'sale-items\',saleItemRow);calcSale()">＋ Add item</button>' +
+    '<tfoot><tr class="tot-row"><td></td><td>Total</td><td class="num" id="sale-tqty">0</td><td></td><td></td><td></td><td class="num" id="sale-tamt">â‚¹0</td><td></td></tr></tfoot></table></div>' +
+    '<button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addRow(\'sale-items\',saleItemRow);calcSale()">ï¼‹ Add item</button>' +
     '<div class="hint">Status: ' + cbox('sl-status', { opts: STATUSES.sale, value: r.status || 'Open', f: 'status', free: false, compact: true }) + '</div>';
 }
 function calcSale() {
@@ -10987,23 +10987,23 @@ function renderUserEditor(u) {
   const modRows = ACCESS_MODULES.map(function (k) { return { k: k, l: (MODULES[k] || {}).label || k }; });
   const inwardRows = [{ k: 'PO Receipt', l: 'Against PO' }, { k: 'Opening Stock', l: 'Opening Stock' }, { k: 'Job Work Return', l: 'Job Work Return' }];
   const masterRows = userMasterKeys().map(function (k) { return { k: k, l: userMasterLabel(k) }; });
-  $('content').innerHTML = '<div class="entry-page"><div class="sec">User Details</div><div class="grid3">' + field('Full Name *', '<input class="inp" id="usr-name" value="' + esc((u && u.name) || '') + '">') + field('Username *', '<input class="inp" id="usr-username" value="' + esc((u && u.username) || '') + '" autocomplete="off">') + field((isEdit ? 'New PIN (leave blank to keep)' : 'PIN *'), '<input class="inp" id="usr-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password">') + field('Role *', '<select class="inp" id="usr-role"' + (isRootUser(u) ? ' disabled title="System Administrator role is locked"' : '') + '> ' + USER_ROLES.map(function (r) { return '<option' + (r === role ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') + '</div>' + userPermissionSearchHtml() + '<div class="sec">Module-wise Access Level</div>' + permTable('modules', modRows, u) + '<div class="sec">Inward — Entry Type-wise Access</div>' + permTable('inwardTypes', inwardRows, u) + '<div class="sec">Masters — Master-wise Access</div>' + permTable('masters', masterRows, u) + '<div class="hint">View controls visibility. Create, Edit and Delete are configured independently for every module, every Inward Entry Type and every Master.</div></div>';
+  $('content').innerHTML = '<div class="entry-page"><div class="sec">User Details</div><div class="grid3">' + field('Full Name *', '<input class="inp" id="usr-name" value="' + esc((u && u.name) || '') + '">') + field('Username *', '<input class="inp" id="usr-username" value="' + esc((u && u.username) || '') + '" autocomplete="off">') + field((isEdit ? 'New PIN (leave blank to keep)' : 'PIN *'), '<input class="inp" id="usr-pin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password">') + field('Role *', '<select class="inp" id="usr-role"' + (isRootUser(u) ? ' disabled title="System Administrator role is locked"' : '') + '> ' + USER_ROLES.map(function (r) { return '<option' + (r === role ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') + '</div>' + userPermissionSearchHtml() + '<div class="sec">Module-wise Access Level</div>' + permTable('modules', modRows, u) + '<div class="sec">Inward â€” Entry Type-wise Access</div>' + permTable('inwardTypes', inwardRows, u) + '<div class="sec">Masters â€” Master-wise Access</div>' + permTable('masters', masterRows, u) + '<div class="hint">View controls visibility. Create, Edit and Delete are configured independently for every module, every Inward Entry Type and every Master.</div></div>';
 }
 function saveUser(id) {
   const existingUser = id ? (db.users || []).find(function (x) { return x.id === id; }) : null;
   const name = (($('usr-name') || {}).value || '').trim(), username = (($('usr-username') || {}).value || '').trim(), pin = (($('usr-pin') || {}).value || '').trim(), isRoot = !!(existingUser && (existingUser.id === 'USR-0001' || String(existingUser.username || '').toLowerCase() === 'admin')), role = isRoot ? 'Admin' : (($('usr-role') || {}).value || 'Custom'), status = role === 'Admin' ? 'Active' : (existingUser ? (existingUser.status || 'Active') : 'Active');
-  if (!name) return reqBad('usr-name', 'Full Name is required'); if (!username) return reqBad('usr-username', 'Username is required'); if ((!id || pin) && !/^\d{4,8}$/.test(pin)) return reqBad('usr-pin', 'PIN must contain 4–8 digits'); const clash = (db.users || []).find(function (x) { return x.id !== id && String(x.username).toLowerCase() === username.toLowerCase(); }); if (clash) return reqBad('usr-username', 'Username already exists'); const me = authUser(); if (id && me && me.id === id && status === 'Inactive') return reqBad('usr-status', 'You cannot deactivate your current login');
+  if (!name) return reqBad('usr-name', 'Full Name is required'); if (!username) return reqBad('usr-username', 'Username is required'); if ((!id || pin) && !/^\d{4,8}$/.test(pin)) return reqBad('usr-pin', 'PIN must contain 4â€“8 digits'); const clash = (db.users || []).find(function (x) { return x.id !== id && String(x.username).toLowerCase() === username.toLowerCase(); }); if (clash) return reqBad('usr-username', 'Username already exists'); const me = authUser(); if (id && me && me.id === id && status === 'Inactive') return reqBad('usr-status', 'You cannot deactivate your current login');
   let u = existingUser, action = u ? 'Updated' : 'Created'; if (!u) { db.seq.user = pf(db.seq.user) + 1; u = { id: 'USR-' + String(db.seq.user).padStart(4, '0') }; db.users.push(u); } u.name = name; u.username = username; if (pin) u.pin = hashPin(pin); u.role = role; u.status = status; u.permissions = collectPermissions(); u.modules = Object.keys(u.permissions.modules).filter(function (k) { return u.permissions.modules[k].view; }); u.accessLevel = 'Detailed'; if (role === 'Admin') { u.modules = ['*']; }
-  auditPush('User Management', action, u.id, [action + ' user: ' + name, 'Role: ' + role, 'Status: ' + status, 'Detailed permissions updated']); saveDB(); syncUsersToMysql(); toast('User saved — ' + name, 'green'); userEditId = null; userEditMode = false; refreshUserManagementView(); return true;
+  auditPush('User Management', action, u.id, [action + ' user: ' + name, 'Role: ' + role, 'Status: ' + status, 'Detailed permissions updated']); saveDB(); syncUsersToMysql(); toast('User saved â€” ' + name, 'green'); userEditId = null; userEditMode = false; refreshUserManagementView(); return true;
 }
-function toggleUserStatus(id) { const u = (db.users || []).find(function (x) { return x.id === id; }), me = authUser(); if (!u) return; if (u.role === 'Admin') return toast('Admin status cannot be changed', 'red'); if (me && me.id === id) return toast('You cannot deactivate your current login', 'red'); const old = u.status || 'Active'; u.status = old === 'Active' ? 'Inactive' : 'Active'; auditPush('User Management', 'Updated', u.id, ['Status: ' + old + ' → ' + u.status]); saveDB(); refreshUserManagementView(); }
+function toggleUserStatus(id) { const u = (db.users || []).find(function (x) { return x.id === id; }), me = authUser(); if (!u) return; if (u.role === 'Admin') return toast('Admin status cannot be changed', 'red'); if (me && me.id === id) return toast('You cannot deactivate your current login', 'red'); const old = u.status || 'Active'; u.status = old === 'Active' ? 'Inactive' : 'Active'; auditPush('User Management', 'Updated', u.id, ['Status: ' + old + ' â†’ ' + u.status]); saveDB(); refreshUserManagementView(); }
 function deleteUser(id) { const u = (db.users || []).find(function (x) { return x.id === id; }), me = authUser(); if (!u) return; if (me && me.id === id) return toast('You cannot delete your current login', 'red'); confirmDelete({ kind: 'user', name: u.name }, function () { db.users = db.users.filter(function (x) { return x.id !== id; }); auditPush('User Management', 'Deleted', u.id, ['User deleted: ' + u.name]); saveDB(); refreshUserManagementView(); }); }
-function userEditorMasterHtml(u) { const isEdit = !!u, role = (u && u.role) || 'Custom', modRows = ACCESS_MODULES.map(function (k) { return { k: k, l: (MODULES[k] || {}).label || k }; }), inwardRows = [{ k: 'PO Receipt', l: 'Against PO' }, { k: 'Opening Stock', l: 'Opening Stock' }, { k: 'Job Work Return', l: 'Job Work Return' }], masterRows = userMasterKeys().map(function (k) { return { k: k, l: userMasterLabel(k) }; }); return '<div class="mhead"><div><h3>' + (isEdit ? 'Edit User — ' + esc(u.name) : 'New User') + '</h3><p>Detailed module, Inward Entry Type and Master-wise access.</p></div><div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-ghost" onclick="cancelUserEdit()">Back</button><button class="btn btn-primary" onclick="saveUser(\'' + (u ? u.id : '') + '\')">' + (isEdit ? 'Update User' : 'Save User') + '</button></div></div><div class="sec">User Details</div><div class="grid3">' + field('Full Name *', '<input class="inp" id="usr-name" value="' + esc((u && u.name) || '') + '">') + field('Username *', '<input class="inp" id="usr-username" value="' + esc((u && u.username) || '') + '">') + field((isEdit ? 'New PIN (leave blank to keep)' : 'PIN *'), '<input class="inp" id="usr-pin" type="password" inputmode="numeric" maxlength="8">') + field('Role *', '<select class="inp" id="usr-role"' + (isRootUser(u) ? ' disabled title="System Administrator role is locked"' : '') + '> ' + USER_ROLES.map(function (r) { return '<option' + (r === role ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') + '</div>' + userPermissionSearchHtml() + '<div class="sec">Module-wise Access</div>' + permTable('modules', modRows, u) + '<div class="sec">Inward Entry Type-wise Access</div>' + permTable('inwardTypes', inwardRows, u) + '<div class="sec">Master-wise Access</div>' + permTable('masters', masterRows, u); }
-function userManagementMasterHtml() { if (!authUser() || authUser().role !== 'Admin') return '<div class="empty"><h3>Access denied</h3></div>'; if (userEditMode) { const u = userEditId ? (db.users || []).find(function (x) { return x.id === userEditId; }) : null; return userEditorMasterHtml(u); } const rows = (db.users || []).slice().sort(function (a, b) { return String(b.id).localeCompare(String(a.id), undefined, { numeric: true }); }); return '<div class="mhead"><div><h3>User Management <span class="c">' + rows.length + '</span></h3><p>Users, roles and detailed access permissions.</p></div><div style="margin-left:auto"><button class="btn btn-primary" onclick="openUserPopup()">' + ic('plus', 15) + 'Add User</button></div></div><div class="mtools"><div class="search msearch">' + ic('search', 16) + '<input class="inp" id="user-list-search" placeholder="Search users by name, username, role or ID" value="' + esc(userListQuery) + '" oninput="userListSearch(this.value)"></div><button type="button" class="btn btn-ghost btn-sm" id="user-list-clear" onclick="clearUserListSearch()"' + (userListQuery ? '' : ' disabled') + '>Clear filters</button></div><div class="table-wrap"><table><thead><tr><th>User ID</th><th>Name</th><th>Username</th><th>Role</th><th>Visible Modules</th><th>Status</th><th class="num">Actions</th></tr></thead><tbody>' + rows.map(function (u) { const mods = u.role === 'Admin' ? 'All modules' : Object.keys((u.permissions && u.permissions.modules) || {}).filter(function (k) { return u.permissions.modules[k].view; }).map(function (m) { return (MODULES[m] || {}).label || m; }).join(', ') || ((u.modules || []).join(', ')); return '<tr data-user-list-row><td><b>' + esc(u.id) + '</b></td><td>' + esc(u.name) + '</td><td>' + esc(u.username) + '</td><td>' + esc(u.role) + '</td><td><div class="sub-line" style="white-space:normal;max-width:330px">' + esc(mods || '—') + '</div></td><td><button class="sw' + (u.status === 'Inactive' ? '' : ' on') + '"' + (u.role === 'Admin' ? ' disabled title="Admin status is locked"' : ' onclick="toggleUserStatus(\'' + u.id + '\')"') + '><span class="sw-knob"></span></button> ' + esc(u.status || 'Active') + '</td><td class="actions-cell"><button class="btn-icon" onclick="openUserPopup(\'' + u.id + '\')">' + ic('pencil', 15) + '</button></td></tr>'; }).join('') + '</tbody></table></div>'; }
+function userEditorMasterHtml(u) { const isEdit = !!u, role = (u && u.role) || 'Custom', modRows = ACCESS_MODULES.map(function (k) { return { k: k, l: (MODULES[k] || {}).label || k }; }), inwardRows = [{ k: 'PO Receipt', l: 'Against PO' }, { k: 'Opening Stock', l: 'Opening Stock' }, { k: 'Job Work Return', l: 'Job Work Return' }], masterRows = userMasterKeys().map(function (k) { return { k: k, l: userMasterLabel(k) }; }); return '<div class="mhead"><div><h3>' + (isEdit ? 'Edit User â€” ' + esc(u.name) : 'New User') + '</h3><p>Detailed module, Inward Entry Type and Master-wise access.</p></div><div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-ghost" onclick="cancelUserEdit()">Back</button><button class="btn btn-primary" onclick="saveUser(\'' + (u ? u.id : '') + '\')">' + (isEdit ? 'Update User' : 'Save User') + '</button></div></div><div class="sec">User Details</div><div class="grid3">' + field('Full Name *', '<input class="inp" id="usr-name" value="' + esc((u && u.name) || '') + '">') + field('Username *', '<input class="inp" id="usr-username" value="' + esc((u && u.username) || '') + '">') + field((isEdit ? 'New PIN (leave blank to keep)' : 'PIN *'), '<input class="inp" id="usr-pin" type="password" inputmode="numeric" maxlength="8">') + field('Role *', '<select class="inp" id="usr-role"' + (isRootUser(u) ? ' disabled title="System Administrator role is locked"' : '') + '> ' + USER_ROLES.map(function (r) { return '<option' + (r === role ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select>') + '</div>' + userPermissionSearchHtml() + '<div class="sec">Module-wise Access</div>' + permTable('modules', modRows, u) + '<div class="sec">Inward Entry Type-wise Access</div>' + permTable('inwardTypes', inwardRows, u) + '<div class="sec">Master-wise Access</div>' + permTable('masters', masterRows, u); }
+function userManagementMasterHtml() { if (!authUser() || authUser().role !== 'Admin') return '<div class="empty"><h3>Access denied</h3></div>'; if (userEditMode) { const u = userEditId ? (db.users || []).find(function (x) { return x.id === userEditId; }) : null; return userEditorMasterHtml(u); } const rows = (db.users || []).slice().sort(function (a, b) { return String(b.id).localeCompare(String(a.id), undefined, { numeric: true }); }); return '<div class="mhead"><div><h3>User Management <span class="c">' + rows.length + '</span></h3><p>Users, roles and detailed access permissions.</p></div><div style="margin-left:auto"><button class="btn btn-primary" onclick="openUserPopup()">' + ic('plus', 15) + 'Add User</button></div></div><div class="mtools"><div class="search msearch">' + ic('search', 16) + '<input class="inp" id="user-list-search" placeholder="Search users by name, username, role or ID" value="' + esc(userListQuery) + '" oninput="userListSearch(this.value)"></div><button type="button" class="btn btn-ghost btn-sm" id="user-list-clear" onclick="clearUserListSearch()"' + (userListQuery ? '' : ' disabled') + '>Clear filters</button></div><div class="table-wrap"><table><thead><tr><th>User ID</th><th>Name</th><th>Username</th><th>Role</th><th>Visible Modules</th><th>Status</th><th class="num">Actions</th></tr></thead><tbody>' + rows.map(function (u) { const mods = u.role === 'Admin' ? 'All modules' : Object.keys((u.permissions && u.permissions.modules) || {}).filter(function (k) { return u.permissions.modules[k].view; }).map(function (m) { return (MODULES[m] || {}).label || m; }).join(', ') || ((u.modules || []).join(', ')); return '<tr data-user-list-row><td><b>' + esc(u.id) + '</b></td><td>' + esc(u.name) + '</td><td>' + esc(u.username) + '</td><td>' + esc(u.role) + '</td><td><div class="sub-line" style="white-space:normal;max-width:330px">' + esc(mods || 'â€”') + '</div></td><td><button class="sw' + (u.status === 'Inactive' ? '' : ' on') + '"' + (u.role === 'Admin' ? ' disabled title="Admin status is locked"' : ' onclick="toggleUserStatus(\'' + u.id + '\')"') + '><span class="sw-knob"></span></button> ' + esc(u.status || 'Active') + '</td><td class="actions-cell"><button class="btn-icon" onclick="openUserPopup(\'' + u.id + '\')">' + ic('pencil', 15) + '</button></td></tr>'; }).join('') + '</tbody></table></div>'; }
 function renderUserManagement() {
   if (!authUser() || authUser().role !== 'Admin') { go('dashboard'); return; } if (userEditMode) { const u = userEditId ? (db.users || []).find(function (x) { return x.id === userEditId; }) : null; renderUserEditor(u); return; }
   $('tb-title').textContent = 'User Management'; $('tb-sub').textContent = 'Users and detailed access permissions'; $('tb-actions').innerHTML = '<button class="btn btn-primary" onclick="openUserPopup()">' + ic('plus', 16) + 'Add User</button>';
-  const rows = (db.users || []).slice().sort(function (a, b) { return String(b.id).localeCompare(String(a.id), undefined, { numeric: true }); }); $('content').innerHTML = '<div class="stats"><div class="stat"><div class="lbl">Users</div><div class="val">' + rows.length + '</div></div><div class="stat"><div class="lbl">Active</div><div class="val">' + rows.filter(function (x) { return x.status !== 'Inactive'; }).length + '</div></div><div class="stat"><div class="lbl">Administrators</div><div class="val">' + rows.filter(function (x) { return x.role === 'Admin'; }).length + '</div></div></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>User ID</th><th>Name</th><th>Username</th><th>Role</th><th>Permission Model</th><th>Visible Modules</th><th>Status</th><th class="num">Actions</th></tr></thead><tbody>' + rows.map(function (u) { const mods = u.role === 'Admin' ? 'All modules' : Object.keys((u.permissions && u.permissions.modules) || {}).filter(function (k) { return u.permissions.modules[k].view; }).map(function (m) { return (MODULES[m] || {}).label || m; }).join(', ') || ((u.modules || []).join(', ')); return '<tr><td><b>' + esc(u.id) + '</b></td><td>' + esc(u.name) + '</td><td>' + esc(u.username) + '</td><td><span class="badge b-blue">' + esc(u.role) + '</span></td><td>Detailed per module</td><td><div class="sub-line" style="max-width:380px;white-space:normal">' + esc(mods || '—') + '</div></td><td><button class="sw' + (u.status === 'Inactive' ? '' : ' on') + '"' + (u.role === 'Admin' ? ' disabled title="Admin status is locked"' : ' onclick="toggleUserStatus(\'' + u.id + '\')"') + '><span class="sw-knob"></span></button> ' + esc(u.status || 'Active') + '</td><td class="actions-cell"><button class="btn-icon" onclick="openUserPopup(\'' + u.id + '\')">' + ic('pencil', 15) + '</button></td></tr>'; }).join('') + '</tbody></table></div></div><div class="hint">Default first login: <b>admin</b> / <b>1234</b>. User creation and editing use this full-page screen — no popup window.</div>';
+  const rows = (db.users || []).slice().sort(function (a, b) { return String(b.id).localeCompare(String(a.id), undefined, { numeric: true }); }); $('content').innerHTML = '<div class="stats"><div class="stat"><div class="lbl">Users</div><div class="val">' + rows.length + '</div></div><div class="stat"><div class="lbl">Active</div><div class="val">' + rows.filter(function (x) { return x.status !== 'Inactive'; }).length + '</div></div><div class="stat"><div class="lbl">Administrators</div><div class="val">' + rows.filter(function (x) { return x.role === 'Admin'; }).length + '</div></div></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>User ID</th><th>Name</th><th>Username</th><th>Role</th><th>Permission Model</th><th>Visible Modules</th><th>Status</th><th class="num">Actions</th></tr></thead><tbody>' + rows.map(function (u) { const mods = u.role === 'Admin' ? 'All modules' : Object.keys((u.permissions && u.permissions.modules) || {}).filter(function (k) { return u.permissions.modules[k].view; }).map(function (m) { return (MODULES[m] || {}).label || m; }).join(', ') || ((u.modules || []).join(', ')); return '<tr><td><b>' + esc(u.id) + '</b></td><td>' + esc(u.name) + '</td><td>' + esc(u.username) + '</td><td><span class="badge b-blue">' + esc(u.role) + '</span></td><td>Detailed per module</td><td><div class="sub-line" style="max-width:380px;white-space:normal">' + esc(mods || 'â€”') + '</div></td><td><button class="sw' + (u.status === 'Inactive' ? '' : ' on') + '"' + (u.role === 'Admin' ? ' disabled title="Admin status is locked"' : ' onclick="toggleUserStatus(\'' + u.id + '\')"') + '><span class="sw-knob"></span></button> ' + esc(u.status || 'Active') + '</td><td class="actions-cell"><button class="btn-icon" onclick="openUserPopup(\'' + u.id + '\')">' + ic('pencil', 15) + '</button></td></tr>'; }).join('') + '</tbody></table></div></div><div class="hint">Default first login: <b>admin</b> / <b>1234</b>. User creation and editing use this full-page screen â€” no popup window.</div>';
 }
 
 /* ================= AUDIT TRAIL ================= */
@@ -11020,18 +11020,18 @@ function refreshAuditView() { if (cur === 'masters' && mTab === 'audit') renderM
 function auditSearch(v) { auditState.q = v; auditState.page = 1; refreshAuditView(); const e = $('audit-q'); if (e) { e.focus(); try { e.setSelectionRange(e.value.length, e.value.length); } catch (err) { } } }
 function auditAction(v) { auditState.action = v; auditState.page = 1; refreshAuditView(); }
 function auditFriendlyField(path) {
-  let s = String(path || 'field').replace(/\[\d+\]/g, ' item').replace(/\./g, ' — ');
+  let s = String(path || 'field').replace(/\[\d+\]/g, ' item').replace(/\./g, ' â€” ');
   const map = { actualQty: 'actual issue quantity', recQty: 'received quantity', poRate: 'rate', dcNo: 'DC number', gstType: 'GST type', outwardRef: 'process outward reference', jwRef: 'job work reference', payStatus: 'payment status' };
   Object.keys(map).forEach(function (k) { s = s.replace(new RegExp(k, 'gi'), map[k]); });
   s = s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function auditPlainChange(c) {
-  const text = String(c || ''), colon = text.indexOf(':'), arrow = text.indexOf('→');
+  const text = String(c || ''), colon = text.indexOf(':'), arrow = text.indexOf('â†’');
   if (colon > -1 && arrow > colon) {
     const field = auditFriendlyField(text.slice(0, colon));
     const oldVal = text.slice(colon + 1, arrow).trim(), newVal = text.slice(arrow + 1).trim();
-    return field + ' changed from “' + oldVal + '” to “' + newVal + '”';
+    return field + ' changed from â€œ' + oldVal + 'â€ to â€œ' + newVal + 'â€';
   }
   return text;
 }
@@ -11039,23 +11039,23 @@ function auditPlainNote(x) {
   const who = x.user || 'A user', area = x.area || 'record', rec = x.record || 'record', changes = x.changes || [], n = changes.length;
   if (x.action === 'Created') return who + ' created ' + rec + ' in ' + area + (changes.length ? '. Details: ' + changes.slice(0, 3).join('; ') + '.' : '.');
   if (x.action === 'Deleted') return who + ' deleted ' + rec + ' from ' + area + (changes.length ? '. Deleted record details: ' + changes.slice(0, 3).join('; ') + '.' : '.');
-  if (x.action === 'Added') return who + ' added “' + rec + '” to ' + area + (changes.length && changes[0] !== 'Master record added' ? '. ' + changes.slice(0, 2).join('; ') + '.' : '.');
-  if (x.action === 'Removed') return who + ' removed “' + rec + '” from ' + area + (changes.length && changes[0] !== 'Master record removed' ? '. ' + changes.slice(0, 2).join('; ') + '.' : '.');
+  if (x.action === 'Added') return who + ' added â€œ' + rec + 'â€ to ' + area + (changes.length && changes[0] !== 'Master record added' ? '. ' + changes.slice(0, 2).join('; ') + '.' : '.');
+  if (x.action === 'Removed') return who + ' removed â€œ' + rec + 'â€ from ' + area + (changes.length && changes[0] !== 'Master record removed' ? '. ' + changes.slice(0, 2).join('; ') + '.' : '.');
   const details = changes.slice(0, 4).map(auditPlainChange);
   return who + ' updated ' + rec + ' in ' + area + (details.length ? '. ' + details.join('; ') + (n > 4 ? '; and ' + (n - 4) + ' more changes' : '') + '.' : '.');
 }
-function auditMasterPanelHtml() { const rows = auditRows().slice(0, 100), body = rows.length ? rows.map(function (x, i) { const when = new Date(x.at), date = isNaN(when) ? x.at : when.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); return '<tr><td class="srcol">' + (i + 1) + '</td><td style="white-space:nowrap">' + esc(date) + '</td><td>' + esc(x.user || '—') + '</td><td><b>' + esc(x.area || '—') + '</b></td><td>' + badge(x.action || 'Updated') + '</td><td>' + esc(x.record || '—') + '</td><td class="audit-note">' + esc(auditPlainNote(x)) + '</td></tr>'; }).join('') : '<tr><td colspan="7"><div class="empty">No audit entries found.</div></td></tr>'; return '<div class="mhead"><div><h3>Audit Trail <span class="c">' + (db.auditTrail || []).length + '</span></h3><p>Trace who changed what and when.</p></div></div><div class="mtools"><div class="search msearch">' + ic('search', 16) + '<input class="inp" id="audit-q" placeholder="Search audit entries" value="' + esc(auditState.q) + '" oninput="auditSearch(this.value)"></div><select class="inp" style="width:auto" onchange="auditAction(this.value)"><option value="">All actions</option>' + ['Created', 'Updated', 'Deleted', 'Added', 'Removed'].map(function (a) { return '<option' + (auditState.action === a ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select></div><div class="table-wrap"><table><thead><tr><th class="srcol">Sr.</th><th>Date & Time</th><th>User</th><th>Module / Master</th><th>Action</th><th>Record</th><th>Simple Change Note</th></tr></thead><tbody>' + body + '</tbody></table></div><div class="hint">Showing latest ' + rows.length + ' matching audit events.</div>'; }
+function auditMasterPanelHtml() { const rows = auditRows().slice(0, 100), body = rows.length ? rows.map(function (x, i) { const when = new Date(x.at), date = isNaN(when) ? x.at : when.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); return '<tr><td class="srcol">' + (i + 1) + '</td><td style="white-space:nowrap">' + esc(date) + '</td><td>' + esc(x.user || 'â€”') + '</td><td><b>' + esc(x.area || 'â€”') + '</b></td><td>' + badge(x.action || 'Updated') + '</td><td>' + esc(x.record || 'â€”') + '</td><td class="audit-note">' + esc(auditPlainNote(x)) + '</td></tr>'; }).join('') : '<tr><td colspan="7"><div class="empty">No audit entries found.</div></td></tr>'; return '<div class="mhead"><div><h3>Audit Trail <span class="c">' + (db.auditTrail || []).length + '</span></h3><p>Trace who changed what and when.</p></div></div><div class="mtools"><div class="search msearch">' + ic('search', 16) + '<input class="inp" id="audit-q" placeholder="Search audit entries" value="' + esc(auditState.q) + '" oninput="auditSearch(this.value)"></div><select class="inp" style="width:auto" onchange="auditAction(this.value)"><option value="">All actions</option>' + ['Created', 'Updated', 'Deleted', 'Added', 'Removed'].map(function (a) { return '<option' + (auditState.action === a ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select></div><div class="table-wrap"><table><thead><tr><th class="srcol">Sr.</th><th>Date & Time</th><th>User</th><th>Module / Master</th><th>Action</th><th>Record</th><th>Simple Change Note</th></tr></thead><tbody>' + body + '</tbody></table></div><div class="hint">Showing latest ' + rows.length + ' matching audit events.</div>'; }
 function renderAuditTrail() {
   const rows = auditRows(), pg = slicePage(rows, auditState); auditState.page = pg.page;
   const body = pg.rows.length ? pg.rows.map(function (x, i) {
     const when = new Date(x.at); const date = isNaN(when) ? x.at : when.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const tone = x.action === 'Deleted' || x.action === 'Removed' ? 'b-red' : x.action === 'Created' || x.action === 'Added' ? 'b-green' : 'b-blue';
-    return '<tr><td class="srcol">' + (pg.from + i) + '</td><td style="white-space:nowrap">' + esc(date) + '</td><td>' + esc(x.user || '—') + '</td><td><b>' + esc(x.area || '—') + '</b></td><td><span class="badge ' + tone + '">' + esc(x.action || '—') + '</span></td><td><b>' + esc(x.record || '—') + '</b></td><td>' + (x.changes || []).map(function (c) { return '<div class="audit-change">' + esc(c) + '</div>'; }).join('') + '</td><td class="audit-note">' + esc(auditPlainNote(x)) + '</td></tr>';
+    return '<tr><td class="srcol">' + (pg.from + i) + '</td><td style="white-space:nowrap">' + esc(date) + '</td><td>' + esc(x.user || 'â€”') + '</td><td><b>' + esc(x.area || 'â€”') + '</b></td><td><span class="badge ' + tone + '">' + esc(x.action || 'â€”') + '</span></td><td><b>' + esc(x.record || 'â€”') + '</b></td><td>' + (x.changes || []).map(function (c) { return '<div class="audit-change">' + esc(c) + '</div>'; }).join('') + '</td><td class="audit-note">' + esc(auditPlainNote(x)) + '</td></tr>';
   }).join('') : '<tr><td colspan="8"><div class="empty"><div class="big">' + ic('view', 28) + '</div><h3>No audit entries found</h3><p>Changes made after Audit Trail was enabled will appear here.</p></div></td></tr>';
   $('content').innerHTML = '<div class="stats"><div class="stat"><div class="lbl">Audit events</div><div class="val">' + fmtNum((db.auditTrail || []).length) + '</div></div><div class="stat"><div class="lbl">Filtered events</div><div class="val">' + fmtNum(rows.length) + '</div></div><div class="stat"><div class="lbl">Retention</div><div class="val">2,000 <small>latest events</small></div></div></div>' +
     '<div class="panel list-panel"><div class="index-stick"><div class="filter-bar"><div class="search">' + ic('search', 16) + '<input class="inp" id="audit-q" placeholder="Search user, module, record or changed field" value="' + esc(auditState.q) + '" oninput="auditSearch(this.value)"></div>' +
     '<select class="inp" style="width:auto" onchange="auditAction(this.value)"><option value="">All actions</option>' + ['Created', 'Updated', 'Deleted', 'Added', 'Removed'].map(function (a) { return '<option' + (auditState.action === a ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select><span class="rowcount">' + rows.length + ' events</span></div></div>' +
-    '<div class="table-wrap"><table><thead><tr><th class="srcol">Sr.</th><th>Date &amp; Time</th><th>User</th><th>Module / Master</th><th>Action</th><th>Record</th><th>Changes (old → new)</th><th>Simple Change Note</th></tr></thead><tbody>' + body + '</tbody></table></div>' + pagerBar(pg, 'audit', 'trail') + '</div>';
+    '<div class="table-wrap"><table><thead><tr><th class="srcol">Sr.</th><th>Date &amp; Time</th><th>User</th><th>Module / Master</th><th>Action</th><th>Record</th><th>Changes (old â†’ new)</th><th>Simple Change Note</th></tr></thead><tbody>' + body + '</tbody></table></div>' + pagerBar(pg, 'audit', 'trail') + '</div>';
 }
 function exportAuditCSV() {
   const rows = auditRows(); if (!rows.length) return toast('No audit entries to export', 'red');
@@ -11086,18 +11086,18 @@ function pivotInitDates() { if (!pivotState.from) pivotState.from = defaultFrom(
 function pivotSourceRows(src) {
   const out = [];
   if (src === 'material') {
-    const add = function (r, list, module, type) { (list || []).forEach(function (i) { const q = pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty), inw = inwardByNo(i.inwardNo), si = inw ? (inw.items || []).find(function (x) { return lcName(x.name) === lcName(i.item); }) : null, rate = si ? pf(si.poRate) : 0; out.push({ _date: i.date || r.date, 'Module': module, 'Issue Date': dpToDisplay(i.date) || i.date, 'DC No.': i.dcNo || '—', 'Reference No.': r.no, 'Vendor': r.vendor, 'Issue Type': type, 'Item': bareItemName(i.item) || i.item, 'Classification': i.classification || '—', 'Inward No.': i.inwardNo || '—', 'UOM': i.unit || '', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': q * rate, 'Average Rate': rate }); }); };
+    const add = function (r, list, module, type) { (list || []).forEach(function (i) { const q = pf(i.actualQty != null && i.actualQty !== '' ? i.actualQty : i.qty), inw = inwardByNo(i.inwardNo), si = inw ? (inw.items || []).find(function (x) { return lcName(x.name) === lcName(i.item); }) : null, rate = si ? pf(si.poRate) : 0; out.push({ _date: i.date || r.date, 'Module': module, 'Issue Date': dpToDisplay(i.date) || i.date, 'DC No.': i.dcNo || 'â€”', 'Reference No.': r.no, 'Vendor': r.vendor, 'Issue Type': type, 'Item': bareItemName(i.item) || i.item, 'Classification': i.classification || 'â€”', 'Inward No.': i.inwardNo || 'â€”', 'UOM': i.unit || '', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': q * rate, 'Average Rate': rate }); }); };
     (db.jobwork || []).forEach(function (r) { add(r, r.issues, 'Job Work', 'Material'); add(r, r.extras, 'Job Work', 'Extra'); }); (db.sample || []).forEach(function (r) { add(r, r.extras, 'Sample', 'Material'); });
   } else if (src === 'inward') {
-    (db.inward || []).forEach(function (r) { (r.items || []).forEach(function (i) { const q = pf(i.recQty), rate = pf(i.poRate); out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'Inward No.': r.no, 'Entry Type': r.entryType || 'PO Receipt', 'Supplier': r.supplier || '—', 'Warehouse': r.warehouse || '—', 'Item': bareItemName(i.name) || i.name, 'Category': (itemByName(i.name) || {}).category || '—', 'Classification': i.classification || '—', 'UOM': i.unit || '', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': q * rate, 'Average Rate': rate }); }); });
+    (db.inward || []).forEach(function (r) { (r.items || []).forEach(function (i) { const q = pf(i.recQty), rate = pf(i.poRate); out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'Inward No.': r.no, 'Entry Type': r.entryType || 'PO Receipt', 'Supplier': r.supplier || 'â€”', 'Warehouse': r.warehouse || 'â€”', 'Item': bareItemName(i.name) || i.name, 'Category': (itemByName(i.name) || {}).category || 'â€”', 'Classification': i.classification || 'â€”', 'UOM': i.unit || '', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': q * rate, 'Average Rate': rate }); }); });
   } else if (src === 'po') {
-    (db.po || []).forEach(function (r) { (r.items || []).forEach(function (i) { const q = pf(i.qty), rate = pf(i.rate); out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'PO No.': r.no, 'Supplier': r.supplier, 'Category': r.category || '—', 'Item': bareItemName(i.name) || i.name, 'Classification': i.classification || '—', 'UOM': i.unit || '', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': q * rate, 'Average Rate': rate }); }); });
+    (db.po || []).forEach(function (r) { (r.items || []).forEach(function (i) { const q = pf(i.qty), rate = pf(i.rate); out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'PO No.': r.no, 'Supplier': r.supplier, 'Category': r.category || 'â€”', 'Item': bareItemName(i.name) || i.name, 'Classification': i.classification || 'â€”', 'UOM': i.unit || '', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': q * rate, 'Average Rate': rate }); }); });
   } else if (src === 'processout') {
     (db.processoutward || []).forEach(function (r) { (r.items || []).forEach(function (i) { const q = pf(i.qty), rate = pf(i.rate); out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'Outward No.': r.no, 'Process Type': r.processType, 'Processor': r.processor, 'Job Work Ref': r.jwRef, 'Style': styleLabel(i.style) || i.style, 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': q * rate, 'Average Rate': rate }); }); });
   } else if (src === 'processin') {
     (db.processinward || []).forEach(function (r) { (r.items || []).forEach(function (i) { out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'Inward No.': r.no, 'Outward Ref': r.outwardRef, 'Process Type': r.processType, 'Processor': r.processor, 'Warehouse': r.warehouse, 'Style': styleLabel(i.style) || i.style, 'Status': r.status, 'Record Count': 1, 'Quantity': pf(i.qty) }); }); });
   } else if (src === 'sales') {
-    (db.sale || []).forEach(function (r) { (r.items || []).forEach(function (i) { const q = pf(i.qty), rate = pf(i.rate), val = pf(i.amount) || q * rate; out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'Sale No.': r.no, 'Customer': r.customer, 'Channel': r.channel, 'Payment Status': r.payStatus, 'Item': i.desc || '—', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': val, 'Average Rate': rate }); }); });
+    (db.sale || []).forEach(function (r) { (r.items || []).forEach(function (i) { const q = pf(i.qty), rate = pf(i.rate), val = pf(i.amount) || q * rate; out.push({ _date: r.date, 'Date': dpToDisplay(r.date) || r.date, 'Sale No.': r.no, 'Customer': r.customer, 'Channel': r.channel, 'Payment Status': r.payStatus, 'Item': i.desc || 'â€”', 'Status': r.status, 'Record Count': 1, 'Quantity': q, 'Value': val, 'Average Rate': rate }); }); });
   }
   const sourceLabel = (PIVOT_SOURCES[src] || {}).label || src; out.forEach(function (r) { r['Data Source'] = sourceLabel; }); return out;
 }
@@ -11108,7 +11108,7 @@ function pivotFilterMatch(value, f, numeric) {
 }
 function pivotFilteredRows() { pivotInitDates(); const metricNames = pivotCombinedDef().metrics, all = []; pivotSelectedSources().forEach(function (src) { all.push.apply(all, pivotSourceRows(src)); }); return all.filter(function (r) { if (!inRange(r._date || '', pivotState.from, pivotState.to)) return false; return Object.keys(pivotState.filters || {}).every(function (k) { if (metricNames.indexOf(k) > -1) return true; return pivotFilterMatch(r[k], pivotState.filters[k], false); }); }); }
 function pivotAggregate(rows, metric) { if (metric === 'Record Count') return rows.length; if (metric === 'Average Rate') { const a = rows.map(function (r) { return pf(r[metric]); }).filter(function (n) { return n !== 0; }); return a.length ? a.reduce(function (x, n) { return x + n; }, 0) / a.length : 0; } return rows.reduce(function (a, r) { return a + pf(r[metric]); }, 0); }
-function pivotResult() { const rows = pivotFilteredRows(), dims = pivotState.breakdowns.slice(), metrics = pivotState.metrics.slice(), map = {}; rows.forEach(function (r) { const vals = dims.map(function (d) { return String(r[d] == null ? '—' : r[d]); }), key = JSON.stringify(vals); if (!map[key]) map[key] = { vals: vals, rows: [] }; map[key].rows.push(r); }); let data = Object.keys(map).map(function (k) { const g = map[k]; return { vals: g.vals, metrics: metrics.map(function (m) { return pivotAggregate(g.rows, m); }), count: g.rows.length }; }); data = data.filter(function (row) { return metrics.every(function (m, i) { const f = (pivotState.filters || {})[m]; return !f || pivotFilterMatch(row.metrics[i], f, true); }); }); const allCols = dims.concat(metrics), si = allCols.indexOf(pivotState.sortCol); if (si > -1) data.sort(function (a, b) { const av = si < dims.length ? a.vals[si] : a.metrics[si - dims.length], bv = si < dims.length ? b.vals[si] : b.metrics[si - dims.length]; const n = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv), undefined, { numeric: true }); return pivotState.sortDir === 'asc' ? n : -n; }); return { raw: rows, dims: dims, metrics: metrics, data: data, totals: metrics.map(function (m) { return pivotAggregate(rows, m); }) }; }
+function pivotResult() { const rows = pivotFilteredRows(), dims = pivotState.breakdowns.slice(), metrics = pivotState.metrics.slice(), map = {}; rows.forEach(function (r) { const vals = dims.map(function (d) { return String(r[d] == null ? 'â€”' : r[d]); }), key = JSON.stringify(vals); if (!map[key]) map[key] = { vals: vals, rows: [] }; map[key].rows.push(r); }); let data = Object.keys(map).map(function (k) { const g = map[k]; return { vals: g.vals, metrics: metrics.map(function (m) { return pivotAggregate(g.rows, m); }), count: g.rows.length }; }); data = data.filter(function (row) { return metrics.every(function (m, i) { const f = (pivotState.filters || {})[m]; return !f || pivotFilterMatch(row.metrics[i], f, true); }); }); const allCols = dims.concat(metrics), si = allCols.indexOf(pivotState.sortCol); if (si > -1) data.sort(function (a, b) { const av = si < dims.length ? a.vals[si] : a.metrics[si - dims.length], bv = si < dims.length ? b.vals[si] : b.metrics[si - dims.length]; const n = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv), undefined, { numeric: true }); return pivotState.sortDir === 'asc' ? n : -n; }); return { raw: rows, dims: dims, metrics: metrics, data: data, totals: metrics.map(function (m) { return pivotAggregate(rows, m); }) }; }
 function pivotFmt(metric, v) { return metric === 'Value' || metric === 'Average Rate' ? fmtINR(v) : fmtNum(v); }
 function pivotToggle(kind, key, on) { const arr = pivotState[kind], i = arr.indexOf(key); if (on && i < 0) arr.push(key); if (!on && i > -1) arr.splice(i, 1); pivotState.reportId = ''; renderCustomReporting(); }
 function pivotSetSource(v) { pivotState.sources = [v]; pivotState.source = v; pivotState.reportId = ''; renderCustomReporting(); }
@@ -11120,7 +11120,7 @@ function pivotOpenColumnMenu(col, kind) {
   const numOps = [['eq', 'Equals'], ['gt', 'Greater than'], ['gte', 'Greater than or equal'], ['lt', 'Less than'], ['lte', 'Less than or equal'], ['between', 'Between']];
   const ops = numeric ? numOps : textOps, op = filter.op || (numeric ? 'eq' : 'contains');
   const filterHtml = '<div class="dlg-field"><label>' + (numeric ? 'Number filter' : 'Text filter') + '</label><select class="inp" id="pivot-filter-op" onchange="const b=document.getElementById(\'pivot-filter-value2-wrap\');if(b)b.style.display=this.value===\'between\'?\'block\':\'none\'">' + ops.map(function (x) { return '<option value="' + x[0] + '"' + (op === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></div><div class="dlg-field"><label>' + (numeric ? 'Value' : 'Text') + '</label><input class="inp" id="pivot-col-filter"' + (numeric ? ' type="number" step="any"' : '') + ' value="' + esc(filter.value || '') + '" placeholder="Enter ' + (numeric ? 'number' : 'text') + '"></div>' + (numeric ? '<div class="dlg-field" id="pivot-filter-value2-wrap" style="display:' + (op === 'between' ? 'block' : 'none') + '"><label>Second value</label><input class="inp" id="pivot-col-filter2" type="number" step="any" value="' + esc(filter.value2 || '') + '"></div>' : '');
-  openDialog({ title: col, bodyHtml: '<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="pivotColumnAction(\'sortAsc\',\'' + esc(col) + '\',\'' + kind + '\')">Sort lowest to highest / A–Z</button><button class="btn btn-ghost" style="width:100%;margin-bottom:14px" onclick="pivotColumnAction(\'sortDesc\',\'' + esc(col) + '\',\'' + kind + '\')">Sort highest to lowest / Z–A</button>' + filterHtml + (pivotState.filters[col] ? '<button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="pivotColumnAction(\'clearFilter\',\'' + esc(col) + '\',\'' + kind + '\')">Clear this filter</button>' : '') + '<button class="btn btn-danger" style="width:100%;margin-top:10px" onclick="pivotColumnAction(\'remove\',\'' + esc(col) + '\',\'' + kind + '\')">Remove column</button>', confirmText: 'Apply filter', onConfirm: function () { const v = (($('pivot-col-filter') || {}).value || '').trim(), selected = (($('pivot-filter-op') || {}).value || op), v2 = (($('pivot-col-filter2') || {}).value || '').trim(); if (v) pivotState.filters[col] = { type: numeric ? 'number' : 'text', op: selected, value: v, value2: v2 }; else delete pivotState.filters[col]; pivotState.reportId = ''; renderCustomReporting(); } });
+  openDialog({ title: col, bodyHtml: '<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="pivotColumnAction(\'sortAsc\',\'' + esc(col) + '\',\'' + kind + '\')">Sort lowest to highest / Aâ€“Z</button><button class="btn btn-ghost" style="width:100%;margin-bottom:14px" onclick="pivotColumnAction(\'sortDesc\',\'' + esc(col) + '\',\'' + kind + '\')">Sort highest to lowest / Zâ€“A</button>' + filterHtml + (pivotState.filters[col] ? '<button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="pivotColumnAction(\'clearFilter\',\'' + esc(col) + '\',\'' + kind + '\')">Clear this filter</button>' : '') + '<button class="btn btn-danger" style="width:100%;margin-top:10px" onclick="pivotColumnAction(\'remove\',\'' + esc(col) + '\',\'' + kind + '\')">Remove column</button>', confirmText: 'Apply filter', onConfirm: function () { const v = (($('pivot-col-filter') || {}).value || '').trim(), selected = (($('pivot-filter-op') || {}).value || op), v2 = (($('pivot-col-filter2') || {}).value || '').trim(); if (v) pivotState.filters[col] = { type: numeric ? 'number' : 'text', op: selected, value: v, value2: v2 }; else delete pivotState.filters[col]; pivotState.reportId = ''; renderCustomReporting(); } });
 }
 function pivotColumnAction(action, col, kind) { if (action === 'sortAsc' || action === 'sortDesc') { pivotState.sortCol = col; pivotState.sortDir = action === 'sortAsc' ? 'asc' : 'desc'; closeDialog(); renderCustomReporting(); return; } if (action === 'clearFilter') { delete pivotState.filters[col]; pivotState.reportId = ''; closeDialog(); renderCustomReporting(); return; } if (action === 'remove') { const a = pivotState[kind], i = a.indexOf(col); if (i > -1) a.splice(i, 1); delete pivotState.filters[col]; pivotState.reportId = ''; closeDialog(); renderCustomReporting(); } }
 function pivotSaveReport() { const name = (($('pivot-name') || {}).value || '').trim(); if (!name) return reqBad('pivot-name', 'Report name is required'); const cfg = { source: pivotSelectedSources()[0], sources: pivotSelectedSources().slice(), name: name, folder: (($('pivot-folder') || {}).value || pivotState.folder || 'Private Reports'), chartType: (($('pivot-chart-type') || {}).value || pivotState.chartType || 'none'), reportFormat: sfReportFormat, from: pivotState.from, to: pivotState.to, breakdowns: pivotState.breakdowns.slice(), metrics: pivotState.metrics.slice(), filters: Object.assign({}, pivotState.filters), sortCol: pivotState.sortCol, sortDir: pivotState.sortDir, updatedAt: Date.now(), createdBy: currentAuditUser() }; pivotState.folder = cfg.folder; pivotState.chartType = cfg.chartType; pivotState.name = name; let r = pivotState.reportId ? (db.customReports || []).find(function (x) { return x.id === pivotState.reportId; }) : null; if (r) { Object.assign(r, cfg); auditPush('Reporting', 'Updated', r.id, ['Saved report updated: ' + name]); } else { r = Object.assign({ id: 'RPT-' + Date.now().toString(36), createdAt: Date.now() }, cfg); db.customReports.push(r); pivotState.reportId = r.id; auditPush('Reporting', 'Created', r.id, ['Saved custom report: ' + name]); } saveDB(); toast('Custom report saved', 'green'); renderCustomReporting(); }
@@ -11131,27 +11131,27 @@ function reportingHome() { reportingMode = 'home'; renderCustomReporting(); }
 function pivotDeleteReport() { if (!pivotState.reportId) return; const id = pivotState.reportId; confirmDelete({ kind: 'saved report', name: pivotState.name }, function () { db.customReports = db.customReports.filter(function (x) { return x.id !== id; }); auditPush('Reporting', 'Deleted', id, ['Saved custom report deleted']); saveDB(); reportingHome(); }); }
 function pivotExport() { const r = pivotResult(), heads = r.dims.concat(r.metrics), lines = [heads.map(csvEsc).join(',')]; r.data.forEach(function (x) { lines.push(x.vals.concat(x.metrics).map(csvEsc).join(',')); }); const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' }), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (pivotState.name || 'custom_report').replace(/[^A-Za-z0-9_-]/g, '_') + '.csv'; document.body.appendChild(a); a.click(); a.remove(); }
 function pivotCustomizerSearch(v) { const q = String(v || '').toLowerCase(); qsa('.pivot-option').forEach(function (x) { x.style.display = x.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none'; }); }
-function pivotFilterLabel(f) { if (!f) return ''; if (typeof f === 'string') return 'contains ' + f; const labels = { contains: 'contains', equals: '=', starts: 'starts', ends: 'ends', notcontains: 'not contains', eq: '=', gt: '>', gte: '≥', lt: '<', lte: '≤', between: 'between' }; return (labels[f.op] || f.op) + ' ' + f.value + (f.op === 'between' && f.value2 ? '–' + f.value2 : ''); }
+function pivotFilterLabel(f) { if (!f) return ''; if (typeof f === 'string') return 'contains ' + f; const labels = { contains: 'contains', equals: '=', starts: 'starts', ends: 'ends', notcontains: 'not contains', eq: '=', gt: '>', gte: 'â‰¥', lt: '<', lte: 'â‰¤', between: 'between' }; return (labels[f.op] || f.op) + ' ' + f.value + (f.op === 'between' && f.value2 ? 'â€“' + f.value2 : ''); }
 function renderCustomReporting() { if (reportingMode === 'home') return renderReportingHome(); if (reportingMode === 'types') return renderReportingTypes(); return renderReportingBuilder(); }
 function renderReportingHome() { const rows = (db.customReports || []).slice().sort(function (a, b) { return pf(b.updatedAt || b.createdAt) - pf(a.updatedAt || a.createdAt); }); $('tb-title').textContent = 'Reports'; $('tb-sub').textContent = 'Recent, private and shared custom reports'; $('tb-actions').innerHTML = '<button class="btn btn-primary" onclick="pivotNewReport()">' + ic('plus', 16) + 'New Report</button>'; $('content').innerHTML = '<div class="sf-report-home-head"><div><h3>All Reports</h3><p class="sub-line">Build, save and run reports from your ERP data.</p></div><div class="search" style="max-width:320px">' + ic('search', 16) + '<input class="inp" id="report-home-q" placeholder="Search reports" oninput="reportHomeSearch(this.value)"></div></div><div class="tabs"><button class="tab active">All Reports <span class="tc">' + rows.length + '</span></button><button class="tab">Private Reports</button><button class="tab">Public Reports</button></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>Report Name</th><th>Folder</th><th>Report Type / Sources</th><th>Created By</th><th>Last Modified</th><th class="num">Actions</th></tr></thead><tbody id="report-home-body">' + reportHomeRows(rows) + '</tbody></table></div></div>'; }
-function reportHomeRows(rows) { return rows.length ? rows.map(function (r) { const when = new Date(r.updatedAt || r.createdAt || Date.now()).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }), sources = (r.sources || [r.source]).map(function (k) { return (PIVOT_SOURCES[k] || {}).label || k; }).join(', '); return '<tr onclick="pivotLoadReport(\'' + r.id + '\')"><td><b>' + esc(r.name) + '</b></td><td>' + esc(r.folder || 'Private Reports') + '</td><td>' + esc(sources) + '</td><td>' + esc(r.createdBy || '—') + '</td><td>' + esc(when) + '</td><td class="actions-cell" onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="pivotLoadReport(\'' + r.id + '\')">Run</button><button class="btn-icon danger" onclick="deleteSavedReportById(\'' + r.id + '\')">' + ic('trash', 14) + '</button></td></tr>'; }).join('') : '<tr><td colspan="6"><div class="empty"><div class="big">' + ic('chart', 28) + '</div><h3>No reports yet</h3><p>Create your first custom report.</p><button class="btn btn-primary" onclick="pivotNewReport()">New Report</button></div></td></tr>'; }
+function reportHomeRows(rows) { return rows.length ? rows.map(function (r) { const when = new Date(r.updatedAt || r.createdAt || Date.now()).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }), sources = (r.sources || [r.source]).map(function (k) { return (PIVOT_SOURCES[k] || {}).label || k; }).join(', '); return '<tr onclick="pivotLoadReport(\'' + r.id + '\')"><td><b>' + esc(r.name) + '</b></td><td>' + esc(r.folder || 'Private Reports') + '</td><td>' + esc(sources) + '</td><td>' + esc(r.createdBy || 'â€”') + '</td><td>' + esc(when) + '</td><td class="actions-cell" onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="pivotLoadReport(\'' + r.id + '\')">Run</button><button class="btn-icon danger" onclick="deleteSavedReportById(\'' + r.id + '\')">' + ic('trash', 14) + '</button></td></tr>'; }).join('') : '<tr><td colspan="6"><div class="empty"><div class="big">' + ic('chart', 28) + '</div><h3>No reports yet</h3><p>Create your first custom report.</p><button class="btn btn-primary" onclick="pivotNewReport()">New Report</button></div></td></tr>'; }
 function reportHomeSearch(v) { const q = String(v || '').toLowerCase(), rows = (db.customReports || []).filter(function (r) { return (r.name + ' ' + (r.folder || '') + ' ' + (r.createdBy || '')).toLowerCase().indexOf(q) > -1; }); const e = $('report-home-body'); if (e) e.innerHTML = reportHomeRows(rows); }
 function deleteSavedReportById(id) { const r = (db.customReports || []).find(function (x) { return x.id === id; }); if (!r) return; confirmDelete({ kind: 'report', name: r.name }, function () { db.customReports = db.customReports.filter(function (x) { return x.id !== id; }); auditPush('Reporting', 'Deleted', id, ['Saved report deleted']); saveDB(); renderReportingHome(); }); }
-function renderReportingTypes() { $('tb-title').textContent = 'New Report'; $('tb-sub').textContent = 'Choose a report type to start'; $('tb-actions').innerHTML = '<button class="btn btn-ghost" onclick="reportingHome()">' + ic('back', 16) + 'Back to Reports</button>'; $('content').innerHTML = '<div class="entry-page"><div class="sec">Choose Report Type</div><div class="search" style="max-width:420px;margin-bottom:16px">' + ic('search', 16) + '<input class="inp" placeholder="Search report types" oninput="const q=this.value.toLowerCase();document.querySelectorAll(\'.report-type-card\').forEach(x=>x.style.display=x.textContent.toLowerCase().includes(q)?\'\':\'none\')"></div><div class="report-type-grid">' + Object.keys(PIVOT_SOURCES).map(function (k) { const d = PIVOT_SOURCES[k]; return '<button class="report-type-card" onclick="pivotStartReport(\'' + k + '\')"><b>' + esc(d.label) + '</b><span>' + d.breakdowns.length + ' available fields · ' + d.metrics.length + ' metrics</span></button>'; }).join('') + '</div></div>'; }
-function pivotChartHtml(res) { const type = pivotState.chartType || 'none'; if (type === 'none' || !res.data.length || !res.metrics.length) return ''; const metric = res.metrics[0], vals = res.data.slice(0, 12).map(function (r) { return { label: (r.vals.filter(Boolean).join(' / ') || 'Total'), value: pf(r.metrics[0]) }; }), max = Math.max.apply(null, vals.map(function (x) { return x.value; })) || 1, colors = ['#0b74b5', '#36a269', '#e58f2a', '#8b5cf6', '#0891b2', '#dc5a5a', '#64748b', '#d97706', '#2563eb', '#16a34a', '#9333ea', '#be123c']; if (type === 'donut') { let run = 0, total = vals.reduce(function (a, x) { return a + x.value; }, 0) || 1, parts = []; vals.forEach(function (x, i) { const a = run / total * 360; run += x.value; const b = run / total * 360; parts.push(colors[i % colors.length] + ' ' + a + 'deg ' + b + 'deg'); }); return '<div class="pivot-chart"><h4>' + esc(metric) + ' by ' + esc(res.dims[0] || 'Total') + '</h4><div class="pivot-donut-wrap"><div class="pivot-donut" style="background:conic-gradient(' + parts.join(',') + ')"></div><div class="pivot-legend">' + vals.map(function (x, i) { return '<span><i style="background:' + colors[i % colors.length] + '"></i>' + esc(x.label) + ' — ' + pivotFmt(metric, x.value) + '</span>'; }).join('') + '</div></div></div>'; } return '<div class="pivot-chart"><h4>' + esc(metric) + ' by ' + esc(res.dims[0] || 'Total') + '</h4><div class="pivot-bars">' + vals.map(function (x, i) { const pct = Math.max(2, x.value / max * 100), width = type === 'funnel' ? Math.max(15, pct) : pct; return '<div class="pivot-bar-row"><span>' + esc(x.label) + '</span><div class="pivot-bar-track"' + (type === 'funnel' ? ' style="margin-left:' + (100 - width) / 2 + '%;margin-right:' + (100 - width) / 2 + '%"' : '') + '><div class="pivot-bar-fill" style="width:' + width + '%;background:' + colors[i % colors.length] + '"></div></div><b class="num">' + pivotFmt(metric, x.value) + '</b></div>'; }).join('') + '</div></div>'; }
+function renderReportingTypes() { $('tb-title').textContent = 'New Report'; $('tb-sub').textContent = 'Choose a report type to start'; $('tb-actions').innerHTML = '<button class="btn btn-ghost" onclick="reportingHome()">' + ic('back', 16) + 'Back to Reports</button>'; $('content').innerHTML = '<div class="entry-page"><div class="sec">Choose Report Type</div><div class="search" style="max-width:420px;margin-bottom:16px">' + ic('search', 16) + '<input class="inp" placeholder="Search report types" oninput="const q=this.value.toLowerCase();document.querySelectorAll(\'.report-type-card\').forEach(x=>x.style.display=x.textContent.toLowerCase().includes(q)?\'\':\'none\')"></div><div class="report-type-grid">' + Object.keys(PIVOT_SOURCES).map(function (k) { const d = PIVOT_SOURCES[k]; return '<button class="report-type-card" onclick="pivotStartReport(\'' + k + '\')"><b>' + esc(d.label) + '</b><span>' + d.breakdowns.length + ' available fields Â· ' + d.metrics.length + ' metrics</span></button>'; }).join('') + '</div></div>'; }
+function pivotChartHtml(res) { const type = pivotState.chartType || 'none'; if (type === 'none' || !res.data.length || !res.metrics.length) return ''; const metric = res.metrics[0], vals = res.data.slice(0, 12).map(function (r) { return { label: (r.vals.filter(Boolean).join(' / ') || 'Total'), value: pf(r.metrics[0]) }; }), max = Math.max.apply(null, vals.map(function (x) { return x.value; })) || 1, colors = ['#0b74b5', '#36a269', '#e58f2a', '#8b5cf6', '#0891b2', '#dc5a5a', '#64748b', '#d97706', '#2563eb', '#16a34a', '#9333ea', '#be123c']; if (type === 'donut') { let run = 0, total = vals.reduce(function (a, x) { return a + x.value; }, 0) || 1, parts = []; vals.forEach(function (x, i) { const a = run / total * 360; run += x.value; const b = run / total * 360; parts.push(colors[i % colors.length] + ' ' + a + 'deg ' + b + 'deg'); }); return '<div class="pivot-chart"><h4>' + esc(metric) + ' by ' + esc(res.dims[0] || 'Total') + '</h4><div class="pivot-donut-wrap"><div class="pivot-donut" style="background:conic-gradient(' + parts.join(',') + ')"></div><div class="pivot-legend">' + vals.map(function (x, i) { return '<span><i style="background:' + colors[i % colors.length] + '"></i>' + esc(x.label) + ' â€” ' + pivotFmt(metric, x.value) + '</span>'; }).join('') + '</div></div></div>'; } return '<div class="pivot-chart"><h4>' + esc(metric) + ' by ' + esc(res.dims[0] || 'Total') + '</h4><div class="pivot-bars">' + vals.map(function (x, i) { const pct = Math.max(2, x.value / max * 100), width = type === 'funnel' ? Math.max(15, pct) : pct; return '<div class="pivot-bar-row"><span>' + esc(x.label) + '</span><div class="pivot-bar-track"' + (type === 'funnel' ? ' style="margin-left:' + (100 - width) / 2 + '%;margin-right:' + (100 - width) / 2 + '%"' : '') + '><div class="pivot-bar-fill" style="width:' + width + '%;background:' + colors[i % colors.length] + '"></div></div><b class="num">' + pivotFmt(metric, x.value) + '</b></div>'; }).join('') + '</div></div>'; }
 function renderReportingBuilder() {
   pivotInitDates(); reportingMode = 'builder'; const def = pivotCombinedDef(), selectedSources = pivotSelectedSources(), res = pivotResult(), saved = (db.customReports || []).slice().sort(function (a, b) { return pf(b.createdAt) - pf(a.createdAt); });
   $('tb-title').textContent = 'Report Builder'; $('tb-sub').textContent = 'Salesforce-style live report preview'; $('tb-actions').innerHTML = '';
   const headers = res.dims.concat(res.metrics), prev = [];
   let body = res.data.map(function (x) { let cells = ''; x.vals.forEach(function (v, i) { const repeat = sfReportFormat !== 'tabular' && prev.slice(0, i + 1).join('|') === x.vals.slice(0, i + 1).join('|'); cells += '<td class="pivot-break">' + (repeat ? '' : '<span class="pivot-indent" style="width:' + (i * 12) + 'px"></span>' + esc(v)) + '</td>'; }); x.metrics.forEach(function (v, i) { cells += '<td class="num">' + pivotFmt(res.metrics[i], v) + '</td>'; }); prev.splice(0, prev.length, ...x.vals); return '<tr>' + cells + '</tr>'; }).join('');
   if (!body) body = '<tr><td colspan="' + Math.max(1, headers.length) + '"><div class="pivot-empty">No records match the report filters.</div></td></tr>';
-  const head = '<tr>' + headers.map(function (h, i) { const kind = i < res.dims.length ? 'breakdowns' : 'metrics'; return '<th' + (kind === 'metrics' ? ' class="num"' : '') + '><span class="pivot-head"><span>' + esc(h) + (pivotState.filters[h] ? '<span class="pivot-filter-chip">' + esc(pivotFilterLabel(pivotState.filters[h])) + '</span>' : '') + '</span><button class="pivot-menu" onclick="pivotOpenColumnMenu(\'' + h.replace(/'/g, "\\'") + '\',\'' + kind + '\')">▾</button></span></th>'; }).join('') + '</tr>';
+  const head = '<tr>' + headers.map(function (h, i) { const kind = i < res.dims.length ? 'breakdowns' : 'metrics'; return '<th' + (kind === 'metrics' ? ' class="num"' : '') + '><span class="pivot-head"><span>' + esc(h) + (pivotState.filters[h] ? '<span class="pivot-filter-chip">' + esc(pivotFilterLabel(pivotState.filters[h])) + '</span>' : '') + '</span><button class="pivot-menu" onclick="pivotOpenColumnMenu(\'' + h.replace(/'/g, "\\'") + '\',\'' + kind + '\')">â–¾</button></span></th>'; }).join('') + '</tr>';
   const foot = headers.length ? '<tfoot><tr class="pivot-total">' + res.dims.map(function (_, i) { return '<td>' + (i === 0 ? 'Grand Total' : '') + '</td>'; }).join('') + res.metrics.map(function (m, i) { return '<td class="num">' + pivotFmt(m, res.totals[i]) + '</td>'; }).join('') + '</tr></tfoot>' : '';
-  const outline = '<div class="sf-side-body"><div class="search">' + ic('search', 14) + '<input class="inp" placeholder="Quick find" oninput="pivotCustomizerSearch(this.value)"></div><div class="sf-side-section"><h4>Report Type <button class="btn-icon" onclick="sfFeature(\'Custom Report Type & Joins\')">＋</button></h4><div class="sf-drop-zone">' + selectedSources.map(function (k) { return '<div class="sf-chip"><span>' + esc(PIVOT_SOURCES[k].label) + '</span><button onclick="pivotToggleSource(\'' + k + '\',false)">×</button></div>'; }).join('') + '<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" onclick="sfFeature(\'Add Related Report Type\')">Add related source</button></div></div><div class="sf-side-section"><h4>Group Rows <button class="btn-icon" onclick="sfFeature(\'Group Rows\')">＋</button></h4><div class="sf-drop-zone">' + pivotState.breakdowns.map(function (k, i) { return '<div class="sf-chip"><button onclick="sfMoveGroup(' + i + ',-1)">↑</button><button onclick="sfMoveGroup(' + i + ',1)">↓</button><span>' + esc(k) + '</span><button onclick="sfRemoveGroup(\'' + k.replace(/'/g, "\\'") + '\')">×</button></div>'; }).join('') + '</div></div><div class="sf-side-section"><h4>Columns <button class="btn-icon" onclick="sfFeature(\'Add Row-Level Formula\')">ƒx</button></h4><div class="sf-drop-zone">' + pivotState.metrics.map(function (k) { return '<div class="sf-chip"><span>' + esc(k) + '</span><button onclick="pivotToggle(\'metrics\',\'' + k.replace(/'/g, "\\'") + '\',false)">×</button></div>'; }).join('') + '</div></div><div class="sf-side-section"><h4>Available Fields</h4><div class="sf-fields">' + def.breakdowns.map(function (k) { return '<label class="sf-field pivot-option"><input type="checkbox"' + (pivotState.breakdowns.indexOf(k) > -1 ? ' checked' : '') + ' onchange="pivotToggle(\'breakdowns\',\'' + k.replace(/'/g, "\\'") + '\',this.checked)"><span>' + esc(k) + '</span><small>Text</small></label>'; }).join('') + def.metrics.map(function (k) { return '<label class="sf-field pivot-option"><input type="checkbox"' + (pivotState.metrics.indexOf(k) > -1 ? ' checked' : '') + ' onchange="pivotToggle(\'metrics\',\'' + k.replace(/'/g, "\\'") + '\',this.checked)"><span>' + esc(k) + '</span><small>Number</small></label>'; }).join('') + '</div></div></div>';
+  const outline = '<div class="sf-side-body"><div class="search">' + ic('search', 14) + '<input class="inp" placeholder="Quick find" oninput="pivotCustomizerSearch(this.value)"></div><div class="sf-side-section"><h4>Report Type <button class="btn-icon" onclick="sfFeature(\'Custom Report Type & Joins\')">ï¼‹</button></h4><div class="sf-drop-zone">' + selectedSources.map(function (k) { return '<div class="sf-chip"><span>' + esc(PIVOT_SOURCES[k].label) + '</span><button onclick="pivotToggleSource(\'' + k + '\',false)">Ã—</button></div>'; }).join('') + '<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" onclick="sfFeature(\'Add Related Report Type\')">Add related source</button></div></div><div class="sf-side-section"><h4>Group Rows <button class="btn-icon" onclick="sfFeature(\'Group Rows\')">ï¼‹</button></h4><div class="sf-drop-zone">' + pivotState.breakdowns.map(function (k, i) { return '<div class="sf-chip"><button onclick="sfMoveGroup(' + i + ',-1)">â†‘</button><button onclick="sfMoveGroup(' + i + ',1)">â†“</button><span>' + esc(k) + '</span><button onclick="sfRemoveGroup(\'' + k.replace(/'/g, "\\'") + '\')">Ã—</button></div>'; }).join('') + '</div></div><div class="sf-side-section"><h4>Columns <button class="btn-icon" onclick="sfFeature(\'Add Row-Level Formula\')">Æ’x</button></h4><div class="sf-drop-zone">' + pivotState.metrics.map(function (k) { return '<div class="sf-chip"><span>' + esc(k) + '</span><button onclick="pivotToggle(\'metrics\',\'' + k.replace(/'/g, "\\'") + '\',false)">Ã—</button></div>'; }).join('') + '</div></div><div class="sf-side-section"><h4>Available Fields</h4><div class="sf-fields">' + def.breakdowns.map(function (k) { return '<label class="sf-field pivot-option"><input type="checkbox"' + (pivotState.breakdowns.indexOf(k) > -1 ? ' checked' : '') + ' onchange="pivotToggle(\'breakdowns\',\'' + k.replace(/'/g, "\\'") + '\',this.checked)"><span>' + esc(k) + '</span><small>Text</small></label>'; }).join('') + def.metrics.map(function (k) { return '<label class="sf-field pivot-option"><input type="checkbox"' + (pivotState.metrics.indexOf(k) > -1 ? ' checked' : '') + ' onchange="pivotToggle(\'metrics\',\'' + k.replace(/'/g, "\\'") + '\',this.checked)"><span>' + esc(k) + '</span><small>Number</small></label>'; }).join('') + '</div></div></div>';
   const activeFilters = Object.keys(pivotState.filters || {});
   const filters = '<div class="sf-side-body"><button class="btn btn-brand" style="width:100%" onclick="sfAddFilter()">Add Filter</button><div class="sf-side-section"><h4>Standard Filters</h4><div class="sf-filter-card"><b>Report Date</b><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px"><input class="inp" data-date readonly value="' + esc(pivotState.from) + '" onchange="pivotSetDate(\'from\',this)"><input class="inp" data-date readonly value="' + esc(pivotState.to) + '" onchange="pivotSetDate(\'to\',this)"></div></div><div class="sf-filter-card"><b>Show Me</b><div>All accessible records</div></div></div><div class="sf-side-section"><h4>Field Filters</h4>' + (activeFilters.length ? activeFilters.map(function (k) { return '<div class="sf-filter-card" onclick="pivotOpenColumnMenu(\'' + k.replace(/'/g, "\\'") + '\',' + (pivotState.metrics.indexOf(k) > -1 ? '\'metrics\'' : '\'breakdowns\'') + ')"><b>' + esc(k) + '</b><div>' + esc(pivotFilterLabel(pivotState.filters[k])) + '</div></div>'; }).join('') : '<div class="hint">No field filters applied.</div>') + '</div><div class="sf-side-section"><h4>Advanced</h4><button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:6px" onclick="sfFeature(\'Cross Filter\')">Add Cross Filter</button><button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:6px" onclick="sfFeature(\'Filter Logic\')">Add Filter Logic</button><button class="btn btn-ghost btn-sm" style="width:100%" onclick="sfFeature(\'Relative Date Filter\')">Relative Date Filter</button></div></div>';
   const chart = pivotChartHtml(res);
-  $('content').innerHTML = '<div class="sf-builder"><div class="sf-builder-top"><button class="btn btn-ghost" onclick="reportingHome()">' + ic('back', 14) + 'Reports</button><div class="sf-builder-title"><input id="pivot-name" value="' + esc(pivotState.name) + '" aria-label="Report name"><span>' + selectedSources.map(function (k) { return PIVOT_SOURCES[k].label; }).join(' + ') + '</span></div><select class="inp" id="pivot-folder" title="Report folder"><option' + ((pivotState.folder || 'Private Reports') === 'Private Reports' ? ' selected' : '') + '>Private Reports</option><option' + (pivotState.folder === 'Public Reports' ? ' selected' : '') + '>Public Reports</option></select><span class="sf-unsaved">● Unsaved changes</span><span class="sf-proto-badge">Lightning Builder</span><div class="sf-format-pills"><button class="' + (sfReportFormat === 'tabular' ? 'on' : '') + '" onclick="sfSetReportFormat(\'tabular\')">Tabular</button><button class="' + (sfReportFormat === 'summary' ? 'on' : '') + '" onclick="sfSetReportFormat(\'summary\')">Summary</button><button class="' + (sfReportFormat === 'matrix' ? 'on' : '') + '" onclick="sfSetReportFormat(\'matrix\')">Matrix</button><button class="' + (sfReportFormat === 'joined' ? 'on' : '') + '" onclick="sfSetReportFormat(\'joined\')">Joined</button></div><button class="btn btn-ghost" onclick="sfFeature(\'Undo / Redo History\')">↶</button><select class="inp" id="pivot-chart-type" onchange="pivotState.chartType=this.value;renderCustomReporting()"><option value="none"' + ((pivotState.chartType || 'none') === 'none' ? ' selected' : '') + '>No Chart</option><option value="bar"' + (pivotState.chartType === 'bar' ? ' selected' : '') + '>Bar</option><option value="funnel"' + (pivotState.chartType === 'funnel' ? ' selected' : '') + '>Funnel</option><option value="donut"' + (pivotState.chartType === 'donut' ? ' selected' : '') + '>Donut</option></select><button class="btn btn-ghost" onclick="sfFeature(\'Conditional Formatting\')">Format</button><button class="btn btn-ghost" onclick="renderCustomReporting()">Run</button><button class="btn btn-brand" onclick="pivotSaveReport()">Save &amp; Run</button></div><div class="sf-builder-body"><aside class="sf-builder-side"><div class="sf-builder-tabs"><button class="' + (sfBuilderTab === 'outline' ? 'on' : '') + '" onclick="sfSetBuilderTab(\'outline\')">Outline</button><button class="' + (sfBuilderTab === 'filters' ? 'on' : '') + '" onclick="sfSetBuilderTab(\'filters\')">Filters (' + activeFilters.length + ')</button></div>' + (sfBuilderTab === 'outline' ? outline : filters) + '</aside><main class="sf-report-canvas">' + (chart ? '<div class="sf-builder-chart">' + chart + '</div>' : '') + '<div class="sf-preview-head"><b>Report Preview</b><span>' + fmtNum(res.raw.length) + ' records · ' + res.data.length + ' rows</span><button class="btn btn-ghost btn-sm" onclick="pivotExport()">Export</button><button class="btn btn-ghost btn-sm" onclick="sfFeature(\'Subscribe and Schedule\')">Subscribe</button></div><div class="sf-report-table"><table class="pivot-table"><thead>' + head + '</thead><tbody>' + body + '</tbody>' + foot + '</table></div></main></div></div>';
+  $('content').innerHTML = '<div class="sf-builder"><div class="sf-builder-top"><button class="btn btn-ghost" onclick="reportingHome()">' + ic('back', 14) + 'Reports</button><div class="sf-builder-title"><input id="pivot-name" value="' + esc(pivotState.name) + '" aria-label="Report name"><span>' + selectedSources.map(function (k) { return PIVOT_SOURCES[k].label; }).join(' + ') + '</span></div><select class="inp" id="pivot-folder" title="Report folder"><option' + ((pivotState.folder || 'Private Reports') === 'Private Reports' ? ' selected' : '') + '>Private Reports</option><option' + (pivotState.folder === 'Public Reports' ? ' selected' : '') + '>Public Reports</option></select><span class="sf-unsaved">â— Unsaved changes</span><span class="sf-proto-badge">Lightning Builder</span><div class="sf-format-pills"><button class="' + (sfReportFormat === 'tabular' ? 'on' : '') + '" onclick="sfSetReportFormat(\'tabular\')">Tabular</button><button class="' + (sfReportFormat === 'summary' ? 'on' : '') + '" onclick="sfSetReportFormat(\'summary\')">Summary</button><button class="' + (sfReportFormat === 'matrix' ? 'on' : '') + '" onclick="sfSetReportFormat(\'matrix\')">Matrix</button><button class="' + (sfReportFormat === 'joined' ? 'on' : '') + '" onclick="sfSetReportFormat(\'joined\')">Joined</button></div><button class="btn btn-ghost" onclick="sfFeature(\'Undo / Redo History\')">â†¶</button><select class="inp" id="pivot-chart-type" onchange="pivotState.chartType=this.value;renderCustomReporting()"><option value="none"' + ((pivotState.chartType || 'none') === 'none' ? ' selected' : '') + '>No Chart</option><option value="bar"' + (pivotState.chartType === 'bar' ? ' selected' : '') + '>Bar</option><option value="funnel"' + (pivotState.chartType === 'funnel' ? ' selected' : '') + '>Funnel</option><option value="donut"' + (pivotState.chartType === 'donut' ? ' selected' : '') + '>Donut</option></select><button class="btn btn-ghost" onclick="sfFeature(\'Conditional Formatting\')">Format</button><button class="btn btn-ghost" onclick="renderCustomReporting()">Run</button><button class="btn btn-brand" onclick="pivotSaveReport()">Save &amp; Run</button></div><div class="sf-builder-body"><aside class="sf-builder-side"><div class="sf-builder-tabs"><button class="' + (sfBuilderTab === 'outline' ? 'on' : '') + '" onclick="sfSetBuilderTab(\'outline\')">Outline</button><button class="' + (sfBuilderTab === 'filters' ? 'on' : '') + '" onclick="sfSetBuilderTab(\'filters\')">Filters (' + activeFilters.length + ')</button></div>' + (sfBuilderTab === 'outline' ? outline : filters) + '</aside><main class="sf-report-canvas">' + (chart ? '<div class="sf-builder-chart">' + chart + '</div>' : '') + '<div class="sf-preview-head"><b>Report Preview</b><span>' + fmtNum(res.raw.length) + ' records Â· ' + res.data.length + ' rows</span><button class="btn btn-ghost btn-sm" onclick="pivotExport()">Export</button><button class="btn btn-ghost btn-sm" onclick="sfFeature(\'Subscribe and Schedule\')">Subscribe</button></div><div class="sf-report-table"><table class="pivot-table"><thead>' + head + '</thead><tbody>' + body + '</tbody>' + foot + '</table></div></main></div></div>';
   setTimeout(function () { dpSyncAll($('content')); alignTables($('content')); }, 0);
 }
 
@@ -11168,7 +11168,7 @@ const REPORT_TYPES = [
   { k: 'intransit_material', l: 'In-transit Material (POD Pending)' },
   { k: 'wip', l: 'WIP (Work in Progress)' },
   { k: 'fg_received', l: 'FG Received' },
-  { k: 'stock', l: 'Stock Report (Fabric · Trims · FG)' },
+  { k: 'stock', l: 'Stock Report (Fabric Â· Trims Â· FG)' },
   { k: 'item_ledger', l: 'Item Ledger (Fabric & Trims)' }
 ];
 window.REPORT_TYPES = REPORT_TYPES;
@@ -11552,7 +11552,7 @@ function rdpPaint() {
     extra = '<div class="rdp-dates">' +
       '<div class="rdp-date' + (RDP.focus === 'from' ? ' on' : '') + '" data-rdp-focus="from">' +
       '<input class="inp" id="rdpFromInp" data-rdp-focus="from" inputmode="numeric" maxlength="10" value="' + esc(dpToDisplay(d.from)) + '" placeholder="DD-MM-YYYY" autocomplete="off" spellcheck="false"></div>' +
-      '<span class="rdp-arrow">→</span>' +
+      '<span class="rdp-arrow">â†’</span>' +
       '<div class="rdp-date' + (RDP.focus === 'to' ? ' on' : '') + '" data-rdp-focus="to">' +
       '<input class="inp" id="rdpToInp" data-rdp-focus="to" inputmode="numeric" maxlength="10" value="' + esc(dpToDisplay(d.to)) + '" placeholder="DD-MM-YYYY" autocomplete="off" spellcheck="false"></div>' +
       '</div>';
@@ -11706,12 +11706,12 @@ function repGroupRows(header, rows, keys, nc) {
           if (nc[i]) tot[i] += parseFloat(String(sorted[k][i]).replace(/,/g, '')) || 0;
         });
       }
-      const bits = ['<b>' + esc(header[idxs[d]]) + ': ' + esc(row[idxs[d]] == null || row[idxs[d]] === '' ? '—' : row[idxs[d]]) + '</b>',
+      const bits = ['<b>' + esc(header[idxs[d]]) + ': ' + esc(row[idxs[d]] == null || row[idxs[d]] === '' ? 'â€”' : row[idxs[d]]) + '</b>',
       cnt + (cnt === 1 ? ' row' : ' rows')];
       header.forEach(function (h, i) {
         if (nc[i] && tot[i]) bits.push(esc(h) + ' ' + fmtNum(tot[i]));
       });
-      out.push({ _g: true, depth: d, html: bits.join(' · '), cols: header.length });
+      out.push({ _g: true, depth: d, html: bits.join(' Â· '), cols: header.length });
     }
     out.push(row);
     prev = row;
@@ -11727,12 +11727,12 @@ function clearItemLedgerFilters() { itemLedgerState = { category: '', classifica
 function itemLedgerRecord() { return (db.masters.items || []).find(function (it) { return it.code === itemLedgerState.itemCode; }) || null; }
 function buildItemLedger(from, to) {
   const item = itemLedgerRecord(); if (!item) return { title: 'Item Ledger', header: ['Transaction Type', 'Transaction No.', 'Date', 'From / To', 'Order Ref No.', 'PO No.', 'Inward No.', 'Received Qty', 'Issued Qty', 'Balance'], rows: [], foot: null }; const nm = lcName(item.name), tx = [];
-  (db.inward || []).forEach(function (r) { (r.items || []).forEach(function (i) { if (lcName(i.name) !== nm || pf(i.recQty) <= 0) return; const typ = r.entryType === 'Opening Stock' ? 'Opening Stock' : r.entryType === 'Job Work Return' ? 'Job Work Return Receipt' : 'Goods Receipt Note'; tx.push({ date: r.date, type: typ, no: r.no, party: r.supplier || r.vendor || 'Warehouse', order: r.jwRef || r.poRef || '—', po: r.poRef || '—', inward: r.no, rec: r.status === 'Rejected' ? 0 : pf(i.recQty), iss: 0 }); }); });
-  (db.jobwork || []).forEach(function (r) { (r.issues || []).concat(r.extras || []).forEach(function (i) { if (lcName(i.item) !== nm) return; const q = issueLineQty(i); if (q <= 0) return; tx.push({ date: i.date || r.date, type: 'Delivery Challan', no: i.dcNo || r.no, party: r.vendor || 'Job Worker', order: r.no, po: i.poRef || '—', inward: i.inwardNo || '—', rec: 0, iss: q }); }); });
-  (db.sample || []).forEach(function (r) { (r.extras || []).forEach(function (i) { if (lcName(i.item) !== nm) return; const q = issueLineQty(i); if (q <= 0) return; tx.push({ date: i.date || r.date, type: 'Sample Delivery Challan', no: i.dcNo || r.no, party: r.vendor || 'Job Worker', order: r.no, po: i.poRef || '—', inward: i.inwardNo || '—', rec: 0, iss: q }); }); });
-  (db.purchasereturn || []).forEach(function (r) { (r.items || []).forEach(function (i) { if (lcName(i.name) !== nm || pf(i.retQty) <= 0) return; tx.push({ date: r.date, type: 'Purchase Return', no: r.no, party: r.supplier || 'Supplier', order: r.poRef || '—', po: r.poRef || '—', inward: r.inwardNo || '—', rec: 0, iss: pf(i.retQty) }); }); });
-  (db.jobworkreturn || []).forEach(function (r) { (r.items || []).forEach(function (i) { if (lcName(i.name) !== nm || pf(i.retQty) <= 0) return; tx.push({ date: r.date, type: 'Job Work Return', no: r.no, party: r.vendor || 'Job Worker', order: r.jwRef || '—', po: '—', inward: '—', rec: pf(i.retQty), iss: 0 }); }); });
-  tx.sort(function (a, b) { if (a.date !== b.date) return a.date < b.date ? -1 : 1; return String(a.no).localeCompare(String(b.no), undefined, { numeric: true }); }); let balance = 0, open = 0, totalRec = 0, totalIss = 0; tx.forEach(function (x) { if (from && x.date < from) open += x.rec - x.iss; }); balance = open; const rows = []; if (open) rows.push(['Opening Balance', '—', dpToDisplay(from) || from, '—', '—', '—', '—', '0', '0', fmtNum(open)]); tx.forEach(function (x) { if (!inRange(x.date, from, to)) return; balance += x.rec - x.iss; totalRec += x.rec; totalIss += x.iss; rows.push([x.type, x.no, dpToDisplay(x.date) || x.date, x.party, x.order, x.po, x.inward, x.rec ? fmtNum(x.rec) : '—', x.iss ? fmtNum(x.iss) : '—', fmtNum(balance)]); }); return { title: 'Item Ledger — ' + item.name + ' (' + item.code + ')', header: ['Transaction Type', 'Transaction No.', 'Date', 'From / To', 'Order Ref No.', 'PO No.', 'Inward No.', 'Received Qty', 'Issued Qty', 'Balance'], rows: rows, foot: ['', '', '', '', '', '', 'Total:', fmtNum(totalRec), fmtNum(totalIss), fmtNum(balance)] };
+  (db.inward || []).forEach(function (r) { (r.items || []).forEach(function (i) { if (lcName(i.name) !== nm || pf(i.recQty) <= 0) return; const typ = r.entryType === 'Opening Stock' ? 'Opening Stock' : r.entryType === 'Job Work Return' ? 'Job Work Return Receipt' : 'Goods Receipt Note'; tx.push({ date: r.date, type: typ, no: r.no, party: r.supplier || r.vendor || 'Warehouse', order: r.jwRef || r.poRef || 'â€”', po: r.poRef || 'â€”', inward: r.no, rec: r.status === 'Rejected' ? 0 : pf(i.recQty), iss: 0 }); }); });
+  (db.jobwork || []).forEach(function (r) { (r.issues || []).concat(r.extras || []).forEach(function (i) { if (lcName(i.item) !== nm) return; const q = issueLineQty(i); if (q <= 0) return; tx.push({ date: i.date || r.date, type: 'Delivery Challan', no: i.dcNo || r.no, party: r.vendor || 'Job Worker', order: r.no, po: i.poRef || 'â€”', inward: i.inwardNo || 'â€”', rec: 0, iss: q }); }); });
+  (db.sample || []).forEach(function (r) { (r.extras || []).forEach(function (i) { if (lcName(i.item) !== nm) return; const q = issueLineQty(i); if (q <= 0) return; tx.push({ date: i.date || r.date, type: 'Sample Delivery Challan', no: i.dcNo || r.no, party: r.vendor || 'Job Worker', order: r.no, po: i.poRef || 'â€”', inward: i.inwardNo || 'â€”', rec: 0, iss: q }); }); });
+  (db.purchasereturn || []).forEach(function (r) { (r.items || []).forEach(function (i) { if (lcName(i.name) !== nm || pf(i.retQty) <= 0) return; tx.push({ date: r.date, type: 'Purchase Return', no: r.no, party: r.supplier || 'Supplier', order: r.poRef || 'â€”', po: r.poRef || 'â€”', inward: r.inwardNo || 'â€”', rec: 0, iss: pf(i.retQty) }); }); });
+  (db.jobworkreturn || []).forEach(function (r) { (r.items || []).forEach(function (i) { if (lcName(i.name) !== nm || pf(i.retQty) <= 0) return; tx.push({ date: r.date, type: 'Job Work Return', no: r.no, party: r.vendor || 'Job Worker', order: r.jwRef || 'â€”', po: 'â€”', inward: 'â€”', rec: pf(i.retQty), iss: 0 }); }); });
+  tx.sort(function (a, b) { if (a.date !== b.date) return a.date < b.date ? -1 : 1; return String(a.no).localeCompare(String(b.no), undefined, { numeric: true }); }); let balance = 0, open = 0, totalRec = 0, totalIss = 0; tx.forEach(function (x) { if (from && x.date < from) open += x.rec - x.iss; }); balance = open; const rows = []; if (open) rows.push(['Opening Balance', 'â€”', dpToDisplay(from) || from, 'â€”', 'â€”', 'â€”', 'â€”', '0', '0', fmtNum(open)]); tx.forEach(function (x) { if (!inRange(x.date, from, to)) return; balance += x.rec - x.iss; totalRec += x.rec; totalIss += x.iss; rows.push([x.type, x.no, dpToDisplay(x.date) || x.date, x.party, x.order, x.po, x.inward, x.rec ? fmtNum(x.rec) : 'â€”', x.iss ? fmtNum(x.iss) : 'â€”', fmtNum(balance)]); }); return { title: 'Item Ledger â€” ' + item.name + ' (' + item.code + ')', header: ['Transaction Type', 'Transaction No.', 'Date', 'From / To', 'Order Ref No.', 'PO No.', 'Inward No.', 'Received Qty', 'Issued Qty', 'Balance'], rows: rows, foot: ['', '', '', '', '', '', 'Total:', fmtNum(totalRec), fmtNum(totalIss), fmtNum(balance)] };
 }
 
 function clearReportFilters() {
@@ -11777,7 +11777,7 @@ function renderReports() {
       '<label class="grp-toggle"><button type="button" class="sw' + (r.grouped ? ' on' : '') + '" onclick="repToggleGrouped()" aria-pressed="' + !!r.grouped + '"><span class="sw-knob"></span></button> Grouped Data</label>' +
       (r.grouped ? ('<div class="grp-by"><span class="grp-by-l">Group By</span>' +
         mcbox('rep-gby', {
-          opts: [], selected: (r.groupBy || []).slice(), placeholder: 'Select columns…',
+          opts: [], selected: (r.groupBy || []).slice(), placeholder: 'Select columnsâ€¦',
           onSet: function (sel) { repState.groupBy = sel.slice(); repState.page = 1; renderReportBody(); }
         }) +
         '</div>') : '')) +
@@ -11824,9 +11824,9 @@ function renderReportBody() {
   const dataOnly = displayRows.filter(function (row) { return !(row && row._g); });
   const pg = groupedOn ? { rows: displayRows, total: dataOnly.length, from: dataOnly.length ? 1 : 0, to: dataOnly.length, page: 1, pages: 1, size: dataOnly.length || 25 }
     : slicePage(rep.rows, repState);
-  $('rep-count').textContent = pg.total + ' records' + (groupedOn ? ' · grouped' : '');
+  $('rep-count').textContent = pg.total + ' records' + (groupedOn ? ' Â· grouped' : '');
   el.innerHTML =
-    '<div class="sec">' + rep.title + ' <span style="text-transform:none;color:var(--muted);font-weight:600">' + (dpToDisplay(from) || from) + ' → ' + (dpToDisplay(to) || to) + '</span></div>' +
+    '<div class="sec">' + rep.title + ' <span style="text-transform:none;color:var(--muted);font-weight:600">' + (dpToDisplay(from) || from) + ' â†’ ' + (dpToDisplay(to) || to) + '</span></div>' +
     (function () {
       const cls = function (i) { return nc[i] ? ' class="num"' : ''; };
       const pageRows = pg.rows;
@@ -11856,9 +11856,9 @@ function renderReportBody() {
 function numCell(c) {
   const s = String(c == null ? '' : c).trim();
   if (/^\d{2}-\d{2}-\d{4}$/.test(s) || /^\d{4}-\d{2}-\d{2}$/.test(s)) return false;  /* a date is not a number */
-  return /^[\d,.\s₹-]+$/.test(s) && /[\d]/.test(s);
+  return /^[\d,.\sâ‚¹-]+$/.test(s) && /[\d]/.test(s);
 }
-/* which columns hold numbers — so the header, the values and the totals row
+/* which columns hold numbers â€” so the header, the values and the totals row
    all line up on the same edge */
 function numColumns(rows, colCount) {
   const out = [];
@@ -11887,7 +11887,7 @@ function buildReport(type, from, to) {
       const isF = isFabricItem(i.name, i.category, i.classification);
       if ((fab ? isF : !isF) && pf(i.recQty) > 0 && inR(inw.date)) {
         const rate = pf(i.poRate != null ? i.poRate : i.rate);
-        rows.push([dpToDisplay(inw.date) || inw.date, inw.no, inw.poRef || '—', inw.supplier, i.name, i.color || '—',
+        rows.push([dpToDisplay(inw.date) || inw.date, inw.no, inw.poRef || 'â€”', inw.supplier, i.name, i.color || 'â€”',
         fmtNum(pf(i.recQty)), i.unit || '', fmtNum(rate), fmtNum(pf(i.recQty) * rate)]);
       }
     }));
@@ -11974,7 +11974,7 @@ function buildReport(type, from, to) {
         const inw = inwardByNo(i.inwardNo);
         const source = inw ? (inw.items || []).find(function (x) { return lcName(x.name) === lcName(i.item); }) : null;
         const rate = source ? pf(source.poRate != null ? source.poRate : source.rate) : 0;
-        rows.push([dpToDisplay(i.date) || i.date || '', j.no, j.vendor, i.item, i.colour || '—',
+        rows.push([dpToDisplay(i.date) || i.date || '', j.no, j.vendor, i.item, i.colour || 'â€”',
         fmtNum(issueQty), i.unit || '', fmtNum(rate), fmtNum(issueQty * rate), j.status]);
       }
     }));
@@ -12006,15 +12006,15 @@ function buildReport(type, from, to) {
         const days = issued ? Math.max(0, Math.floor((now.getTime() - issued.getTime()) / 86400000)) : 0;
         pending.push({
           date: date, row: [
-            dpToDisplay(date) || date || '—', moduleName, line.dcNo || 'Pending', rec.no || '—', rec.vendor || '—',
-            bareItemName(line.item) || line.item, line.classification || '—', fmtNum(qty), line.unit || '', fmtNum(days), 'POD Pending'
+            dpToDisplay(date) || date || 'â€”', moduleName, line.dcNo || 'Pending', rec.no || 'â€”', rec.vendor || 'â€”',
+            bareItemName(line.item) || line.item, line.classification || 'â€”', fmtNum(qty), line.unit || '', fmtNum(days), 'POD Pending'
           ]
         });
       });
     };
     (db.jobwork || []).forEach(function (r) {
-      pushLines(r, r.issues, 'Job Work — Material');
-      pushLines(r, r.extras, 'Job Work — Extra');
+      pushLines(r, r.issues, 'Job Work â€” Material');
+      pushLines(r, r.extras, 'Job Work â€” Extra');
     });
     (db.sample || []).forEach(function (r) {
       pushLines(r, r.extras, 'Sample');
@@ -12025,7 +12025,7 @@ function buildReport(type, from, to) {
     });
     const rows = pending.map(function (x) { return x.row; });
     return {
-      title: 'In-transit Material — POD Not Uploaded', header: header, rows: rows,
+      title: 'In-transit Material â€” POD Not Uploaded', header: header, rows: rows,
       foot: ['', '', '', '', '', '', 'Pending lines:', fmtNum(rows.length), '', '', '']
     };
   }
@@ -12060,7 +12060,7 @@ function buildReport(type, from, to) {
       if (wip <= 0) return;
       const styles = jwStyleList(j).map(function (x) { return styleLabel(x) || x; }).join(', ');
       raw.push({
-        no: j.no || '', vendor: j.vendor || '—', styles: styles || '—', orderQty: orderQty,
+        no: j.no || '', vendor: j.vendor || 'â€”', styles: styles || 'â€”', orderQty: orderQty,
         consumption: consumption, fabricIssue: fabricIssue, fabricReturn: fabricReturn, actualIssue: actualIssue,
         garmentExpected: garmentExpected, inwardPass: inwardPass, inwardReject: inwardReject, wip: wip
       });
@@ -12069,7 +12069,7 @@ function buildReport(type, from, to) {
     const totals = { orderQty: 0, fabricIssue: 0, fabricReturn: 0, actualIssue: 0, garmentExpected: 0, inwardPass: 0, inwardReject: 0, wip: 0 };
     const rows = raw.map(function (x) { Object.keys(totals).forEach(function (k) { totals[k] += pf(x[k]); }); return [x.no, x.vendor, x.styles, fmtNum(x.orderQty), x.consumption.toFixed(2), fmtNum(x.fabricIssue), fmtNum(x.fabricReturn), fmtNum(x.actualIssue), fmtNum(x.garmentExpected), fmtNum(x.inwardPass), fmtNum(x.inwardReject), fmtNum(x.wip)]; });
     return {
-      title: 'WIP — Work in Progress', header: header, rows: rows,
+      title: 'WIP â€” Work in Progress', header: header, rows: rows,
       foot: ['', '', 'Total:', fmtNum(totals.orderQty), '', fmtNum(totals.fabricIssue), fmtNum(totals.fabricReturn), fmtNum(totals.actualIssue), fmtNum(totals.garmentExpected), fmtNum(totals.inwardPass), fmtNum(totals.inwardReject), fmtNum(totals.wip)]
     };
   }
@@ -12077,7 +12077,7 @@ function buildReport(type, from, to) {
     const header = ['Date', 'JW No', 'Vendor', 'Style', 'Colour', 'Qty', 'Consumption'];
     const rows = [];
     db.jobwork.forEach(j => jwReceipts(j).forEach(rx => {
-      if (pf(rx.qty) > 0 && inR(rx.date || '')) rows.push([dpToDisplay(rx.date) || rx.date || '', j.no, j.vendor, rx.desc || '—', rx.colour || '—', fmtNum(pf(rx.qty)), fmtNum(pf(rx.consumption))]);
+      if (pf(rx.qty) > 0 && inR(rx.date || '')) rows.push([dpToDisplay(rx.date) || rx.date || '', j.no, j.vendor, rx.desc || 'â€”', rx.colour || 'â€”', fmtNum(pf(rx.qty)), fmtNum(pf(rx.consumption))]);
     }));
     rows.sort((a, b) => (a[0] < b[0] ? -1 : 1));
     const tq = rows.reduce((a, r) => a + parseFloat(String(r[5]).replace(/,/g, '')), 0);
@@ -12102,7 +12102,7 @@ function stockSections(from, to) {
       if ((i.date || '') < from) fOpen -= issueLineQty(i); else if (inR(i.date || '', from, to)) fOut += issueLineQty(i);
     }
   }));
-  sections.push({ title: '🧶 Fabric Stock', header: ['Item', 'Opening', 'GRN Received', 'Issued to JW', 'Closing'], rows: [['Fabric (m)', fmtNum(fOpen), fmtNum(fIn), fmtNum(fOut), fmtNum(fOpen + fIn - fOut)]] });
+  sections.push({ title: 'ðŸ§¶ Fabric Stock', header: ['Item', 'Opening', 'GRN Received', 'Issued to JW', 'Closing'], rows: [['Fabric (m)', fmtNum(fOpen), fmtNum(fIn), fmtNum(fOut), fmtNum(fOpen + fIn - fOut)]] });
   // Trims
   const tMap = {};
   db.inward.forEach(inw => (inw.items || []).forEach(i => {
@@ -12117,7 +12117,7 @@ function stockSections(from, to) {
       if ((i.date || '') < from) tMap[i.item].open -= issueLineQty(i); else if (inR(i.date || '', from, to)) tMap[i.item].out += issueLineQty(i);
     }
   }));
-  sections.push({ title: '🧷 Trims Stock', header: ['Item', 'Opening', 'GRN Received', 'Issued to JW', 'Closing'], rows: Object.keys(tMap).map(k => [k, fmtNum(tMap[k].open), fmtNum(tMap[k].inn), fmtNum(tMap[k].out), fmtNum(tMap[k].open + tMap[k].inn - tMap[k].out)]) });
+  sections.push({ title: 'ðŸ§· Trims Stock', header: ['Item', 'Opening', 'GRN Received', 'Issued to JW', 'Closing'], rows: Object.keys(tMap).map(k => [k, fmtNum(tMap[k].open), fmtNum(tMap[k].inn), fmtNum(tMap[k].out), fmtNum(tMap[k].open + tMap[k].inn - tMap[k].out)]) });
   // FG
   const fgMap = {};
   db.jobwork.forEach(j => jwReceipts(j).forEach(rx => {
@@ -12128,12 +12128,12 @@ function stockSections(from, to) {
   }));
   db.sale.forEach(s => (s.items || []).forEach(i => {
     if (pf(i.qty) > 0 && i.desc) {
-      const skey = i.desc.indexOf(' · ') > -1 ? i.desc.split(' · ')[0] : i.desc;   // internal style ID
+      const skey = i.desc.indexOf(' Â· ') > -1 ? i.desc.split(' Â· ')[0] : i.desc;   // internal style ID
       fgMap[skey] = fgMap[skey] || { open: 0, inn: 0, out: 0 };
       if (s.date < from) fgMap[skey].open -= pf(i.qty); else if (inR(s.date, from, to)) fgMap[skey].out += pf(i.qty);
     }
   }));
-  sections.push({ title: '👕 Finished Goods Stock (pcs)', header: ['Style', 'Opening', 'Received from JW', 'Sold', 'Closing'], rows: Object.keys(fgMap).map(k => [k, fmtNum(fgMap[k].open), fmtNum(fgMap[k].inn), fmtNum(fgMap[k].out), fmtNum(fgMap[k].open + fgMap[k].inn - fgMap[k].out)]) });
+  sections.push({ title: 'ðŸ‘• Finished Goods Stock (pcs)', header: ['Style', 'Opening', 'Received from JW', 'Sold', 'Closing'], rows: Object.keys(fgMap).map(k => [k, fmtNum(fgMap[k].open), fmtNum(fgMap[k].inn), fmtNum(fgMap[k].out), fmtNum(fgMap[k].open + fgMap[k].inn - fgMap[k].out)]) });
   return sections;
 }
 
@@ -12176,7 +12176,7 @@ function exportReportCSV() {
     a.download = r.type + '_' + from + '_to_' + to + '.csv';
     document.body.appendChild(a); a.click(); a.remove();
     toast('Report CSV exported', 'green');
-  } catch (e) { toast('Download blocked in preview — open the file in a browser to export'); }
+  } catch (e) { toast('Download blocked in preview â€” open the file in a browser to export'); }
 }
 
 /* ---------------- CSV export ---------------- */
@@ -12198,8 +12198,8 @@ function exportCSV(m) {
     a.href = URL.createObjectURL(blob);
     a.download = m + '_' + today() + '.csv';
     document.body.appendChild(a); a.click(); a.remove();
-    toast('CSV exported — ' + rows.length + ' rows', 'green');
-  } catch (e) { toast('Download blocked in preview — open the file in a browser to export'); }
+    toast('CSV exported â€” ' + rows.length + ' rows', 'green');
+  } catch (e) { toast('Download blocked in preview â€” open the file in a browser to export'); }
 }
 
 /* ---------------- Demo data & clear ---------------- */
@@ -12221,7 +12221,7 @@ function loadDemo() {
   db.masters.fabrics = ['Cotton 240 GSM', 'Cotton 180 GSM', 'Polyester', 'Viscose'];
   db.masters.sizes = ['S', 'M', 'L', 'XL', 'XXL'];
   seedParentMap(db);
-  /* Onboarded parties — every supplier / customer used below exists as a real
+  /* Onboarded parties â€” every supplier / customer used below exists as a real
      Party onboarding record, so the strict list-only dropdowns on PO, Inward,
      Job Work and Sale all have valid options to pick from. */
   const bt = function (nm, city, state, gst, pan) {
@@ -12324,7 +12324,7 @@ function loadDemo() {
         { date: day(7), item: 'Buttons', classification: 'Button', inwardNo: 'IN-0002', poRef: 'PO-0002', cons: 1.25, actualQty: 500, colour: 'White', qty: 500, unit: 'pcs', sizes: ['S', 'M', 'L', 'XL'] },
         { date: day(4), item: 'Zipper', classification: 'Zipper', inwardNo: 'IN-0002', poRef: 'PO-0002', cons: 0.5, actualQty: 200, colour: 'Black', qty: 200, unit: 'pcs', sizes: ['S', 'M', 'L', 'XL'] }
       ],
-      expectedDate: day(2), receiveDate: day(1), status: 'Completed', notes: '2 styles · 2 issue lots'
+      expectedDate: day(2), receiveDate: day(1), status: 'Completed', notes: '2 styles Â· 2 issue lots'
     },
     {
       id: uid(), no: nextNo('jobwork', 'JW'), date: day(5), vendor: 'Global Stitching Unit',
@@ -12342,11 +12342,11 @@ function loadDemo() {
   db.sale = [
     {
       id: uid(), no: nextNo('sale', 'SL'), date: day(3), customer: 'Myntra D2C', channel: 'Myntra D2C', payStatus: 'Paid', payMode: 'Bank Transfer', invoiceNo: 'INV-1101', notes: 'Summer drop 1', status: 'Completed',
-      items: [{ desc: 'CS-101 · Casual Shirt (White)', qty: 300, rate: 899, disc: 20, tax: 5, amount: 300 * 899 * 0.8 * 1.05 }]
+      items: [{ desc: 'CS-101 Â· Casual Shirt (White)', qty: 300, rate: 899, disc: 20, tax: 5, amount: 300 * 899 * 0.8 * 1.05 }]
     },
     {
       id: uid(), no: nextNo('sale', 'SL'), date: day(1), customer: 'Retail Store Pune', channel: 'Offline', payStatus: 'Unpaid', payMode: '', invoiceNo: '', notes: '', status: 'Open',
-      items: [{ desc: 'TS-204 · T-Shirt (Black)', qty: 50, rate: 549, disc: 10, tax: 5, amount: 50 * 549 * 0.9 * 1.05 }]
+      items: [{ desc: 'TS-204 Â· T-Shirt (Black)', qty: 50, rate: 549, disc: 10, tax: 5, amount: 50 * 549 * 0.9 * 1.05 }]
     }
   ];
   saveDB(); toast('Demo data loaded', 'green'); render();
@@ -12374,7 +12374,7 @@ function clearAll() {
       const preservedUserId = (function () { try { return sessionStorage.getItem('stitchflow_user_id') || ''; } catch (e) { return ''; } })();
       db = defaultDB();
       db.users = preservedUsers;            // keep everyone (admin, manager, store)
-      // do NOT clear sessionStorage here — that would log the user out.
+      // do NOT clear sessionStorage here â€” that would log the user out.
       // drafts in sessionStorage are harmless and will be cleared naturally
       // when the user opens a new form.
       saveDB();
@@ -12382,7 +12382,7 @@ function clearAll() {
       pageView = null; cur = 'dashboard'; mTab = 'items'; mPage = 1; mSize = 25; mQuery = '';
       // restore the login session in case saveDB blew it away
       try { if (preservedUserId) sessionStorage.setItem('stitchflow_user_id', preservedUserId); } catch (e) { }
-      toast('All data cleared — every record and master removed', 'red');
+      toast('All data cleared â€” every record and master removed', 'red');
       render();
     }
   });
@@ -12390,7 +12390,7 @@ function clearAll() {
 
 
 /* =====================================================================
-   COSTING — buyer order costing (fabric + trims BOM, cost break-up, FOB)
+   COSTING â€” buyer order costing (fabric + trims BOM, cost break-up, FOB)
    ===================================================================== */
 const fmt2 = (n) => (Number(n) || 0).toFixed(2);
 const fmt4 = (n) => (Number(n) || 0).toFixed(4);
@@ -12430,7 +12430,7 @@ function costItemRow(tbodyId, item, cons, uom, rate, wastage) {
     '<td>' + cbox(uomId, { opts: db.masters.uoms || [], value: uom || '', f: 'uom', placeholder: 'UOM', compact: true }) + '</td>' +
     '<td><input class="inp num" type="number" step="any" data-f="rate" value="' + costNumVal(rate) + '" oninput="recalcAll()"></td>' +
     '<td><input class="inp num" type="number" step="any" data-f="wastage" value="' + costNumVal(wastage) + '" oninput="recalcAll()"></td>' +
-    '<td><input class="inp num" data-f="amount" value="0.0000" readonly tabindex="-1" title="Cons × (1 + Wastage%) × Rate"></td>' +
+    '<td><input class="inp num" data-f="amount" value="0.0000" readonly tabindex="-1" title="Cons Ã— (1 + Wastage%) Ã— Rate"></td>' +
     '<td class="xl-act"><button type="button" class="btn-icon danger" title="Remove" onclick="costRemoveRow(this,\'' + tbodyId + '\')">' + ic('trash', 14) + '</button></td>' +
     '</tr>';
 }
@@ -12444,7 +12444,7 @@ function formCosting(rec) {
     '<div class="split-col">' +
     '<div class="sec">Order Info and Cost Break Up</div>' +
     '<div class="xl-sheet">' +
-    '<div class="xl-sheet-head">Order Info<span class="xl-tip">↵ / ↓↑ move · Tab ⇥ ↔ navigate · drag green corner to fill · paste rows from Excel</span></div>' +
+    '<div class="xl-sheet-head">Order Info<span class="xl-tip">â†µ / â†“â†‘ move Â· Tab â‡¥ â†” navigate Â· drag green corner to fill Â· paste rows from Excel</span></div>' +
     '<div class="xl-grid">' +
     '<div class="xl-cell xl-lbl">Style Image</div>' +
     '<div class="xl-cell xl-val xl-imgcell" id="styleImageCell">' +
@@ -12471,9 +12471,9 @@ function formCosting(rec) {
     '<div class="xl-cell xl-lbl">Trim Fabric</div>' +
     '<div class="xl-cell xl-val"><input class="xl-in" id="trimFabric" placeholder="e.g. N/A" spellcheck="false"></div>' +
     '<div class="xl-cell xl-lbl">Wash Type</div>' +
-    '<div class="xl-cell xl-val">' + cbox('cost-washType', { opts: db.masters.washTypes || [], value: (rec.order && rec.order.washType) || '', placeholder: 'Select wash type…' }) + '</div>' +
+    '<div class="xl-cell xl-val">' + cbox('cost-washType', { opts: db.masters.washTypes || [], value: (rec.order && rec.order.washType) || '', placeholder: 'Select wash typeâ€¦' }) + '</div>' +
     '<div class="xl-cell xl-lbl">Production Factory</div>' +
-    '<div class="xl-cell xl-val">' + cbox('cost-factory', { opts: vendorPartyOptions(), value: (rec.order && rec.order.factory) || '', placeholder: 'Select vendor…' }) + '</div>' +
+    '<div class="xl-cell xl-val">' + cbox('cost-factory', { opts: vendorPartyOptions(), value: (rec.order && rec.order.factory) || '', placeholder: 'Select vendorâ€¦' }) + '</div>' +
     '<div class="xl-cell xl-lbl">Size and Ratio</div>' +
     '<div class="xl-cell xl-val"><input class="xl-in" id="sizeRatio" placeholder="e.g. S-XL" spellcheck="false"></div>' +
     '<div class="xl-cell xl-lbl">SAM</div>' +
@@ -12495,13 +12495,13 @@ function formCosting(rec) {
     '<div class="table-wrap"><table class="mini-table xl-table cost-bom" id="fabricBomTable">' +
     '<thead><tr>' + srTh() + '<th>Particulars *</th><th class="num">Cons/pcs</th><th>UOM</th><th class="num">Rate</th><th class="num">Wastage %</th><th class="num">Cost</th><th></th></tr></thead>' +
     '<tbody id="fabricBody"></tbody></table></div>' +
-    '<div class="bom-foot"><span class="bom-hint">Paste rows from Excel · drag the green corner to fill down</span>' +
+    '<div class="bom-foot"><span class="bom-hint">Paste rows from Excel Â· drag the green corner to fill down</span>' +
     '<button class="btn btn-ghost btn-sm" onclick="addRow(\'fabricBody\', fabricRowTpl); recalcAll()">' + ic('plus', 15) + 'Add item</button></div>' +
     '<div class="sec">Trims Cost Breakup</div>' +
     '<div class="table-wrap"><table class="mini-table xl-table cost-bom" id="sewingBomTable">' +
     '<thead><tr>' + srTh() + '<th>Particulars *</th><th class="num">Cons/pcs</th><th>UOM</th><th class="num">Rate</th><th class="num">Wastage %</th><th class="num">Cost</th><th></th></tr></thead>' +
     '<tbody id="sewingBody"></tbody></table></div>' +
-    '<div class="bom-foot"><span class="bom-hint">Paste rows from Excel · drag the green corner to fill down</span>' +
+    '<div class="bom-foot"><span class="bom-hint">Paste rows from Excel Â· drag the green corner to fill down</span>' +
     '<button class="btn btn-ghost btn-sm" onclick="addRow(\'sewingBody\', sewingRowTpl); recalcAll()">' + ic('plus', 15) + 'Add item</button></div>' +
     '</div>' +
     '</div>' +
@@ -12740,7 +12740,7 @@ function saveCosting(id) {
   }
   saveDB();
   pageView = null;
-  toast('Costing saved — ' + (data.no || o.brand || o.style), 'green');
+  toast('Costing saved â€” ' + (data.no || o.brand || o.style), 'green');
   render();
 }
 function repeatCosting(id) {
@@ -12802,13 +12802,13 @@ function printCosting(id) {
         '<td class="rt">' + fmtNum(pf(r.cons)) + '</td><td>' + esc(r.uom || '') + '</td>' +
         '<td class="rt">' + fmtNum(pf(r.rate)) + '</td><td class="rt">' + fmtNum(pf(r.wastage)) + '</td>' +
         '<td class="rt">' + fmt4(costingLineAmt(r)) + '</td></tr>';
-    }).join('') || '<tr><td colspan="7">—</td></tr>';
+    }).join('') || '<tr><td colspan="7">â€”</td></tr>';
   };
   const img = rec.styleImage
     ? '<img class="simg" src="' + rec.styleImage + '" alt="Style image">'
     : '<div class="noph">No style image</div>';
   const kv = function (lbl, val) {
-    return '<tr><td class="k">' + esc(lbl) + '</td><td>' + (val === '' || val == null ? '—' : val) + '</td></tr>';
+    return '<tr><td class="k">' + esc(lbl) + '</td><td>' + (val === '' || val == null ? 'â€”' : val) + '</td></tr>';
   };
   const doc =
     '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Costing ' + esc(rec.no) + ' | ' + esc(PRINT_CO.name) + '</title>' +
@@ -12845,7 +12845,7 @@ function printCosting(id) {
     '<div class="sheet">' +
     '<div class="hd"><h1>' + esc(PRINT_CO.name) + '</h1>' +
     '<div>' + esc(PRINT_CO.reg) + '</div><div>' + esc(PRINT_CO.works) + '</div></div>' +
-    '<div class="title">STYLE COSTING — ' + esc(rec.no) + '</div>' +
+    '<div class="title">STYLE COSTING â€” ' + esc(rec.no) + '</div>' +
     '<div class="meta">' +
     '<div class="imgcol"><div style="font-weight:bold;margin-bottom:6px">Style Image</div>' + img + '</div>' +
     '<div class="infocol"><table class="kv">' +
@@ -12883,7 +12883,7 @@ function printCosting(id) {
     '<div class="foot">SUBJECT TO ' + esc(PRINT_CO.jurisdiction.toUpperCase()) + ' JURISDICTION</div>' +
     '</div></body></html>';
   const w = window.open('', '_blank');
-  if (!w) return toast('Pop-up blocked — allow pop-ups to print', 'red');
+  if (!w) return toast('Pop-up blocked â€” allow pop-ups to print', 'red');
   w.document.write(doc);
   w.document.close();
 }
@@ -12939,7 +12939,7 @@ function afterRenderCosting(rec) {
   bindTableColResize($('breakupTable'), 'cost-breakup');
 }
 
-/* Excel-style keyboard / paste / fill-handle — scoped to costing sheets */
+/* Excel-style keyboard / paste / fill-handle â€” scoped to costing sheets */
 let COSTING_NAV_BOUND = false;
 function bindCostingExcelNav() {
   if (COSTING_NAV_BOUND) return;
@@ -13191,7 +13191,7 @@ function bindCostingExcelNav() {
 
 
 /* =====================================================================
-   GLOBAL ADMIN SEARCH — Shopify-style dropdown across every module
+   GLOBAL ADMIN SEARCH â€” Shopify-style dropdown across every module
    ===================================================================== */
 const GB_MODS = [
   { k: 'po', label: 'PO' },
@@ -13233,7 +13233,7 @@ function gbRecords(m) {
       return {
         kind: 'hit', m: m, id: it.id,
         title: it.name || '',
-        sub: [it.code, it.category, it.classification].filter(Boolean).join(' · '),
+        sub: [it.code, it.category, it.classification].filter(Boolean).join(' Â· '),
         status: it.active === false ? 'Inactive' : 'Active',
         date: '',
         hay: ((it.name || '') + ' ' + (it.code || '') + ' ' + (it.category || '') + ' ' + (it.classification || '') + ' ' + (it.hsn || '') + ' ' + (it.description || '')).toLowerCase()
@@ -13245,7 +13245,7 @@ function gbRecords(m) {
       return {
         kind: 'hit', m: m, id: x.id,
         title: x.legalName || x.shortName || '',
-        sub: [x.code, x.businessType, x.city, x.state].filter(Boolean).join(' · '),
+        sub: [x.code, x.businessType, x.city, x.state].filter(Boolean).join(' Â· '),
         status: x.status || '',
         date: '',
         hay: ((x.legalName || '') + ' ' + (x.shortName || '') + ' ' + (x.code || '') + ' ' + (x.businessType || '') + ' ' + (x.gstNo || '') + ' ' + (x.pan || '') + ' ' + (x.city || '') + ' ' + (x.state || '')).toLowerCase()
@@ -13255,7 +13255,7 @@ function gbRecords(m) {
   return (db[m] || []).map(function (r) {
     const party = r.supplier || r.vendor || r.customer || r.party || '';
     let extra = '';
-    if (m === 'costing' && r.order) extra = [r.order.style, r.order.brand, r.order.label].filter(Boolean).join(' · ');
+    if (m === 'costing' && r.order) extra = [r.order.style, r.order.brand, r.order.label].filter(Boolean).join(' Â· ');
     else if (m === 'jobwork' || m === 'sample') extra = (typeof jwFirstStyle === 'function') ? (jwFirstStyle(r) || '') : '';
     else if (m === 'inward' || m === 'purchasereturn') extra = r.poRef || '';
     else if (m === 'jobworkreturn') extra = r.jwRef || '';
@@ -13263,7 +13263,7 @@ function gbRecords(m) {
       : (m === 'sale') ? sumBy(r.items, 'amount')
         : (m === 'costing') ? ((r.order && r.order.fob) || 0)
           : 0;
-    const sub = [party, extra, dpToDisplay(r.date) || r.date, amt ? fmtINR(amt) : ''].filter(Boolean).join(' · ');
+    const sub = [party, extra, dpToDisplay(r.date) || r.date, amt ? fmtINR(amt) : ''].filter(Boolean).join(' Â· ');
     return {
       kind: 'hit', m: m, id: r.id,
       title: r.no || '',
@@ -13389,7 +13389,7 @@ function gbPaint() {
   }
   if (recs.length) {
     html += '<div class="gb-sec">' + (gbState.mod ? esc(gbMod(gbState.mod).label) : 'Records') +
-      (hits.length ? ' · ' + hits.length : '') + '</div>';
+      (hits.length ? ' Â· ' + hits.length : '') + '</div>';
     recs.forEach(function (it) {
       const idx = i++;
       const st = it.status ? badge(it.status) : '';
@@ -13405,7 +13405,7 @@ function gbPaint() {
     html += '<button type="button" class="gb-more' + (gbState.active === idx ? ' on' : '') + '" data-gb="' + idx + '">Show ' + Math.min(20, remain) + ' more</button>';
   }
   if (!html) {
-    html = '<div class="gb-empty">' + (q ? 'No matches for “' + esc(q) + '”' : 'Type to search PO, Job Work, Sample and more') + '</div>';
+    html = '<div class="gb-empty">' + (q ? 'No matches for â€œ' + esc(q) + 'â€' : 'Type to search PO, Job Work, Sample and more') + '</div>';
   }
   pop.innerHTML = html;
   const on = pop.querySelector('[data-gb="' + gbState.active + '"]');
@@ -13520,7 +13520,7 @@ try {
     return qaToast(msg, type);
   };
 
-  function qaStyleKey(v) { return String(v || '').split(' · ')[0].trim().toLowerCase(); }
+  function qaStyleKey(v) { return String(v || '').split(' Â· ')[0].trim().toLowerCase(); }
   window.qaStyleKey = qaStyleKey;
   function qaGoodStatus(r) { return r && !/cancel|reject|pending qc/i.test(String(r.status || '')); }
   function qaFgAvailable(desc, excludeSaleId) {
@@ -13576,7 +13576,7 @@ try {
     const rows = gatherRows('po-items', ['name']);
     // v5 change: rate=0 is ALLOWED but show warning only (not blocked)
     const zeroRate = rows.find(i => String(i.name || '').trim() && pf(i.rate) <= 0);
-    if (zeroRate) toast('Note: Rate is zero for ' + (zeroRate.name || 'an item') + ' — saved with zero-value warning flag.', 'amber');
+    if (zeroRate) toast('Note: Rate is zero for ' + (zeroRate.name || 'an item') + ' â€” saved with zero-value warning flag.', 'amber');
     const before = id ? null : db.po.length;
     const result = qaSavePO(id);
     if (zeroRate && result !== false) {
@@ -13598,7 +13598,7 @@ try {
     const type = (($('f-entrytype') || {}).value) || 'PO Receipt';
     // v5: BLOCK a Job Work Return that exceeds material issued to the job worker.
     // The JWR UI lives on the Inward form (entryType = "Job Work Return"),
-    // and rows are rendered inside #inward-items using jwrItemRow — the return
+    // and rows are rendered inside #inward-items using jwrItemRow â€” the return
     // qty field is data-f="recQty" and each <tr> carries data-issued and
     // data-returned with the live outstanding balance.
     if (type === 'Job Work Return') {
@@ -13621,7 +13621,7 @@ try {
           const unitStr = unit ? ' ' + unit : '';
           return reqBadCell('inward-items', k, 'recQty',
             'Return exceeds material issued to the job worker: ' + itemName +
-            ' — outstanding balance is ' + fmtNum(balance) + unitStr +
+            ' â€” outstanding balance is ' + fmtNum(balance) + unitStr +
             ', you are returning ' + fmtNum(retQty) + unitStr);
         }
       }
@@ -13629,7 +13629,7 @@ try {
     if (type === 'PO Receipt') {
       const no = cboxGet('in-po'), po = (db.po || []).find(p => p.no === no);
       if (po && !['Approved', 'Partially Received', 'Received'].includes(po.status)) {
-        toast('Inward blocked: PO ' + po.no + ' is "' + (po.status || 'Draft') + '" — approve the PO before booking inward.', 'red');
+        toast('Inward blocked: PO ' + po.no + ' is "' + (po.status || 'Draft') + '" â€” approve the PO before booking inward.', 'red');
         return reqBad('in-po', 'PO ' + po.no + ' is not approved. Approve it first, then book inward.');
       }
       window.__qaLastPOWarning = null;
@@ -13698,7 +13698,7 @@ try {
   // The JWR over-balance check is enforced in qaSaveInward (entryType === 'Job Work
   // Return'), which is the path the form actually uses. Keep a defensive wrapper
   // around saveJobWorkReturn too, in case any other call site reaches it: it
-  // uses the same row layout — data-f="recQty" with data-issued / data-returned.
+  // uses the same row layout â€” data-f="recQty" with data-issued / data-returned.
   const qaSaveJwr = saveJobWorkReturn;
   saveJobWorkReturn = function (id) {
     const tbodyId = $('jwr-items') ? 'jwr-items' : 'inward-items';
@@ -13720,7 +13720,7 @@ try {
         const unitStr = unit ? ' ' + unit : '';
         return reqBadCell(tbodyId, k, 'recQty',
           'Return exceeds material issued to the job worker: ' + itemName +
-          ' — outstanding balance is ' + fmtNum(balance) + unitStr +
+          ' â€” outstanding balance is ' + fmtNum(balance) + unitStr +
           ', you are returning ' + fmtNum(retQty) + unitStr);
       }
     }
@@ -13730,7 +13730,7 @@ try {
   const qaSavePr = savePurchaseReturn;
   savePurchaseReturn = function (id) {
     // v5: HARD-BLOCK Purchase Return that exceeds available inward stock
-    // (inward recQty − prior returns already issued for this inward + item)
+    // (inward recQty âˆ’ prior returns already issued for this inward + item)
     const inwardNo = cboxGet('pr-inward');
     if (inwardNo) {
       const rows = qsa('#pr-items tr');
@@ -13746,7 +13746,7 @@ try {
           const nmEl = qs('[data-f="name"]', tr);
           const itemName = nmEl ? (nmEl.value || 'this item') : 'this item';
           return reqBadCell('pr-items', k, 'retQty',
-            'Return Qty cannot exceed available stock — ' + itemName + ' has only ' + fmtNum(avail) + ' in stock. You entered ' + fmtNum(retQty) + '.');
+            'Return Qty cannot exceed available stock â€” ' + itemName + ' has only ' + fmtNum(avail) + ' in stock. You entered ' + fmtNum(retQty) + '.');
         }
       }
     }
@@ -13861,9 +13861,9 @@ try {
     if (!saveDB()) { if (!id) db.sale = db.sale.filter(r => r !== rec); return false; }
     pageView = null;
     if (lowStockNotice.length) {
-      toast('Sale saved — ' + rec.no + ' (Note: pending stock for ' + lowStockNotice.join(', ') + ')', 'amber');
+      toast('Sale saved â€” ' + rec.no + ' (Note: pending stock for ' + lowStockNotice.join(', ') + ')', 'amber');
     } else {
-      toast('Sale saved — ' + rec.no, 'green');
+      toast('Sale saved â€” ' + rec.no, 'green');
     }
     render();
   };
@@ -13889,20 +13889,20 @@ try {
     (db.masters.parties || []).filter(function (x) { return x.status !== 'Inactive'; }).forEach(function (x) {
       const nm = x.shortName || x.legalName || x.displayName;
       if (!nm) return;
-      if (partyHasType(x, 'Vendor') || partyHasType(x, 'Supplier') || partyHasType(x, 'Job worker') || partyHasType(x, 'JobWorker')) add(nm, nm + (x.city ? ' · ' + x.city : ''));
+      if (partyHasType(x, 'Vendor') || partyHasType(x, 'Supplier') || partyHasType(x, 'Job worker') || partyHasType(x, 'JobWorker')) add(nm, nm + (x.city ? ' Â· ' + x.city : ''));
     });
     (db.partners || []).forEach(function (x) {
       const nm = x.shortName || x.displayName || x.legalName;
       if (!nm) return;
       const roles = (x.roles || []).map(function (r) { return String(r || '').trim(); });
-      if (roles.indexOf('VENDOR') > -1 || roles.indexOf('SUPPLIER') > -1 || roles.indexOf('JOB_WORKER') > -1) add(nm, nm + ((x.registrations && x.registrations[0] && x.registrations[0].city) ? ' · ' + x.registrations[0].city : ''));
+      if (roles.indexOf('VENDOR') > -1 || roles.indexOf('SUPPLIER') > -1 || roles.indexOf('JOB_WORKER') > -1) add(nm, nm + ((x.registrations && x.registrations[0] && x.registrations[0].city) ? ' Â· ' + x.registrations[0].city : ''));
     });
     return out.sort(function (a, b) { return String(a.l).localeCompare(String(b.l)); });
   };
 
   // v5: only posted (Approved / Completed / Received / Closed) records are
   // blocked from deletion. Master values are always deletable. The check
-  // is restricted to transactional modules — master data (m in db.masters.*)
+  // is restricted to transactional modules â€” master data (m in db.masters.*)
   // is never blocked here, and Job Work with FG receipts is handled in
   // the caller if needed. The user gets a clear message and the trash icon
   // is replaced with a lock in the list.
@@ -13913,14 +13913,14 @@ try {
     // Real downstream usage always blocks (JW / Sample / PR / later inward, etc.)
     const used = origDeleteBlockReason(m, r);
     if (used) return used;
-    // Inward is saved as Completed on create — that is not a later posted document.
+    // Inward is saved as Completed on create â€” that is not a later posted document.
     if (m === 'inward') return '';
     // Job Work: lock only while FG receipts / JW returns exist (handled above).
     // Status Completed / Partially Received must not keep delete locked after receipts are removed.
     if (m === 'jobwork' || m === 'sample') return '';
     // Process Outward: lock only while Process Inward exists (handled above).
     if (m === 'processoutward') return '';
-    // Process Inward is the receipt itself — allow delete so outward can unlock.
+    // Process Inward is the receipt itself â€” allow delete so outward can unlock.
     if (m === 'processinward') return '';
     if (r && POSTED_MODULES.indexOf(m) > -1 &&
       /approved|completed|received|closed/i.test(r.status || '')) {
@@ -13957,7 +13957,7 @@ try {
     if (type === 'fabric_grn' || type === 'trims_grn') rep.rows = rep.rows.filter(r => !/rejected|cancelled/i.test(String(r[11] || '')));
     if (type === 'fabric_issue' || type === 'trims_issue') {
       const fab = type === 'fabric_issue', rows = [];
-      function add(rec, list) { (list || []).forEach(function (i) { const q = issueLineQty(i), d = i.date || rec.date || '', isF = isFabricItem(i.item, i.category, i.classification); if ((fab ? isF : !isF) && q > 0 && inRange(d, from, to) && !/cancel/i.test(rec.status || '')) { const inw = inwardByNo(i.inwardNo), src = inw ? (inw.items || []).find(x => lcName(x.name) === lcName(i.item)) : null, rate = src ? pf(src.poRate != null ? src.poRate : src.rate) : 0; rows.push([dpToDisplay(d) || d, rec.no, rec.vendor, i.item, i.colour || '—', fmtNum(q), i.unit || '', fmtNum(rate), fmtNum(q * rate), rec.status]); } }); }
+      function add(rec, list) { (list || []).forEach(function (i) { const q = issueLineQty(i), d = i.date || rec.date || '', isF = isFabricItem(i.item, i.category, i.classification); if ((fab ? isF : !isF) && q > 0 && inRange(d, from, to) && !/cancel/i.test(rec.status || '')) { const inw = inwardByNo(i.inwardNo), src = inw ? (inw.items || []).find(x => lcName(x.name) === lcName(i.item)) : null, rate = src ? pf(src.poRate != null ? src.poRate : src.rate) : 0; rows.push([dpToDisplay(d) || d, rec.no, rec.vendor, i.item, i.colour || 'â€”', fmtNum(q), i.unit || '', fmtNum(rate), fmtNum(q * rate), rec.status]); } }); }
       (db.jobwork || []).forEach(r => { add(r, r.issues); add(r, r.extras); }); (db.sample || []).forEach(r => add(r, r.extras)); rows.sort((a, b) => qaIso(a[0]).localeCompare(qaIso(b[0]))); rep.rows = rows;
     }
     if (rep && rep.rows && rep.header) { const di = rep.header.findIndex(h => /date/i.test(h)); if (di > -1) rep.rows.sort((a, b) => qaIso(a[di]).localeCompare(qaIso(b[di]))); }
@@ -13973,10 +13973,10 @@ try {
     (db.jobwork || []).forEach(r => { issue(r, r.issues); issue(r, r.extras); }); (db.sample || []).forEach(r => issue(r, r.extras));
     (db.purchasereturn || []).forEach(r => { if (/cancel/i.test(r.status || '')) return; (r.items || []).forEach(i => { const b = bucket(i.name, isFabricItem(i.name, i.category, i.classification) ? 'Fabric' : 'Trims'), q = pf(i.retQty); if (r.date < from) b.open -= q; else if (inRange(r.date, from, to)) b.out += q; }); });
     const make = cat => Object.values(material).filter(b => b.cat === cat).map(b => [b.name, fmtNum(b.open), fmtNum(b.inn), fmtNum(b.out), fmtNum(b.open + b.inn - b.out)]);
-    const fg = {}; function fgb(k) { k = String(k || '').split(' · ')[0]; return fg[k] || (fg[k] = { open: 0, inn: 0, out: 0 }); }
+    const fg = {}; function fgb(k) { k = String(k || '').split(' Â· ')[0]; return fg[k] || (fg[k] = { open: 0, inn: 0, out: 0 }); }
     (db.jobwork || []).forEach(j => { if (/cancel/i.test(j.status || '')) return; (jwReceipts(j) || []).forEach(rx => { if (/reject|fail/i.test(rx.qc || '')) return; const b = fgb(rx.desc), q = pf(rx.qty), d = rx.date || j.date || ''; if (d < from) b.open += q; else if (inRange(d, from, to)) b.inn += q; }); });
     (db.sale || []).forEach(s => { if (/cancel/i.test(s.status || '')) return; (s.items || []).forEach(i => { const b = fgb(i.desc), q = pf(i.qty); if (s.date < from) b.open -= q; else if (inRange(s.date, from, to)) b.out += q; }); });
-    return [{ title: '🧶 Fabric Stock', header: ['Item', 'Opening', 'Accepted Inward', 'Issued / Returned', 'Closing'], rows: make('Fabric') }, { title: '🧷 Trims Stock', header: ['Item', 'Opening', 'Accepted Inward', 'Issued / Returned', 'Closing'], rows: make('Trims') }, { title: '👕 Finished Goods Stock (pcs)', header: ['Style', 'Opening', 'FG Received', 'Sold', 'Closing'], rows: Object.keys(fg).map(k => [k, fmtNum(fg[k].open), fmtNum(fg[k].inn), fmtNum(fg[k].out), fmtNum(fg[k].open + fg[k].inn - fg[k].out)]) }];
+    return [{ title: 'ðŸ§¶ Fabric Stock', header: ['Item', 'Opening', 'Accepted Inward', 'Issued / Returned', 'Closing'], rows: make('Fabric') }, { title: 'ðŸ§· Trims Stock', header: ['Item', 'Opening', 'Accepted Inward', 'Issued / Returned', 'Closing'], rows: make('Trims') }, { title: 'ðŸ‘• Finished Goods Stock (pcs)', header: ['Style', 'Opening', 'FG Received', 'Sold', 'Closing'], rows: Object.keys(fg).map(k => [k, fmtNum(fg[k].open), fmtNum(fg[k].inn), fmtNum(fg[k].out), fmtNum(fg[k].open + fg[k].inn - fg[k].out)]) }];
   };
 
   function qaNotifStoreKey() {
@@ -14053,7 +14053,7 @@ try {
     const r = (db[module] || []).find(x => x.id === id);
     if (!r) return;
     const isApprover = qaCanApprove(module);
-    // Submit (Draft → Submitted) is allowed for any user who can edit the record
+    // Submit (Draft â†’ Submitted) is allowed for any user who can edit the record
     const isSubmit = status === 'Submitted' && (r.status === 'Draft' || r.status === 'Rejected');
     if (!isApprover && !isSubmit) {
       // Allow Close/Reopen/Cancel if user can edit (existing record edit rights)
@@ -14065,7 +14065,7 @@ try {
     // v5: if rejecting, require a mandatory reason (only approvers can reject)
     if (status === 'Rejected' && !r._qaAskingReject) {
       openDialog({
-        title: 'Reject ' + module.toUpperCase() + ' — ' + (r.no || ''),
+        title: 'Reject ' + module.toUpperCase() + ' â€” ' + (r.no || ''),
         message: 'Provide a reason for rejection. This reason is mandatory and will be recorded on the document.',
         bodyHtml: '<div class="dlg-field"><label>Reason for rejection *</label><textarea class="inp" id="qa-reject-reason" rows="3" placeholder="e.g. Price too high, wrong specs, duplicate PO, etc."></textarea></div>',
         confirmText: 'Reject ' + module.toUpperCase(),
@@ -14080,7 +14080,7 @@ try {
           // apply status directly (avoid recursive dialog)
           r.status = status;
           r.updatedAt = Date.now();
-          auditPush(module, 'Status changed', r.no, ['Status → Rejected (Reason: ' + reason + ')']);
+          auditPush(module, 'Status changed', r.no, ['Status â†’ Rejected (Reason: ' + reason + ')']);
           qaPushPoNotif('Rejected', r, reason);
           if (saveDB()) { toast(r.no + ' rejected', 'green'); render(); }
         },
@@ -14092,7 +14092,7 @@ try {
     // v5: cancellation needs a reason too (for audit). A plain re-open does not.
     if (status === 'Cancelled' && r.status !== 'Cancelled' && !r._qaAskingCancel) {
       openDialog({
-        title: 'Cancel ' + module.toUpperCase() + ' — ' + (r.no || ''),
+        title: 'Cancel ' + module.toUpperCase() + ' â€” ' + (r.no || ''),
         message: 'Cancelling a record keeps it in the system for audit but excludes it from active reports and stock. <br><br>A reason is required and will be recorded on the document.',
         bodyHtml: '<div class="dlg-field"><label>Reason for cancellation *</label><textarea class="inp" id="qa-cancel-reason" rows="3" placeholder="e.g. Wrong supplier chosen, duplicate entry, vendor cancelled, etc."></textarea></div>',
         confirmText: 'Cancel ' + module.toUpperCase(),
@@ -14105,8 +14105,8 @@ try {
           r.cancelledBy = (authUser() && (authUser().name || authUser().username)) || 'unknown';
           r._qaAskingCancel = false;
           r.status = status; r.updatedAt = Date.now();
-          auditPush(module, 'Status changed', r.no, ['Status → Cancelled (Reason: ' + reason + ')']);
-          if (saveDB()) { toast(r.no + ' cancelled — kept in system as audit record', r.no ? 'green' : 'green'); render(); }
+          auditPush(module, 'Status changed', r.no, ['Status â†’ Cancelled (Reason: ' + reason + ')']);
+          if (saveDB()) { toast(r.no + ' cancelled â€” kept in system as audit record', r.no ? 'green' : 'green'); render(); }
         },
         onCancel: function () { r._qaAskingCancel = false; },
         after: function () { const ta = $('qa-cancel-reason'); if (ta) ta.focus(); r._qaAskingCancel = true; }
@@ -14129,7 +14129,7 @@ try {
       r.previousCancelledAt = r.cancelledAt;
       r.cancelReason = null; r.cancelledBy = null; r.cancelledAt = null;
     }
-    auditPush(module, 'Status changed', r.no, ['Status → ' + status + (status === 'Rejected' && r.rejectReason ? ' (Reason: ' + r.rejectReason + ')' : '') + (status === 'Cancelled' && r.cancelReason ? ' (Reason: ' + r.cancelReason + ')' : '')]);
+    auditPush(module, 'Status changed', r.no, ['Status â†’ ' + status + (status === 'Rejected' && r.rejectReason ? ' (Reason: ' + r.rejectReason + ')' : '') + (status === 'Cancelled' && r.cancelReason ? ' (Reason: ' + r.cancelReason + ')' : '')]);
     if (module === 'po' && (status === 'Submitted' || status === 'Approved' || status === 'Rejected')) {
       qaPushPoNotif(status, r, status === 'Rejected' ? (r.rejectReason || '') : '');
     }
@@ -14148,7 +14148,7 @@ try {
     }
     // v5: removed Inward QC workflow (Pending QC, QC Pass/Reject buttons)
     if (m === 'purchasereturn') { if (r.status === 'Draft') add('Mark Sent', 'Sent', 'btn-primary'); if (r.status === 'Sent') add('Credit Note Received', 'Closed', 'btn-primary'); }
-    // v5: Cancel & Re-open — every module whose STATUSES includes 'Cancelled'.
+    // v5: Cancel & Re-open â€” every module whose STATUSES includes 'Cancelled'.
     // Cancel requires a reason; works on Drafts as well as Approved/Completed/etc.
     // (delete is blocked for posted records, but Cancel is the supported way to
     // mark them out of the way.) Re-open takes a Cancelled record back to Draft.
@@ -14188,10 +14188,10 @@ try {
       return new Date(ts).toLocaleString();
     }
     const items = due.length ? due.map(function (x) {
-      const meta = [x.no, x.by ? ('by ' + x.by) : '', ago(x.at)].filter(Boolean).join(' · ');
-      return '<div class="qa-notif-item" data-qa-jump="po" data-qa-id="' + esc(x.recId || x.id || '') + '"><div class="qa-notif-type">' + esc(x.type) + '</div><div class="qa-notif-meta">' + esc(meta) + (x.note ? (' — ' + esc(x.note)) : '') + '</div></div>';
+      const meta = [x.no, x.by ? ('by ' + x.by) : '', ago(x.at)].filter(Boolean).join(' Â· ');
+      return '<div class="qa-notif-item" data-qa-jump="po" data-qa-id="' + esc(x.recId || x.id || '') + '"><div class="qa-notif-type">' + esc(x.type) + '</div><div class="qa-notif-meta">' + esc(meta) + (x.note ? (' â€” ' + esc(x.note)) : '') + '</div></div>';
     }).join('') : '<div class="qa-empty" style="padding:16px;color:#6b7280">No PO submit / approve / reject alerts yet.</div>';
-    panel.innerHTML = '<div class="qa-dropdown-head"><strong>Notifications</strong><div style="font-size:11px;color:#6b7280;font-weight:400">PO submit, approve & reject — all users</div></div>' + items;
+    panel.innerHTML = '<div class="qa-dropdown-head"><strong>Notifications</strong><div style="font-size:11px;color:#6b7280;font-weight:400">PO submit, approve & reject â€” all users</div></div>' + items;
     panel.style.cssText = 'position:fixed;top:' + (rect.bottom + 8) + 'px;right:' + (window.innerWidth - rect.right) + 'px;width:340px;max-height:420px;overflow-y:auto;background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:9000;padding:6px;color:#1f2937';
     document.body.appendChild(panel);
     setTimeout(function () { document.addEventListener('click', qaDropdownOutsideHandler, true); }, 0);
@@ -14304,7 +14304,7 @@ try {
   document.addEventListener('input', function (e) { if (e.target && e.target.closest && e.target.closest('.entry-page')) qaDirty = true; }, true);
   setInterval(qaSaveDraft, 5000);
   window.addEventListener('beforeunload', function (e) { if (qaDirty) { qaSaveDraft(); e.preventDefault(); e.returnValue = 'You have unsaved changes.'; } });
-  // v5: unsaved-warning guard — track whether we've already prompted for this dirty session
+  // v5: unsaved-warning guard â€” track whether we've already prompted for this dirty session
   let qaWarnedThisSession = false;
   document.addEventListener('click', function (e) {
     if (!qaDirty) { qaWarnedThisSession = false; return; }
@@ -14334,10 +14334,10 @@ try {
   // Configurable 30-minute idle sign-out and failed-login throttling.
   let qaLastActive = Date.now();['pointerdown', 'keydown', 'touchstart'].forEach(n => document.addEventListener(n, () => qaLastActive = Date.now(), true));
   setInterval(function () { if (authUser() && Date.now() - qaLastActive > 30 * 60 * 1000) { toast('Signed out after 30 minutes of inactivity', 'red'); authLogout(); } }, 60000);
-  // v5: failed-login throttling — after 5 failed attempts, lock login for 5 minutes
+  // v5: failed-login throttling â€” after 5 failed attempts, lock login for 5 minutes
   // and disable username, PIN and sign-in button until lock expires
   const QA_LOGIN_FAIL_KEY = 'stitchflow_login_fail';
-  // v5: self-contained dialog for Forgot PIN — works even on login screen
+  // v5: self-contained dialog for Forgot PIN â€” works even on login screen
   function qaShowForgotPinDialog() {
     // Remove any existing one
     const existing = $('qa-forgot-dialog');
@@ -14349,7 +14349,7 @@ try {
       '<div style="background:#fff;border-radius:14px;width:100%;max-width:440px;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden;animation:pop .16s ease">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb">' +
       '<h3 style="margin:0;font-size:18px;font-weight:600;color:#111827">Recover access</h3>' +
-      '<button id="qa-forgot-close-x" type="button" style="background:transparent;border:none;cursor:pointer;padding:4px;color:#6b7280;font-size:20px;line-height:1" aria-label="Close">×</button>' +
+      '<button id="qa-forgot-close-x" type="button" style="background:transparent;border:none;cursor:pointer;padding:4px;color:#6b7280;font-size:20px;line-height:1" aria-label="Close">Ã—</button>' +
       '</div>' +
       '<div style="padding:20px;color:#374151;font-size:14px;line-height:1.55">' +
       'Contact your StitchFlow administrator to verify your identity and reset your PIN. For security, PINs cannot be recovered or displayed.' +
@@ -14407,7 +14407,7 @@ try {
           submitBtn.style.opacity = '0.55';
           submitBtn.style.cursor = 'not-allowed';
           submitBtn.style.background = '#9ca3af';
-          submitBtn.textContent = 'Locked — try in ' + qaFormatCountdown(remaining);
+          submitBtn.textContent = 'Locked â€” try in ' + qaFormatCountdown(remaining);
         }
         if (forgotBtn) { forgotBtn.disabled = true; forgotBtn.style.opacity = '0.55'; }
         if (msg) {
@@ -14492,440 +14492,464 @@ try {
 })();
 
 /* ===== Partner onboarding + GST API connection ===== */
-function gstSettingsKey() { return 'garmentErpGstSettings'; }
-function gstSettingsRead() {
-  try {
-    if (db.gstApiSettings && typeof db.gstApiSettings === 'object') return Object.assign({}, db.gstApiSettings);
-    return JSON.parse(localStorage.getItem(gstSettingsKey()) || '{}');
-  } catch (e) { return {}; }
+function gstSettingsKey(){ return 'garmentErpGstSettings'; }
+function gstSettingsRead(){
+  try{
+    if(db.gstApiSettings && typeof db.gstApiSettings==='object') return Object.assign({}, db.gstApiSettings);
+    return JSON.parse(localStorage.getItem(gstSettingsKey())||'{}');
+  }catch(e){ return {}; }
 }
-function gstSettingsWrite(d) {
-  db.gstApiSettings = d;
-  try { localStorage.setItem(gstSettingsKey(), JSON.stringify(d)); } catch (e) { }
-  if (typeof saveDB === 'function') saveDB();
+function gstSettingsWrite(d){
+  db.gstApiSettings=d;
+  try{ localStorage.setItem(gstSettingsKey(), JSON.stringify(d)); }catch(e){}
+  if(typeof saveDB==='function') saveDB();
 }
-function gstSettingsDefaults(p) {
-  return { baseUrl: '', lookupPath: '/v1/gstin/{gstin}', queryParam: 'gstin', authType: 'apiKey' };
+function gstSettingsDefaults(p){
+  return { baseUrl:'', lookupPath:'/v1/gstin/{gstin}', queryParam:'gstin', authType:'apiKey' };
 }
-function gstToggles() {
-  const t = (gstSettingsRead().toggles) || {};
-  return Object.assign({ enabled: true, proxy: true, demo: true, autofill: true, typing: true, autocreate: false }, t);
+function gstToggles(){
+  const t=(gstSettingsRead().toggles)||{};
+  return Object.assign({enabled:true,proxy:true,demo:true,autofill:true,typing:true,autocreate:false}, t);
 }
-function gstinValid(gstin) {
-  gstin = String(gstin || '').trim().toUpperCase();
-  if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gstin)) return false;
-  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'; let factor = 2, sum = 0;
-  for (let i = 13; i >= 0; i--) { const code = chars.indexOf(gstin[i]); const product = code * factor; sum += Math.floor(product / 36) + product % 36; factor = factor === 2 ? 1 : 2; }
-  return chars[(36 - (sum % 36)) % 36] === gstin[14];
+function gstinValid(gstin){
+  gstin=String(gstin||'').trim().toUpperCase();
+  if(!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gstin)) return false;
+  const chars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'; let factor=2,sum=0;
+  for(let i=13;i>=0;i--){ const code=chars.indexOf(gstin[i]); const product=code*factor; sum+=Math.floor(product/36)+product%36; factor=factor===2?1:2; }
+  return chars[(36-(sum%36))%36]===gstin[14];
 }
-function gstStateName(code) {
-  const states = { '01': 'Jammu and Kashmir', '02': 'Himachal Pradesh', '03': 'Punjab', '04': 'Chandigarh', '05': 'Uttarakhand', '06': 'Haryana', '07': 'Delhi', '08': 'Rajasthan', '09': 'Uttar Pradesh', '10': 'Bihar', '11': 'Sikkim', '12': 'Arunachal Pradesh', '13': 'Nagaland', '14': 'Manipur', '15': 'Mizoram', '16': 'Tripura', '17': 'Meghalaya', '18': 'Assam', '19': 'West Bengal', '20': 'Jharkhand', '21': 'Odisha', '22': 'Chhattisgarh', '23': 'Madhya Pradesh', '24': 'Gujarat', '26': 'Dadra and Nagar Haveli and Daman and Diu', '27': 'Maharashtra', '29': 'Karnataka', '30': 'Goa', '32': 'Kerala', '33': 'Tamil Nadu', '34': 'Puducherry', '36': 'Telangana', '37': 'Andhra Pradesh', '38': 'Ladakh' };
-  return states[String(code || '').padStart(2, '0')] || '';
+function gstStateName(code){
+  const states={'01':'Jammu and Kashmir','02':'Himachal Pradesh','03':'Punjab','04':'Chandigarh','05':'Uttarakhand','06':'Haryana','07':'Delhi','08':'Rajasthan','09':'Uttar Pradesh','10':'Bihar','11':'Sikkim','12':'Arunachal Pradesh','13':'Nagaland','14':'Manipur','15':'Mizoram','16':'Tripura','17':'Meghalaya','18':'Assam','19':'West Bengal','20':'Jharkhand','21':'Odisha','22':'Chhattisgarh','23':'Madhya Pradesh','24':'Gujarat','26':'Dadra and Nagar Haveli and Daman and Diu','27':'Maharashtra','29':'Karnataka','30':'Goa','32':'Kerala','33':'Tamil Nadu','34':'Puducherry','36':'Telangana','37':'Andhra Pradesh','38':'Ladakh'};
+  return states[String(code||'').padStart(2,'0')]||'';
 }
-function demoGstProfile(gstin) {
-  const code = gstin.slice(0, 2);
-  const map = { '27': ['Maharashtra', 'Nagpur', 'Nagpur', '440001'], '29': ['Karnataka', 'Bengaluru', 'Bengaluru Urban', '560001'], '24': ['Gujarat', 'Ahmedabad', 'Ahmedabad', '380001'], '07': ['Delhi', 'New Delhi', 'New Delhi', '110001'], '09': ['Uttar Pradesh', 'Noida', 'Gautam Buddha Nagar', '201301'] };
-  const x = map[code] || [gstStateName(code) || 'State not mapped', 'City not mapped', 'District not mapped', '000000'];
-  return { gstin: gstin, pan: gstin.slice(2, 12), legalName: 'Demo GST Taxpayer ' + gstin.slice(2, 7), tradeName: 'Demo Trade Name', status: 'ACTIVE', stateCode: code, state: x[0], city: x[1], district: x[2], pincode: x[3], principalAddress: 'Demo principal place of business, ' + x[1] + ', ' + x[0] + ' - ' + x[3] };
+function demoGstProfile(gstin){
+  const code=gstin.slice(0,2);
+  const map={'27':['Maharashtra','Nagpur','Nagpur','440001'],'29':['Karnataka','Bengaluru','Bengaluru Urban','560001'],'24':['Gujarat','Ahmedabad','Ahmedabad','380001'],'07':['Delhi','New Delhi','New Delhi','110001'],'09':['Uttar Pradesh','Noida','Gautam Buddha Nagar','201301']};
+  const x=map[code]||[gstStateName(code)||'State not mapped','City not mapped','District not mapped','000000'];
+  return { gstin:gstin, pan:gstin.slice(2,12), legalName:'Demo GST Taxpayer '+gstin.slice(2,7), tradeName:'Demo Trade Name', status:'ACTIVE', stateCode:code, state:x[0], city:x[1], district:x[2], pincode:x[3], principalAddress:'Demo principal place of business, '+x[1]+', '+x[0]+' - '+x[3] };
 }
-function normalizeGstProviderResponse(payload, gstin) {
-  let x = payload || {};
-  for (let i = 0; i < 6; i++) { const next = x && (x.normalizedProfile || x.profile || x.result || x.response || x.data); if (!next || next === x || typeof next !== 'object' || Array.isArray(next)) break; x = next; }
-  const a = x.principalPlace || x.principal_place || x.pradr || x.principalAddress || x.address || {};
-  const ad = a.addr || a;
-  const gstinValue = String(x.gstin || x.GSTIN || x.gstinNo || gstin || '').toUpperCase();
-  const stateCode = String(x.stateCode || x.state_code || x.stateCd || (/^\d{2}$/.test(String(x.stcd || '')) ? x.stcd : '') || (/^\d{2}/.test(gstinValue) ? gstinValue.slice(0, 2) : '')).padStart(2, '0');
-  const stateName = gstStateName(stateCode) || x.stateName || x.state || ad.state || '';
-  const address = typeof a === 'string' ? a : [ad.flno, ad.bno, ad.bnm, ad.building, ad.st, ad.street, ad.loc, ad.locality, ad.dst, ad.district, ad.state, ad.pncd, ad.pincode, ad.addressLine1, ad.addressLine2, ad.city].filter(Boolean).join(', ');
-  const pan = x.pan || x.PAN || x.panNo || (gstinValue.length === 15 ? gstinValue.slice(2, 12) : '');
-  return { legalName: x.legalName || x.legal_name || x.lgnm || x.legalNameOfBusiness || '', tradeName: x.tradeName || x.trade_name || x.tradeNam || '', pan: pan, state: stateName, stateCode: stateCode, city: x.city || ad.loc || ad.city || '', district: x.district || ad.dst || ad.district || '', pincode: x.pincode || x.pin || ad.pncd || ad.pincode || '', principalAddress: address, gstin: gstinValue, status: String(x.status || x.taxpayerStatus || x.sts || 'ACTIVE').toUpperCase() };
+function normalizeGstProviderResponse(payload, gstin){
+  let x=payload||{};
+  for(let i=0;i<6;i++){ const next=x&&(x.normalizedProfile||x.profile||x.result||x.response||x.data); if(!next||next===x||typeof next!=='object'||Array.isArray(next)) break; x=next; }
+  const a=x.principalPlace||x.principal_place||x.pradr||x.principalAddress||x.address||{};
+  const ad=a.addr||a;
+  const gstinValue=String(x.gstin||x.GSTIN||x.gstinNo||gstin||'').toUpperCase();
+  const stateCode=String(x.stateCode||x.state_code||x.stateCd||(/^\d{2}$/.test(String(x.stcd||''))?x.stcd:'')||(/^\d{2}/.test(gstinValue)?gstinValue.slice(0,2):'')).padStart(2,'0');
+  const stateName=gstStateName(stateCode)||x.stateName||x.state||ad.state||'';
+  const address=typeof a==='string'?a:[ad.flno,ad.bno,ad.bnm,ad.building,ad.st,ad.street,ad.loc,ad.locality,ad.dst,ad.district,ad.state,ad.pncd,ad.pincode,ad.addressLine1,ad.addressLine2,ad.city].filter(Boolean).join(', ');
+  const pan=x.pan||x.PAN||x.panNo||(gstinValue.length===15?gstinValue.slice(2,12):'');
+  return { legalName:x.legalName||x.legal_name||x.lgnm||x.legalNameOfBusiness||'', tradeName:x.tradeName||x.trade_name||x.tradeNam||'', pan:pan, state:stateName, stateCode:stateCode, city:x.city||ad.loc||ad.city||'', district:x.district||ad.dst||ad.district||'', pincode:x.pincode||x.pin||ad.pncd||ad.pincode||'', principalAddress:address, gstin:gstinValue, status:String(x.status||x.taxpayerStatus||x.sts||'ACTIVE').toUpperCase() };
 }
-function gstHasLiveApi(cfg) {
-  cfg = cfg || gstSettingsRead();
-  return !!(String(cfg.baseUrl || '').trim() || String(cfg.proxyEndpoint || '').trim());
+function gstHasLiveApi(cfg){
+  cfg=cfg||gstSettingsRead();
+  return !!(String(cfg.baseUrl||'').trim() || String(cfg.proxyEndpoint||'').trim());
 }
-function gstBuildLookupUrl(cfg, gstin) {
-  let path = cfg.lookupPath || '/v1/gstin/{gstin}';
-  let url = String(cfg.baseUrl || '').replace(/\/$/, '');
-  if (path.indexOf('{gstin}') > -1) url += (path.charAt(0) === '/' ? '' : '/') + path.replace('{gstin}', encodeURIComponent(gstin));
+function gstBuildLookupUrl(cfg, gstin){
+  let path=cfg.lookupPath||'/v1/gstin/{gstin}';
+  let url=String(cfg.baseUrl||'').replace(/\/$/,'');
+  if(path.indexOf('{gstin}')>-1) url+= (path.charAt(0)==='/'?'':'/') + path.replace('{gstin}',encodeURIComponent(gstin));
   else {
-    url += (path ? ((path.charAt(0) === '/' ? '' : '/') + path.replace(/^\//, '')) : '');
-    url += (url.indexOf('?') > -1 ? '&' : '?') + encodeURIComponent(cfg.queryParam || 'gstin') + '=' + encodeURIComponent(gstin);
+    url+= (path?((path.charAt(0)==='/'?'':'/')+path.replace(/^\//,'')):'');
+    url+=(url.indexOf('?')>-1?'&':'?')+encodeURIComponent(cfg.queryParam||'gstin')+'='+encodeURIComponent(gstin);
   }
   return url;
 }
-function gstAuthHeaders(cfg) {
-  const h = { 'Accept': 'application/json' };
-  const key = String(cfg.apiKey || '').trim();
-  if (!key || cfg.authType === 'none') return h;
-  if (cfg.authType === 'bearer') { h.Authorization = 'Bearer ' + key; return h; }
-  h['X-API-Key'] = key; h['apiKey'] = key; h['apikey'] = key;
+function gstAuthHeaders(cfg){
+  const h={'Accept':'application/json'};
+  const key=String(cfg.apiKey||'').trim();
+  if(!key || cfg.authType==='none') return h;
+  if(cfg.authType==='bearer'){ h.Authorization='Bearer '+key; return h; }
+  h['X-API-Key']=key; h['apiKey']=key; h['apikey']=key;
   return h;
 }
-async function gstFetchProfile(gstin) {
-  const cfg = gstSettingsRead(); const tog = gstToggles();
-  gstin = String(gstin || '').trim().toUpperCase();
-  if (!gstinValid(gstin)) throw new Error('Invalid GSTIN format or checksum');
-  if (tog.enabled === false) throw new Error('GST auto-fetch is disabled in GST API connection');
-  const live = gstHasLiveApi(cfg);
-  if (!live) {
-    return { profile: demoGstProfile(gstin), raw: { mode: 'demo', reason: 'No Base URL or proxy configured', gstin: gstin }, mode: 'demo' };
+async function gstFetchProfile(gstin){
+  const cfg=gstSettingsRead(); const tog=gstToggles();
+  gstin=String(gstin||'').trim().toUpperCase();
+  if(!gstinValid(gstin)) throw new Error('Invalid GSTIN format or checksum');
+  if(tog.enabled===false) throw new Error('GST auto-fetch is disabled in GST API connection');
+  const live=gstHasLiveApi(cfg);
+  if(!live){
+    return { profile: demoGstProfile(gstin), raw:{ mode:'demo', reason:'No Base URL or proxy configured', gstin:gstin }, mode:'demo' };
   }
-  const timeout = Math.max(1, Math.min(180, Number(cfg.timeout) || 30)) * 1000;
-  if (tog.proxy && cfg.proxyEndpoint) {
-    const c = new AbortController(), t = setTimeout(function () { c.abort(); }, timeout);
-    const r = await fetch(cfg.proxyEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gstin: gstin }), signal: c.signal });
+  const timeout=Math.max(1,Math.min(180, Number(cfg.timeout)||30))*1000;
+  if(tog.proxy && cfg.proxyEndpoint){
+    const c=new AbortController(), t=setTimeout(function(){c.abort();}, timeout);
+    const r=await fetch(cfg.proxyEndpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({gstin:gstin}), signal:c.signal });
     clearTimeout(t);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const raw = await r.json();
-    return { profile: normalizeGstProviderResponse(raw, gstin), raw: raw, mode: 'proxy' };
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const raw=await r.json();
+    return { profile: normalizeGstProviderResponse(raw,gstin), raw:raw, mode:'proxy' };
   }
-  const url = gstBuildLookupUrl(cfg, gstin);
-  const h = gstAuthHeaders(cfg);
-  const c = new AbortController(), t = setTimeout(function () { c.abort(); }, timeout);
-  const r = await fetch(url, { headers: h, signal: c.signal });
+  const url=gstBuildLookupUrl(cfg,gstin);
+  const h=gstAuthHeaders(cfg);
+  const c=new AbortController(), t=setTimeout(function(){c.abort();}, timeout);
+  const r=await fetch(url,{ headers:h, signal:c.signal });
   clearTimeout(t);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const raw = await r.json();
-  return { profile: normalizeGstProviderResponse(raw, gstin), raw: raw, mode: 'live' };
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const raw=await r.json();
+  return { profile: normalizeGstProviderResponse(raw,gstin), raw:raw, mode:'live' };
 }
 
 var obEditId = (typeof obEditId !== 'undefined') ? obEditId : null;
-var obListState = (typeof obListState !== 'undefined') ? obListState : { q: '', page: 1, size: 25 };
-function partnersDb() { if (!db.partners) db.partners = []; return db.partners; }
-function nextPartnerCode() {
-  const n = (partnersDb().length || 0) + 1;
-  return 'PRT-' + String(n).padStart(4, '0');
+var obListState = (typeof obListState !== 'undefined') ? obListState : { q:'', page:1, size:25 };
+function partnersDb(){ if(!db.partners) db.partners=[]; return db.partners; }
+function nextPartnerCode(){
+  const used={};
+  partnersDb().forEach(function(x){ used[String(x.code||'').trim().toUpperCase()]=true; });
+  let n=1, code='';
+  do { code='PRT-'+String(n++).padStart(4,'0'); } while (used[code]);
+  return code;
 }
-function obField(root, f) { const el = qs('[data-ob="' + f + '"]', root || document); return el ? (el.type === 'checkbox' ? el.checked : el.value) : ''; }
-function obSet(root, f, v) { const el = qs('[data-ob="' + f + '"]', root || document); if (!el) return; if (el.type === 'checkbox') el.checked = !!v; else el.value = v == null ? '' : v; }
-function obSearch(value) {
-  const input = value && value.nodeType ? value : null;
-  const text = input ? input.value : String(value || '');
-  const caret = input && typeof input.selectionStart === 'number' ? input.selectionStart : text.length;
-  obListState.q = text; obListState.page = 1; renderPartnerOnboarding();
-  setTimeout(function () {
-    const next = qs('.ob-filter-tools input');
-    if (!next) return;
+function obField(root,f){ const el=qs('[data-ob="'+f+'"]',root||document); return el?(el.type==='checkbox'?el.checked:el.value):''; }
+function obSet(root,f,v){ const el=qs('[data-ob="'+f+'"]',root||document); if(!el)return; if(el.type==='checkbox') el.checked=!!v; else el.value=v==null?'':v; }
+function obSearch(value){
+  const input=value && value.nodeType ? value : null;
+  const text=input ? input.value : String(value||'');
+  const caret=input && typeof input.selectionStart==='number' ? input.selectionStart : text.length;
+  obListState.q=text; obListState.page=1; renderPartnerOnboarding();
+  setTimeout(function(){
+    const next=qs('.ob-filter-tools input');
+    if(!next)return;
     next.focus();
-    try { next.setSelectionRange(caret, caret); } catch (e) { }
-  }, 0);
+    try{next.setSelectionRange(caret,caret);}catch(e){}
+  },0);
 }
-function obClearFilters() { obListState.q = ''; obListState.page = 1; renderPartnerOnboarding(); }
-function obRegUsed(gstin, partnerId) {
-  const key = String(gstin || '').trim().toUpperCase(); if (!key) return false;
-  const parties = (db.masters.parties || []).filter(function (p) { return String(p.gstNo || '').trim().toUpperCase() === key; });
-  if (parties.some(function (p) { return p.partnerId !== partnerId; })) return true;
-  const names = {};
-  parties.forEach(function (p) { [p.name, p.legalName, p.tradeName, p.shortName].forEach(function (v) { const n = String(v || '').trim().toLowerCase(); if (n) names[n] = true; }); });
-  if (!Object.keys(names).length) return false;
-  const used = function (v) { return !!names[String(v || '').trim().toLowerCase()]; };
-  return (db.po || []).some(function (r) { return used(r.supplier) || used(r.supplierTrade) || used(r.shipTo) || used(r.buyer); }) ||
-    (db.inward || []).some(function (r) { return used(r.supplier) || used(r.supplierTrade); }) ||
-    (db.jobwork || []).some(function (r) { return used(r.vendor); }) ||
-    (db.sample || []).some(function (r) { return used(r.vendor); }) ||
-    (db.sale || []).some(function (r) { return used(r.customer) || used(r.party); }) ||
-    (db.purchasereturn || []).some(function (r) { return used(r.supplier) || used(r.party); });
+function obClearFilters(){ obListState.q=''; obListState.page=1; renderPartnerOnboarding(); }
+function obRegUsed(gstin, partnerId){
+  const key=String(gstin||'').trim().toUpperCase(); if(!key) return false;
+  const parties=(db.masters.parties||[]).filter(function(p){return String(p.gstNo||'').trim().toUpperCase()===key;});
+  if(parties.some(function(p){return p.partnerId!==partnerId;})) return true;
+  const names={};
+  parties.forEach(function(p){[p.name,p.legalName,p.tradeName,p.shortName].forEach(function(v){const n=String(v||'').trim().toLowerCase();if(n)names[n]=true;});});
+  if(!Object.keys(names).length) return false;
+  const used=function(v){return !!names[String(v||'').trim().toLowerCase()];};
+  return (db.po||[]).some(function(r){return used(r.supplier)||used(r.supplierTrade)||used(r.shipTo)||used(r.buyer);}) ||
+    (db.inward||[]).some(function(r){return used(r.supplier)||used(r.supplierTrade);}) ||
+    (db.jobwork||[]).some(function(r){return used(r.vendor);}) ||
+    (db.sample||[]).some(function(r){return used(r.vendor);}) ||
+    (db.sale||[]).some(function(r){return used(r.customer)||used(r.party);}) ||
+    (db.purchasereturn||[]).some(function(r){return used(r.supplier)||used(r.party);});
 }
-function obDuplicateExists(displayName, registrations, currentId) {
-  const nameKey = String(displayName || '').trim().toLowerCase();
-  const gstKeys = (registrations || []).map(function (r) { return String(r.gstin || '').trim().toUpperCase(); }).filter(Boolean);
-  return partnersDb().some(function (p) {
-    if (currentId && p.id === currentId) return false;
-    if (nameKey && String(p.displayName || '').trim().toLowerCase() === nameKey) return true;
-    return false;
+function obDuplicateExists(displayName, registrations, currentId){
+  const nameKey=String(displayName||'').trim().toLowerCase();
+  const gstKeys=(registrations||[]).map(function(r){return String(r.gstin||'').trim().toUpperCase();}).filter(Boolean);
+  return partnersDb().some(function(p){
+    if (currentId && p.id===currentId) return false;
+    if (nameKey && String(p.displayName||'').trim().toLowerCase()===nameKey) return true;
+    return (p.registrations||[]).some(function(r){return gstKeys.indexOf(String(r.gstin||'').trim().toUpperCase())>-1;});
   });
 }
-function obPartnerUsed(partner) {
-  return (partner && partner.registrations || []).some(function (r) { return obRegUsed(r.gstin, partner.id); });
+function obPartnerUsed(partner){
+  return (partner && partner.registrations||[]).some(function(r){return obRegUsed(r.gstin, partner.id);});
 }
 
-function renderPartnerOnboarding() {
-  const list = partnersDb();
-  if (obEditId === 'new' || (obEditId && list.some(function (x) { return x.id === obEditId; }))) {
-    renderPartnerForm(obEditId === 'new' ? null : list.find(function (x) { return x.id === obEditId; }));
+function renderPartnerOnboarding(){
+  if(!obListState) obListState={q:'',page:1,size:25};
+  const list=partnersDb();
+  if(obEditId==='new' || (obEditId && list.some(function(x){return x.id===obEditId;}))){
+    renderPartnerForm(obEditId==='new'?null:list.find(function(x){return x.id===obEditId;}));
     return;
   }
-  $('tb-title').textContent = 'Partner onboarding';
-  $('tb-sub').textContent = 'Onboard buyer and vendor accounts with GSTIN auto-fetch';
-  const rows = list.slice().reverse().map(function (p) {
-    const roles = (p.roles || []).join(', ') || '—';
-    const gst = ((p.registrations || [])[0] || {}).gstin || '—';
-    return '<tr><td><b>' + esc(p.code || '') + '</b></td><td>' + esc(p.displayName || '') + '</td><td>' + esc(roles) + '</td><td>' + esc(gst) + '</td><td>' + esc(p.status || 'Draft') + '</td>' +
-      '<td class="actions-cell no-print" onclick="event.stopPropagation()">' +
-      '<button class="btn-icon" title="Edit" onclick="obEditPartner(\'' + p.id + '\')">' + ic('pencil', 15) + '</button>' +
-      '<button class="btn-icon danger" title="Delete" onclick="obDeletePartner(\'' + p.id + '\')">' + ic('trash', 15) + '</button>' +
+  $('tb-title').textContent='Partner onboarding';
+  $('tb-sub').textContent='Onboard buyer and vendor accounts with GSTIN auto-fetch';
+  const canAddPartner = typeof userCan !== 'function' || userCan('partneronboarding', 'create');
+  if($('tb-actions')) $('tb-actions').innerHTML = canAddPartner ? '<button class="btn btn-primary" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>' : '';
+  const query=String(obListState.q||'').trim().toLowerCase();
+  const filtered=list.slice().reverse().filter(function(p){
+    if(!query) return true;
+    return [p.code,p.displayName,p.shortName].concat((p.registrations||[]).map(function(r){return r.gstin||'';})).join(' ').toLowerCase().indexOf(query)>-1;
+  });
+  const total=filtered.length, pages=Math.max(1,Math.ceil(total/(obListState.size||25)));
+  obListState.page=Math.min(Math.max(1,obListState.page||1),pages);
+  const visible=filtered.slice((obListState.page-1)*obListState.size,obListState.page*obListState.size);
+  const rows=visible.map(function(p){
+    const used=obPartnerUsed(p);
+    const roles=(p.roles||[]).map(function(r){
+      if(r==='JOB_WORKER'||r==='SUPPLIER') return 'Supplier';
+      if(r==='VENDOR') return 'Vendor';
+      if(r==='BUYER') return 'Buyer';
+      return r;
+    }).join(', ')||'ΓÇö';
+    const gst=((p.registrations||[])[0]||{}).gstin||'ΓÇö';
+    return '<tr><td><b>'+esc(p.code||'')+'</b></td><td>'+esc(p.displayName||'')+'</td><td>'+esc(roles)+'</td><td>'+esc(gst)+'</td><td>'+esc(p.status||'Draft')+'</td>'+
+      '<td class="actions-cell no-print" onclick="event.stopPropagation()">'+
+        '<button class="btn-icon" title="Edit" onclick="obEditPartner(\''+p.id+'\')">'+ic('pencil',15)+'</button>'+
+        '<button class="btn-icon danger" title="'+(used?'Cannot delete ΓÇö partner is used in transactions':'Delete')+'" '+(used?'disabled':'onclick="obDeletePartner(\''+p.id+'\')"')+'>'+ic('trash',15)+'</button>'+ 
       '</td></tr>';
-  }).join('') || '<tr><td colspan="6"><div class="empty"><h3>No partners yet</h3><p>Create a partner and verify GSTIN to auto-fetch legal name, trade name and address.</p></div></td></tr>';
-  $('content').innerHTML = '<div class="ob-wrap"><div class="ob-notice"><div>ⓘ</div><div><strong>GST auto-fetch</strong> Enter a 15-character GSTIN and click Verify (or type all 15 digits). Data is pulled from the provider configured in <a href="#" onclick="go(\'gstapi\');return false">GST API connection</a>.</div></div><div class="panel list-panel"><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
+  }).join('') || ('<tr><td colspan="6"><div class="empty"><h3>No partners found</h3><p>Create a partner or change the search text.</p>' + (canAddPartner ? '<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="obNewPartner()">' + ic('plus',14) + 'New partner</button></div>' : '') + '</div></td></tr>');
+  const pg={page:obListState.page,pages:pages,size:obListState.size,total:total,from:total?(obListState.page-1)*obListState.size+1:0,to:Math.min(obListState.page*obListState.size,total)};
+  $('content').innerHTML='<div class="ob-wrap"><div class="panel list-panel"><div class="mtools ob-filter-tools"><div class="search msearch">'+ic('search',16)+'<input class="inp" placeholder="Search partner, GSTIN or code" value="'+esc(obListState.q)+'" oninput="obSearch(this)"></div><span class="rowcount" id="ob-count">'+filtered.length+' of '+list.length+'</span><button class="btn btn-ghost btn-sm" id="ob-clear-filters" onclick="obClearFilters()"'+(obListState.q?'':' disabled')+'>Clear filters</button></div><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+pagerBar(pg,'ob','partners')+'</div></div>';
 }
 
-function obDeletePartner(id) {
-  const rec = partnersDb().find(function (x) { return x.id === id; });
-  if (!rec) return;
-  const goDel = function () {
-    fetch('api/modules/partneronboarding.php?id=' + encodeURIComponent(id), { method: 'DELETE' })
-      .then(res => res.json())
-      .then(res => {
-        if (!res.ok) throw new Error(res.error || 'Server error');
-        if (db.masters && db.masters.parties) {
-          db.masters.parties = db.masters.parties.filter(function (x) { return x.id !== id; });
-        }
-        toast((rec.code || rec.displayName || 'Partner') + ' deleted', 'green');
-        obEditId = null; renderPartnerOnboarding();
-      })
-      .catch(err => {
-        toast(err.message, 'red');
-      });
+function obDeletePartner(id){
+  const rec=partnersDb().find(function(x){return x.id===id;});
+  if(!rec) return;
+  if(obPartnerUsed(rec)) return toast('Cannot delete ΓÇö this partner is used in transactions','red');
+  const goDel=function(){
+    db.partners=partnersDb().filter(function(x){return x.id!==id;});
+    if(db.masters&&db.masters.parties){
+      db.masters.parties=db.masters.parties.filter(function(x){return x.partnerId!==id;});
+    }
+    saveDB();
+    toast((rec.code||rec.displayName||'Partner')+' deleted','green');
+    obEditId=null; render();
   };
-  if (typeof confirmDelete === 'function') {
-    confirmDelete({ kind: 'partner', name: rec.displayName || rec.code || 'this partner', confirmText: 'Delete permanently' }, goDel);
-  } else if (confirm('Delete ' + (rec.displayName || rec.code) + '?')) goDel();
+  if(typeof confirmDelete==='function'){
+    confirmDelete({kind:'partner', name:rec.displayName||rec.code||'this partner', confirmText:'Delete permanently'}, goDel);
+  } else if(confirm('Delete '+(rec.displayName||rec.code)+'?')) goDel();
 }
-function obNewPartner() { obEditId = 'new'; render(); }
-function obEditPartner(id) { obEditId = id; render(); }
-function obBackList() { obEditId = null; render(); }
+function obNewPartner(){ obEditId='new'; render(); }
+function obEditPartner(id){ obEditId=id; render(); }
+function obBackList(){ obEditId=null; render(); }
 
-function obRegHtml(r, i) {
-  r = r || {};
-  return '<div class="ob-repeat" data-ob-reg>' +
-    '<div class="ob-repeat-h"><div><b>GST registration</b> <span class="ob-badge">GSTIN ' + (i + 1) + '</span></div>' +
-    '<button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-reg]\').remove();obUpdateSummary()">×</button></div>' +
-    '<div class="grid-fixed">' +
-    field('GSTIN *', '<div class="ob-inline"><input class="inp ob-gstin" data-ob="gstin" maxlength="15" value="' + esc(r.gstin || '') + '" placeholder="27ABCDE1234F1Z5" oninput="obGstinTyped(this)"><button type="button" class="btn btn-ghost btn-sm" onclick="obVerifyGstin(this)">Verify</button></div><div class="ob-ver" data-ob-ver></div>') +
-    field('PAN', '<input class="inp" data-ob="pan" maxlength="10" value="' + esc(r.pan || '') + '" placeholder="Auto from GSTIN" disabled title="Auto-filled from GSTIN">') +
-    field('State / GST state code *', '<input class="inp" data-ob="state" value="' + esc(r.state || '') + '" placeholder="Maharashtra / 27">') +
-    field('GST legal name *', '<input class="inp" data-ob="legalName" value="' + esc(r.legalName || '') + '" placeholder="Fetched from GST provider">') +
-    field('Trade name *', '<input class="inp" data-ob="tradeName" value="' + esc(r.tradeName || '') + '" placeholder="Brand / trade name">') +
-    '</div>' +
-    '<div class="grid-fixed" style="margin-top:8px">' +
-    field('City *', '<input class="inp" data-ob="city" value="' + esc(r.city || '') + '">') +
-    field('District *', '<input class="inp" data-ob="district" value="' + esc(r.district || '') + '">') +
-    field('State *', '<input class="inp" data-ob="placeState" value="' + esc(r.placeState || '') + '">') +
-    field('PIN code *', '<input class="inp" data-ob="pincode" maxlength="6" value="' + esc(r.pincode || '') + '">') +
-    '</div>' +
-    '<div class="ob-mini">Principal place of business</div>' +
-    '<div class="grid-fixed">' + field('Full GST address *', '<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address">' + esc(r.principalAddress || '') + '</textarea>') + '</div></div>';
+function obRegHtml(r,i){
+  r=r||{};
+  const locked=obRegUsed(r.gstin, obEditId && obEditId!=='new' ? obEditId : '');
+  const disabled=locked?' disabled':'';
+  return '<div class="ob-repeat" data-ob-reg>'+
+    '<div class="ob-repeat-h"><div><b>GST registration</b> <span class="ob-badge">GSTIN '+(i+1)+'</span></div>'+
+    (locked?'<span class="ob-badge">Used</span>':'<button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-reg]\').remove();obUpdateSummary()">├ù</button>')+'</div>'+ 
+    '<div class="grid-fixed">'+
+      field('GSTIN *','<div class="ob-inline"><input class="inp ob-gstin" data-ob="gstin" maxlength="15" value="'+esc(r.gstin||'')+'" placeholder="27ABCDE1234F1Z5" oninput="obGstinTyped(this)"'+disabled+'><button type="button" class="btn btn-ghost btn-sm" onclick="obVerifyGstin(this)"'+disabled+'>Verify</button></div><div class="ob-ver" data-ob-ver></div>')+
+      field('PAN','<input class="inp" data-ob="pan" maxlength="10" value="'+esc(r.pan||'')+'" placeholder="Auto from GSTIN" disabled title="Auto-filled from GSTIN">')+
+      field('State / GST state code *','<input class="inp" data-ob="state" value="'+esc(r.state||'')+'" placeholder="Maharashtra / 27"'+disabled+'>')+
+      field('GST legal name *','<input class="inp" data-ob="legalName" value="'+esc(r.legalName||'')+'" placeholder="Fetched from GST provider"'+disabled+'>')+
+      field('Trade name *','<input class="inp" data-ob="tradeName" value="'+esc(r.tradeName||'')+'" placeholder="Brand / trade name"'+disabled+'>')+
+    '</div>'+
+    '<div class="grid-fixed" style="margin-top:8px">'+
+      field('City *','<input class="inp" data-ob="city" value="'+esc(r.city||'')+'"'+disabled+'>')+
+      field('District','<input class="inp" data-ob="district" value="'+esc(r.district||'')+'"'+disabled+'>')+
+      field('State *','<input class="inp" data-ob="placeState" value="'+esc(r.placeState||'')+'"'+disabled+'>')+
+      field('PIN code *','<input class="inp" data-ob="pincode" maxlength="6" value="'+esc(r.pincode||'')+'"'+disabled+'>')+
+    '</div>'+
+    '<div class="ob-mini">Principal place of business</div>'+
+    '<div class="grid-fixed wide-last">'+field('Full GST address','<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address"'+disabled+'>'+esc(r.principalAddress||'')+'</textarea>')+'</div></div>';
 }
-function obToggleBrand(btn) {
-  const box = btn.closest('[data-ob-brand]'); if (!box) return;
-  const hid = qs('[data-ob="status"]', box);
-  const on = !(hid && hid.value === 'ACTIVE');
-  if (hid) hid.value = on ? 'ACTIVE' : 'INACTIVE';
-  btn.classList.toggle('on', on);
-  const lab = qs('[data-ob-stlbl]', box); if (lab) lab.textContent = on ? 'Active' : 'Inactive';
+function obToggleBrand(btn){
+  const box=btn.closest('[data-ob-brand]'); if(!box) return;
+  const hid=qs('[data-ob="status"]',box);
+  const on=!(hid&&hid.value==='ACTIVE');
+  if(hid) hid.value=on?'ACTIVE':'INACTIVE';
+  btn.classList.toggle('on',on);
+  const lab=qs('[data-ob-stlbl]',box); if(lab) lab.textContent=on?'Active':'Inactive';
 }
-function obBrandHtml(b, i) {
-  b = b || {};
-  return '<div class="ob-repeat" data-ob-brand><div class="ob-repeat-h"><div><b>Brand ' + (i + 1) + '</b></div><button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-brand]\').remove();obUpdateSummary()">×</button></div><div class="grid-fixed">' +
-    field('Brand name *', '<input class="inp" data-ob="brandName" value="' + esc(b.brandName || '') + '" placeholder="e.g. UrbanLine">') +
-    field('Status', '<input type="hidden" data-ob="status" value="' + (b.status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE') + '"><button type="button" class="gst-sw' + (b.status === 'INACTIVE' ? '' : ' on') + '" title="Active / Inactive" onclick="obToggleBrand(this)"><span></span></button><div class="fhint" data-ob-stlbl>' + (b.status === 'INACTIVE' ? 'Inactive' : 'Active') + '</div>') +
+function obBrandHtml(b,i){
+  b=b||{};
+  return '<div class="ob-repeat" data-ob-brand><div class="ob-repeat-h"><div><b>Brand '+(i+1)+'</b></div><button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-brand]\').remove();obUpdateSummary()">├ù</button></div><div class="grid-fixed">'+
+    field('Brand name *','<input class="inp" data-ob="brandName" value="'+esc(b.brandName||'')+'" placeholder="e.g. UrbanLine">')+
+    field('Status','<input type="hidden" data-ob="status" value="'+(b.status==='INACTIVE'?'INACTIVE':'ACTIVE')+'"><button type="button" class="gst-sw'+(b.status==='INACTIVE'?'':' on')+'" title="Active / Inactive" onclick="obToggleBrand(this)"><span></span></button><div class="fhint" data-ob-stlbl>'+(b.status==='INACTIVE'?'Inactive':'Active')+'</div>')+
     '</div></div>';
 }
-function obContactHtml(c, i) {
-  c = c || {};
-  return '<div class="ob-repeat" data-ob-contact><div class="ob-repeat-h"><div><b>Contact ' + (i + 1) + '</b></div><button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-contact]\').remove();obUpdateSummary()">×</button></div><div class="grid-fixed">' +
-    field('Name', '<input class="inp" data-ob="name" value="' + esc(c.name || '') + '">') +
-    field('Mobile', '<input class="inp" data-ob="mobile" value="' + esc(c.mobile || '') + '" placeholder="+91 ...">') +
-    field('Email', '<input class="inp" data-ob="email" value="' + esc(c.email || '') + '" placeholder="name@company.com">') +
+function obContactHtml(c,i){
+  c=c||{};
+  return '<div class="ob-repeat" data-ob-contact><div class="ob-repeat-h"><div><b>Contact '+(i+1)+'</b></div><button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-contact]\').remove();obUpdateSummary()">├ù</button></div><div class="grid-fixed">'+
+    field('Name','<input class="inp" data-ob="name" value="'+esc(c.name||'')+'">')+
+    field('Mobile','<input class="inp" data-ob="mobile" value="'+esc(c.mobile||'')+'" placeholder="+91 ...">')+
+    field('Email','<input class="inp" data-ob="email" value="'+esc(c.email||'')+'" placeholder="name@company.com">')+
     '</div></div>';
 }
-function obTogglePartnerStatus(btn) {
-  const hid = $('ob-status');
-  const on = !(hid && hid.value === 'Active');
-  if (hid) hid.value = on ? 'Active' : 'Inactive';
-  btn.classList.toggle('on', on);
-  const lab = $('ob-status-lbl'); if (lab) lab.textContent = on ? 'Active' : 'Inactive';
+function obTogglePartnerStatus(btn){
+  const hid=$('ob-status');
+  const on=!(hid&&hid.value==='Active');
+  if(hid) hid.value=on?'Active':'Inactive';
+  btn.classList.toggle('on',on);
+  const lab=$('ob-status-lbl'); if(lab) lab.textContent=on?'Active':'Inactive';
 }
-function renderPartnerForm(rec) {
-  rec = rec || {};
-  $('tb-title').textContent = rec.id ? 'Edit partner' : 'New partner';
-  $('tb-sub').textContent = 'GSTIN verify auto-fills legal name, trade name, PAN and address';
-  $('tb-actions').innerHTML = '<button class="btn btn-ghost" onclick="obBackList()">' + ic('back', 16) + 'Back</button><button class="btn btn-primary" onclick="obSubmitPartner()">Save partner</button>';
-  const roles = rec.roles || [];
-  const regs = rec.registrations && rec.registrations.length ? rec.registrations : [{}];
-  const brands = rec.brands && rec.brands.length ? rec.brands : [{}];
-  const contacts = rec.contacts && rec.contacts.length ? rec.contacts : [{}];
-  $('content').innerHTML = '<div class="ob-wrap"><div>' +
-    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">01</span><h3 style="margin:0">Partner account</h3></div><p class="ob-help">One commercial account even if the partner has several brands or GSTINs.</p></div></div>' +
-    '<div class="grid-fixed">' + field('Account / group name *', '<input class="inp" id="ob-name" value="' + esc(rec.displayName || '') + '" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()">') + field('Short name *', '<input class="inp" id="ob-short" value="' + esc(rec.shortName || '') + '" placeholder="e.g. ABC Retail">') +
-    '<div class="field" id="ob-biztype" style="max-width:none"><label class="lbl">Business Type *</label><div class="ob-check">' +
-    [['BUYER', 'Buyer'], ['VENDOR', 'Vendor'], ['JOB_WORKER', 'Job worker']].map(function (r) { return '<label><input type="checkbox" data-ob-role="' + r[0] + '"' + (roles.indexOf(r[0]) > -1 ? ' checked' : '') + ' onchange="obUpdateSummary()"> ' + r[1] + '</label>'; }).join('') +
-    '</div></div>' +
-    '<div class="field" id="ob-pstatus"><label class="lbl">Vendor / Buyer Status *</label>' +
-    '<input type="hidden" id="ob-status" value="' + esc((rec.status === 'Inactive' || rec.status === 'INACTIVE') ? 'Inactive' : 'Active') + '">' +
-    '<button type="button" class="gst-sw' + ((rec.status === 'Inactive' || rec.status === 'INACTIVE') ? '' : ' on') + '" title="Active / Inactive" onclick="obTogglePartnerStatus(this)"><span></span></button>' +
-    '<div class="fhint" id="ob-status-lbl">' + ((rec.status === 'Inactive' || rec.status === 'INACTIVE') ? 'Inactive' : 'Active') + '</div></div></div>' +
-    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">02</span><h3 style="margin:0">GST registrations</h3></div><p class="ob-help">Verify GSTIN to auto-fetch taxpayer data from the configured API provider.</p></div><button type="button" class="btn btn-primary btn-sm" onclick="obAddReg()">＋ Add GSTIN</button></div><div id="ob-regs">' + regs.map(obRegHtml).join('') + '</div></div>' +
-    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">03</span><h3 style="margin:0">Brands</h3></div><p class="ob-help">Brands can be shared across GST registrations.</p></div><button type="button" class="btn btn-primary btn-sm" onclick="obAddBrand()">＋ Add brand</button></div><div id="ob-brands">' + brands.map(obBrandHtml).join('') + '</div></div>' +
-    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">04</span><h3 style="margin:0">Contacts</h3></div><p class="ob-help">Accounts, merchandising, logistics and payment contacts.</p></div><button type="button" class="btn btn-primary btn-sm" onclick="obAddContact()">＋ Add contact</button></div><div id="ob-contacts">' + contacts.map(obContactHtml).join('') + '</div></div>' +
-    '<div class="ob-foot"><span class="muted" id="ob-foot">Complete required fields and save</span><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="obBackList()">Cancel</button><button class="btn btn-primary" onclick="obSubmitPartner()">Submit</button></div></div>' +
+function renderPartnerForm(rec){
+  rec=rec||{};
+  $('tb-title').textContent=rec.id?'Edit partner':'New partner';
+  $('tb-sub').textContent='GSTIN verify auto-fills legal name, trade name, PAN and address';
+  $('tb-actions').innerHTML='<button class="btn btn-ghost" onclick="obBackList()">'+ic('back',16)+'Back</button><button class="btn btn-primary" onclick="obSubmitPartner()">Save partner</button>';
+  const roles=rec.roles||[];
+  const regs=rec.registrations&&rec.registrations.length?rec.registrations:[{}];
+  const brands=rec.brands&&rec.brands.length?rec.brands:[{}];
+  const contacts=rec.contacts&&rec.contacts.length?rec.contacts:[{}];
+  $('content').innerHTML='<div class="ob-wrap"><div>'+
+    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">01</span><h3 style="margin:0">Partner account</h3></div><p class="ob-help">One commercial account even if the partner has several brands or GSTINs.</p></div></div>'+
+    '<div class="grid-fixed ob-account-grid" style="display:flex;flex-wrap:wrap;gap:0 18px;align-items:flex-start">'+field('Account / group name *','<input class="inp" id="ob-name" value="'+esc(rec.displayName||'')+'" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()"'+(rec.id?' disabled title="Group name cannot be changed after saving"':'')+'>','ob-account-field')+field('Short name *','<input class="inp" id="ob-short" value="'+esc(rec.shortName||'')+'" placeholder="e.g. ABC Retail">','ob-account-field')+
+    '<div class="field" id="ob-biztype" style="max-width:none;min-width:max-content;flex-shrink:0"><label class="lbl">Business Type *</label><div class="ob-check" style="display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap">'+
+      [['BUYER','Buyer'],['VENDOR','Vendor'],['SUPPLIER','Supplier']].map(function(r){
+        const checked = roles.indexOf(r[0])>-1 || (r[0]==='SUPPLIER' && roles.indexOf('JOB_WORKER')>-1);
+        return '<label style="white-space:nowrap;flex-shrink:0"><input type="checkbox" data-ob-role="'+r[0]+'"'+(checked?' checked':'')+' onchange="obUpdateSummary()"> '+r[1]+'</label>';
+      }).join('')+
+    '</div></div>'+
+    '<div class="field" id="ob-pstatus" style="flex-shrink:0"><label class="lbl">Vendor / Buyer Status *</label>'+
+      '<input type="hidden" id="ob-status" value="'+esc((rec.status==='Inactive'||rec.status==='INACTIVE')?'Inactive':'Active')+'">'+
+      '<button type="button" class="gst-sw'+((rec.status==='Inactive'||rec.status==='INACTIVE')?'':' on')+'" title="Active / Inactive" onclick="obTogglePartnerStatus(this)"><span></span></button>'+
+      '<div class="fhint" id="ob-status-lbl">'+((rec.status==='Inactive'||rec.status==='INACTIVE')?'Inactive':'Active')+'</div></div></div>'+
+    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">02</span><h3 style="margin:0">GST registrations</h3></div><p class="ob-help">Verify GSTIN to auto-fetch taxpayer data from the configured API provider.</p></div><button type="button" class="btn btn-primary btn-sm" onclick="obAddReg()">∩╝ï Add GSTIN</button></div><div id="ob-regs">'+regs.map(obRegHtml).join('')+'</div></div>'+
+    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">03</span><h3 style="margin:0">Brands</h3></div><p class="ob-help">Brands can be shared across GST registrations.</p></div><button type="button" class="btn btn-primary btn-sm" onclick="obAddBrand()">∩╝ï Add brand</button></div><div id="ob-brands">'+brands.map(obBrandHtml).join('')+'</div></div>'+
+    '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">04</span><h3 style="margin:0">Contacts</h3></div><p class="ob-help">Accounts, merchandising, logistics and payment contacts.</p></div><button type="button" class="btn btn-primary btn-sm" onclick="obAddContact()">∩╝ï Add contact</button></div><div id="ob-contacts">'+contacts.map(obContactHtml).join('')+'</div></div>'+
+    '<div class="ob-foot"><span class="muted" id="ob-foot">Complete required fields and save</span><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="obBackList()">Cancel</button><button class="btn btn-primary" onclick="obSubmitPartner()">Submit</button></div></div>'+
     '</div></div></div>';
   obUpdateSummary();
 }
-function obAddReg() { const h = $('ob-regs'); if (!h) return; h.insertAdjacentHTML('beforeend', obRegHtml({}, qsa('[data-ob-reg]', h).length)); obUpdateSummary(); }
-function obAddBrand() { const h = $('ob-brands'); if (!h) return; h.insertAdjacentHTML('beforeend', obBrandHtml({}, qsa('[data-ob-brand]', h).length)); obUpdateSummary(); }
-function obAddContact() { const h = $('ob-contacts'); if (!h) return; h.insertAdjacentHTML('beforeend', obContactHtml({}, qsa('[data-ob-contact]', h).length)); obUpdateSummary(); }
-function obCardData(sel) {
-  return qsa(sel).map(function (card) {
-    const o = {};
-    qsa('[data-ob]', card).forEach(function (el) { o[el.getAttribute('data-ob')] = el.type === 'checkbox' ? el.checked : el.value; });
+function obAddReg(){ const h=$('ob-regs'); if(!h)return; h.insertAdjacentHTML('beforeend', obRegHtml({}, qsa('[data-ob-reg]',h).length)); obUpdateSummary(); }
+function obAddBrand(){ const h=$('ob-brands'); if(!h)return; h.insertAdjacentHTML('beforeend', obBrandHtml({}, qsa('[data-ob-brand]',h).length)); obUpdateSummary(); }
+function obAddContact(){ const h=$('ob-contacts'); if(!h)return; h.insertAdjacentHTML('beforeend', obContactHtml({}, qsa('[data-ob-contact]',h).length)); obUpdateSummary(); }
+function obCardData(sel){
+  return qsa(sel).map(function(card){
+    const o={};
+    qsa('[data-ob]',card).forEach(function(el){ o[el.getAttribute('data-ob')]=el.type==='checkbox'?el.checked:el.value; });
     return o;
   });
 }
-function obUpdateSummary() {
-  const roles = qsa('[data-ob-role]:checked').length;
-  const regs = qsa('[data-ob-reg]').length, brands = qsa('[data-ob-brand]').length, contacts = qsa('[data-ob-contact]').length;
-  if ($('ob-sum-roles')) $('ob-sum-roles').textContent = roles;
-  if ($('ob-sum-regs')) $('ob-sum-regs').textContent = regs;
-  if ($('ob-sum-brands')) $('ob-sum-brands').textContent = brands;
-  if ($('ob-sum-contacts')) $('ob-sum-contacts').textContent = contacts;
-  const name = (($('ob-name') || {}).value || '').trim();
-  const gstOk = qsa('[data-ob-reg] [data-ob="gstin"]').some(function (el) { return gstinValid(el.value); });
-  const pct = Math.round([name, roles, regs, gstOk].filter(Boolean).length / 4 * 100);
-  if ($('ob-sum-pct')) $('ob-sum-pct').textContent = pct + '%';
-  if ($('ob-sum-bar')) $('ob-sum-bar').style.width = pct + '%';
+function obUpdateSummary(){
+  const roles=qsa('[data-ob-role]:checked').length;
+  const regs=qsa('[data-ob-reg]').length, brands=qsa('[data-ob-brand]').length, contacts=qsa('[data-ob-contact]').length;
+  if($('ob-sum-roles')) $('ob-sum-roles').textContent=roles;
+  if($('ob-sum-regs')) $('ob-sum-regs').textContent=regs;
+  if($('ob-sum-brands')) $('ob-sum-brands').textContent=brands;
+  if($('ob-sum-contacts')) $('ob-sum-contacts').textContent=contacts;
+  const name=(($('ob-name')||{}).value||'').trim();
+  const gstOk=qsa('[data-ob-reg] [data-ob="gstin"]').some(function(el){return gstinValid(el.value);});
+  const pct=Math.round([name,roles,regs,gstOk].filter(Boolean).length/4*100);
+  if($('ob-sum-pct')) $('ob-sum-pct').textContent=pct+'%';
+  if($('ob-sum-bar')) $('ob-sum-bar').style.width=pct+'%';
 }
-function obApplyProfile(card, p) {
-  if (!card || !p) return;
-  const derived = obPanFromGstin(obField(card, 'gstin'));
-  obSet(card, 'pan', derived || p.pan || '');
-  const panEl = qs('[data-ob="pan"]', card); if (panEl) panEl.disabled = true;
-  if (p.legalName) obSet(card, 'legalName', p.legalName);
-  if (p.tradeName) obSet(card, 'tradeName', p.tradeName);
-  if (p.state || p.stateCode) obSet(card, 'state', [p.state, p.stateCode].filter(Boolean).join(' / '));
-  if (p.state) obSet(card, 'placeState', p.state);
-  if (p.principalAddress) obSet(card, 'principalAddress', p.principalAddress);
-  if (p.city) obSet(card, 'city', p.city);
-  if (p.district) obSet(card, 'district', p.district);
-  if (p.pincode) obSet(card, 'pincode', p.pincode);
-  const name = $('ob-name');
-  if (name && !String(name.value || '').trim() && (p.tradeName || p.legalName)) name.value = p.tradeName || p.legalName;
+function obApplyProfile(card, p){
+  if(!card||!p) return;
+  const derived=obPanFromGstin(obField(card,'gstin'));
+  obSet(card,'pan', derived || p.pan || '');
+  const panEl=qs('[data-ob="pan"]',card); if(panEl) panEl.disabled=true;
+  if(p.legalName) obSet(card,'legalName',p.legalName);
+  if(p.tradeName) obSet(card,'tradeName',p.tradeName);
+  if(p.state||p.stateCode) obSet(card,'state',[p.state,p.stateCode].filter(Boolean).join(' / '));
+  if(p.state) obSet(card,'placeState',p.state);
+  if(p.principalAddress) obSet(card,'principalAddress',p.principalAddress);
+  if(p.city) obSet(card,'city',p.city);
+  if(p.district) obSet(card,'district',p.district);
+  if(p.pincode) obSet(card,'pincode',p.pincode);
+  const name=$('ob-name');
+  if(name && !String(name.value||'').trim() && (p.tradeName||p.legalName)) name.value=p.tradeName||p.legalName;
 }
-async function obVerifyGstin(btn) {
-  const card = btn && btn.closest('[data-ob-reg]'); if (!card) return;
-  const inp = qs('[data-ob="gstin"]', card), ver = qs('[data-ob-ver]', card);
-  const gstin = String((inp && inp.value) || '').trim().toUpperCase();
-  if (inp) inp.value = gstin;
+async function obVerifyGstin(btn){
+  const card=btn&&btn.closest('[data-ob-reg]'); if(!card) return;
+  const inp=qs('[data-ob="gstin"]',card), ver=qs('[data-ob-ver]',card);
+  const gstin=String((inp&&inp.value)||'').trim().toUpperCase();
+  if(inp) inp.value=gstin;
   obFillPanFromGstin(card);
-  if (!gstinValid(gstin)) { if (ver) { ver.className = 'ob-ver err'; ver.textContent = 'Invalid GSTIN format or checksum.'; } return; }
-  if (ver) { ver.className = 'ob-ver warn'; ver.textContent = 'Fetching GST profile…'; }
-  try {
-    const res = await gstFetchProfile(gstin);
-    const tog = gstToggles();
-    if (tog.autofill !== false) obApplyProfile(card, res.profile);
-    if (ver) { ver.className = 'ob-ver ok'; ver.textContent = (res.mode === 'demo' ? 'Demo profile auto-filled.' : 'Official GST data received.') + ' Review before saving.'; }
-    toast(res.mode === 'demo' ? 'Demo GST profile auto-filled' : 'GST profile fetched', 'green');
+  if(!gstinValid(gstin)){ if(ver){ver.className='ob-ver err';ver.textContent='Invalid GSTIN format or checksum.';} return; }
+  if(ver){ver.className='ob-ver warn';ver.textContent='Fetching GST profileΓÇª';}
+  try{
+    const res=await gstFetchProfile(gstin);
+    const tog=gstToggles();
+    if(tog.autofill!==false) obApplyProfile(card, res.profile);
+    if(ver){ver.className='ob-ver ok';ver.textContent=(res.mode==='demo'?'Demo profile auto-filled.':'Official GST data received.')+' Review before saving.';}
+    toast(res.mode==='demo'?'Demo GST profile auto-filled':'GST profile fetched','green');
     obUpdateSummary();
-  } catch (e) {
-    if (ver) { ver.className = 'ob-ver err'; ver.textContent = e.message || 'Lookup failed'; }
-    toast(e.message || 'GST lookup failed', 'red');
+  }catch(e){
+    if(ver){ver.className='ob-ver err';ver.textContent=e.message||'Lookup failed';}
+    toast(e.message||'GST lookup failed','red');
   }
 }
 var obTypeTimer = (typeof obTypeTimer !== 'undefined') ? obTypeTimer : null;
-function obPanFromGstin(gstin) {
-  gstin = String(gstin || '').toUpperCase().replace(/\s/g, '');
-  return gstin.length >= 12 ? gstin.slice(2, 12) : '';
+function obPanFromGstin(gstin){
+  gstin=String(gstin||'').toUpperCase().replace(/\s/g,'');
+  return gstin.length>=12 ? gstin.slice(2,12) : '';
 }
-function obFillPanFromGstin(card) {
-  if (!card) return;
-  const gst = qs('[data-ob="gstin"]', card), pan = qs('[data-ob="pan"]', card);
-  if (!gst || !pan) return;
-  const p = obPanFromGstin(gst.value);
-  if (p) { pan.value = p; pan.disabled = true; }
+function obFillPanFromGstin(card){
+  if(!card) return;
+  const gst=qs('[data-ob="gstin"]',card), pan=qs('[data-ob="pan"]',card);
+  if(!gst||!pan) return;
+  const p=obPanFromGstin(gst.value);
+  if(p){ pan.value=p; pan.disabled=true; }
 }
-function obGstinTyped(el) {
-  el.value = String(el.value || '').toUpperCase().replace(/\s/g, '');
+function obGstinTyped(el){
+  el.value=String(el.value||'').toUpperCase().replace(/\s/g,'');
   obFillPanFromGstin(el.closest('[data-ob-reg]'));
-  const tog = gstToggles();
-  if (el.value.length === 15 && gstinValid(el.value) && tog.enabled !== false && tog.typing) {
+  const tog=gstToggles();
+  if(el.value.length===15 && gstinValid(el.value) && tog.enabled!==false && tog.typing){
     clearTimeout(obTypeTimer);
-    const card = el.closest('[data-ob-reg]');
-    obTypeTimer = setTimeout(function () { if (card) obVerifyGstin(qs('button', card)); }, 450);
+    const card=el.closest('[data-ob-reg]');
+    obTypeTimer=setTimeout(function(){ if(card) obVerifyGstin(qs('button',card)); },450);
   }
   obUpdateSummary();
 }
-function obNeed(el, msg) {
-  if (typeof clearReqMarks === 'function') clearReqMarks();
-  if (typeof reqBad === 'function') return reqBad(el, msg);
-  toast(msg, 'red'); return false;
+function obNeed(el, msg){
+  if(typeof clearReqMarks==='function') clearReqMarks();
+  if(typeof reqBad==='function') return reqBad(el, msg);
+  toast(msg,'red'); return false;
 }
-function obRegField(card, key) { return card ? qs('[data-ob="' + key + '"]', card) : null; }
-function obSubmitPartner() {
-  if (typeof clearReqMarks === 'function') clearReqMarks();
-  const displayName = (($('ob-name') || {}).value || '').trim();
-  const shortName = (($('ob-short') || {}).value || '').trim();
-  if (!displayName) return obNeed('ob-name', 'Account / group name is required');
-  if (!shortName) return obNeed('ob-short', 'Short name is required');
-  const roles = qsa('[data-ob-role]:checked').map(function (el) { return el.getAttribute('data-ob-role'); });
-  if (!roles.length) {
-    const fld = $('ob-biztype') || qs('.ob-check');
-    if (fld) {
+function obRegField(card, key){ return card ? qs('[data-ob="'+key+'"]', card) : null; }
+function obSubmitPartner(){
+  if(typeof clearReqMarks==='function') clearReqMarks();
+  const displayName=(($('ob-name')||{}).value||'').trim();
+  const shortName=(($('ob-short')||{}).value||'').trim();
+  if(!displayName) return obNeed('ob-name','Account / group name is required');
+  if(!shortName) return obNeed('ob-short','Short name is required');
+  const roles=qsa('[data-ob-role]:checked').map(function(el){return el.getAttribute('data-ob-role');});
+  if(!roles.length){
+    const fld=$('ob-biztype')||qs('.ob-check');
+    if(fld){
       fld.classList.add('field-bad');
-      qsa('.ob-check label', fld).forEach(function (lb) { lb.classList.add('inp-bad'); });
-      try { fld.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { }
+      qsa('.ob-check label', fld).forEach(function(lb){ lb.classList.add('inp-bad'); });
+      try{ fld.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
       fld.classList.remove('req-flash'); void fld.offsetWidth; fld.classList.add('req-flash');
-      setTimeout(function () { fld.classList.remove('req-flash'); }, 600);
+      setTimeout(function(){ fld.classList.remove('req-flash'); }, 600);
     }
-    return toast('Select at least one Business Type', 'red');
+    return toast('Select at least one Business Type','red');
   }
-  const cards = qsa('[data-ob-reg]');
-  if (!cards.length) return toast('Add at least one GST registration', 'red');
-  const reqKeys = [
-    ['gstin', 'GSTIN is required'],
-    ['state', 'State / GST state code is required'],
-    ['legalName', 'GST legal name is required'],
-    ['tradeName', 'Trade name is required'],
-    ['city', 'City is required'],
-    ['district', 'District is required'],
-    ['placeState', 'State is required'],
-    ['pincode', 'PIN code is required'],
-    ['principalAddress', 'Full GST address is required']
+  const cards=qsa('[data-ob-reg]');
+  if(!cards.length) return toast('Add at least one GST registration','red');
+  const reqKeys=[
+    ['gstin','GSTIN is required'],
+    ['state','State / GST state code is required'],
+    ['legalName','GST legal name is required'],
+    ['tradeName','Trade name is required'],
+    ['city','City is required'],
+    ['placeState','State is required'],
+    ['pincode','PIN code is required'],
   ];
-  for (let i = 0; i < cards.length; i++) {
-    const card = cards[i], n = i + 1;
-    const gstEl = obRegField(card, 'gstin');
-    const gstin = ((gstEl && gstEl.value) || '').trim();
-    if (!gstinValid(gstin)) return obNeed(gstEl, 'GST registration ' + n + ': enter a valid GSTIN');
-    for (let k = 0; k < reqKeys.length; k++) {
-      if (reqKeys[k][0] === 'gstin') continue;
-      const el = obRegField(card, reqKeys[k][0]);
-      const val = ((el && el.value) || '').trim();
-      if (!val) return obNeed(el, 'GST registration ' + n + ': ' + reqKeys[k][1]);
+  for(let i=0;i<cards.length;i++){
+    const card=cards[i], n=i+1;
+    const gstEl=obRegField(card,'gstin');
+    const gstin=((gstEl&&gstEl.value)||'').trim();
+    if(!gstinValid(gstin)) return obNeed(gstEl,'GST registration '+n+': enter a valid GSTIN');
+    for(let k=0;k<reqKeys.length;k++){
+      if(reqKeys[k][0]==='gstin') continue;
+      const el=obRegField(card,reqKeys[k][0]);
+      const val=((el&&el.value)||'').trim();
+      if(!val) return obNeed(el,'GST registration '+n+': '+reqKeys[k][1]);
     }
   }
-  const registrations = obCardData('[data-ob-reg]');
-  const currentId = (obEditId && obEditId !== 'new') ? obEditId : '';
-
-  if (obDuplicateExists(displayName, registrations, currentId)) return toast('Duplicate group name — partner was not saved', 'red');
-  const rec = {
-    id: (obEditId && obEditId !== 'new') ? obEditId : uid(),
-    code: (($('ob-code') || {}).value === 'AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
-    displayName: displayName, shortName: shortName, roles: roles, status: (($('ob-status') || {}).value === 'Inactive' ? 'Inactive' : 'Active'),
-    registrations: registrations, brands: obCardData('[data-ob-brand]'), contacts: obCardData('[data-ob-contact]'),
-    updatedAt: Date.now()
+  const registrations=obCardData('[data-ob-reg]');
+  const currentId=(obEditId && obEditId!=='new') ? obEditId : '';
+  const seenGst={};
+  for(let i=0;i<registrations.length;i++){
+    const gst=String(registrations[i].gstin||'').trim().toUpperCase();
+    if(gst && seenGst[gst]) return obNeed(obRegField(cards[i],'gstin'),'GSTIN is duplicated in this partner');
+    if(gst) seenGst[gst]=true;
+  }
+  if(obDuplicateExists(displayName,registrations,currentId)) return toast('Duplicate group name or GSTIN ΓÇö partner was not saved','red');
+  const rec={
+    id: currentId || uid(),
+    code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
+    displayName:displayName, shortName:shortName, roles:roles, status:(($('ob-status')||{}).value==='Inactive'?'Inactive':'Active'),
+    registrations:registrations, brands:obCardData('[data-ob-brand]'), contacts:obCardData('[data-ob-contact]'),
+    updatedAt:Date.now()
   };
-  const arr = partnersDb();
-  const ix = arr.findIndex(function (x) { return x.id === rec.id; });
-  if (ix >= 0) arr[ix] = Object.assign({}, arr[ix], rec);
-  else { rec.createdAt = Date.now(); arr.push(rec); }
+  const arr=partnersDb();
+  const ix=arr.findIndex(function(x){return x.id===rec.id;});
+  if(ix>=0) arr[ix]=Object.assign({},arr[ix],rec);
+  else { rec.createdAt=Date.now(); arr.push(rec); }
   obSyncToPartyMaster(rec);
   saveDB();
-  toast(rec.code + ' saved — GST data stored on the partner', 'green');
-  obEditId = null; render();
+  toast(rec.code+' saved ΓÇö GST data stored on the partner','green');
+  obEditId=null; render();
 }
-function obSyncToPartyMaster(rec) {
-  if (!db.masters) db.masters = {}; if (!db.masters.parties) db.masters.parties = [];
-  const g = (rec.registrations || [])[0] || {};
-  const legal = g.legalName || rec.displayName;
-  const trade = g.tradeName || rec.displayName || rec.shortName;
-  const short = g.tradeName || rec.shortName || rec.displayName;
-  const types = [];
-  if (rec.roles.indexOf('VENDOR') > -1 || rec.roles.indexOf('SUPPLIER') > -1 || rec.roles.indexOf('JOB_WORKER') > -1) types.push('Supplier');
-  if (rec.roles.indexOf('BUYER') > -1 || rec.roles.indexOf('BRAND_OWNER') > -1) types.push('Customer');
-  if (!types.length) types.push('Supplier');
-  let p = db.masters.parties.find(function (x) { return x.partnerId === rec.id || String(x.gstNo || '').toUpperCase() === String(g.gstin || '').toUpperCase(); });
-  const billTos = (rec.registrations || []).map(function (r, i) {
+function obSyncToPartyMaster(rec){
+  if(!db.masters) db.masters={}; if(!db.masters.parties) db.masters.parties=[];
+  const g=(rec.registrations||[])[0]||{};
+  const legal=g.legalName||rec.displayName;
+  const trade=g.tradeName||rec.displayName||rec.shortName;
+  const short=g.tradeName||rec.shortName||rec.displayName;
+  const types=[];
+  if(rec.roles.indexOf('VENDOR')>-1||rec.roles.indexOf('SUPPLIER')>-1||rec.roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
+  if(rec.roles.indexOf('BUYER')>-1||rec.roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
+  if(!types.length) types.push('Supplier');
+  let p=db.masters.parties.find(function(x){return x.partnerId===rec.id || String(x.gstNo||'').toUpperCase()===String(g.gstin||'').toUpperCase();});
+  const billTos = (rec.registrations || []).map(function(r, i){
     const tName = String(r.tradeName || r.legalName || rec.displayName || ('Trade ' + (i + 1))).trim();
     return {
       name: tName,
@@ -14941,151 +14965,151 @@ function obSyncToPartyMaster(rec) {
       active: true
     };
   });
-  const data = { partnerId: rec.id, legalName: legal, tradeName: trade, shortName: short, registrations: rec.registrations, billTos: billTos, gstNo: g.gstin || '', pan: g.pan || '', address: g.principalAddress || '', city: g.city || '', district: g.district || '', state: g.placeState || g.state || '', pin: g.pincode || '', businessType: types, status: 'Active' };
-  if (p) Object.assign(p, data);
-  else db.masters.parties.push(Object.assign({ id: uid(), code: rec.code }, data));
+  const data={ partnerId:rec.id, legalName:legal, tradeName:trade, shortName:short, registrations:rec.registrations, billTos:billTos, gstNo:g.gstin||'', pan:g.pan||'', address:g.principalAddress||'', city:g.city||'', district:g.district||'', state:g.placeState||g.state||'', pin:g.pincode||'', businessType:types, status:'Active' };
+  if(p) Object.assign(p,data);
+  else db.masters.parties.push(Object.assign({ id:uid(), code:rec.code }, data));
 }
 
-function renderGstApi() {
-  const d = Object.assign({ provider: 'custom', environment: 'Production', timeout: 30, businessType: 'Supplier', queryParam: 'gstin', authType: 'apiKey', toggles: gstToggles() }, gstSettingsDefaults('custom'), gstSettingsRead());
-  const tog = Object.assign({ enabled: true, proxy: true, demo: true, autofill: true, typing: true, autocreate: false }, d.toggles || {});
-  function sw(k, title, sub) { return '<div class="gst-tog"><button type="button" class="gst-sw' + (tog[k] ? ' on' : '') + '" data-gst-tog="' + k + '" onclick="gstFlipTog(this)"><span></span></button><div><strong>' + title + '</strong><small>' + sub + '</small></div></div>'; }
-  $('content').innerHTML = '<div class="ob-wrap">' +
-    '<div class="gst-panel"><h3>GST API connection</h3><p class="sub">Connect a third-party GST provider. Partner onboarding Verify uses this config to auto-fetch taxpayer data.</p><div class="gst-rule"></div>' +
-    '<div class="grid-fixed">' +
-    field('API Provider', '<select class="inp" id="gstProvider" onchange="gstProviderChanged()"><option value="custom"' + (d.provider !== 'sandbox' ? ' selected' : '') + '>Custom provider</option><option value="sandbox"' + (d.provider === 'sandbox' ? ' selected' : '') + '>Sandbox / test provider</option></select>') +
-    field('Environment', '<div class="gst-segbar"><button type="button" class="gst-seg' + (d.environment !== 'Production' ? ' on' : '') + '" data-gst-env="Sandbox" onclick="gstSetEnv(this)">Sandbox</button><button type="button" class="gst-seg' + (d.environment === 'Production' ? ' on' : '') + '" data-gst-env="Production" onclick="gstSetEnv(this)">Production</button></div>') +
-    field('Base URL', '<input class="inp" id="gstBaseUrl" value="' + esc(d.baseUrl || '') + '" placeholder="https://api.example.com">') +
-    field('GSTIN lookup path', '<input class="inp" id="gstLookupPath" value="' + esc(d.lookupPath || '') + '" placeholder="/v1/gstin/{gstin}">') +
-    field('Query param for GSTIN', '<input class="inp" id="gstQueryParam" value="' + esc(d.queryParam || 'gstin') + '">') +
-    field('Auth type', '<select class="inp" id="gstAuthType"><option value="apiKey"' + (d.authType === 'apiKey' ? ' selected' : '') + '>API key</option><option value="bearer"' + (d.authType === 'bearer' ? ' selected' : '') + '>Bearer token</option><option value="none"' + (d.authType === 'none' ? ' selected' : '') + '>No authentication</option></select>') +
-    '</div>' +
-    '<div class="grid3" style="margin-top:12px">' +
-    field('API Key / Token', '<input class="inp" id="gstApiKey" type="password" value="' + esc(d.apiKey || '') + '" placeholder="Enter API key or token"><div class="fhint">Keep the secret on the ERP server in production.</div>') +
-    field('ERP proxy endpoint (optional)', '<input class="inp" id="gstProxyEndpoint" value="' + esc(d.proxyEndpoint || '') + '" placeholder="https://your-erp.example/api/gst/verify">') +
-    field('Request timeout (seconds)', '<input class="inp" id="gstTimeout" type="number" min="1" max="180" value="' + (d.timeout || 30) + '">') +
-    '</div><div class="gst-lock">🔒 Never send GST provider credentials from the browser in production. Use the ERP server-side proxy.</div></div>' +
-    '<div class="gst-panel"><h3>Auto-fetch behaviour</h3><p class="sub">What happens when a user enters a GSTIN on Partner onboarding.</p>' +
-    '<div class="grid-fixed">' + sw('enabled', 'Enable GST auto-fetch', 'Turn partner lookup on') + sw('proxy', 'Server-side proxy', 'Keep API key on server and avoid CORS') + sw('demo', 'Demo mode', 'Sample data without credentials') + sw('autofill', 'Auto-fill partner form', 'Name, address, PAN and GST data') + sw('typing', 'Validate GSTIN while typing', 'Auto-lookup at 15th character') + sw('autocreate', 'Auto-create empty party', 'Create a party if lookup fails') + '</div></div>' +
-    '<div class="gst-panel"><h3>Connection status</h3>' +
-    '<div class="gst-status"><span class="gst-pill" id="gstStatusBadge">Ready</span><span id="gstLastChecked">Last checked — never</span><span id="gstStatusMsg" style="margin-left:auto;font-size:11px"></span></div>' +
-    '<div style="height:14px"></div><h3>Try a GSTIN lookup</h3><p class="sub">Fetch a profile and preview how it maps into Partner onboarding.</p>' +
-    '<div class="grid2"><div>' + field('GSTIN', '<input class="inp ob-gstin" id="gstLookup" maxlength="15" value="27AABCO1234M1ZG" placeholder="27ABCDE1234F1Z5" oninput="gstLookupTyped()"><div class="gst-val" id="gstLookupValidation"></div>') + '</div><div style="display:flex;align-items:end;padding-bottom:18px"><button class="btn btn-primary" id="gstFetchBtn" onclick="gstFetchPreview()">Fetch &amp; preview</button></div></div>' +
-    '<div class="gst-preview" id="gstPreview"><div class="gst-preview-h"><strong>Normalized GST profile</strong><span class="gst-pill" id="gstPreviewStatus">Active</span></div><div class="gst-preview-b"><div class="gst-col"><h4>Mapped fields</h4><dl id="gstMapped" class="gst-kv"></dl></div><div class="gst-col"><h4>Raw provider response</h4><pre id="gstRaw" class="gst-raw"></pre></div></div></div>' +
-    '<div class="ob-tip" style="margin-top:14px"><strong>How this works</strong> — Partner onboarding reads this configuration when Verify is clicked. The GSTIN is validated locally, then legal name, trade name, PAN, state, city, district, address and PIN are mapped. Demo mode generates a local sample so you can preview without credentials.</div>' +
-    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn btn-ghost" onclick="gstSettingsTest()">Test connection</button><button class="btn btn-primary" onclick="gstSettingsSave()">Save settings</button><button class="btn btn-ghost" onclick="go(\'partneronboarding\')">← Partner onboarding</button></div>' +
+function renderGstApi(){
+  const d=Object.assign({ provider:'custom', environment:'Production', timeout:30, businessType:'Supplier', queryParam:'gstin', authType:'apiKey', toggles:gstToggles() }, gstSettingsDefaults('custom'), gstSettingsRead());
+  const tog=Object.assign({enabled:true,proxy:true,demo:true,autofill:true,typing:true,autocreate:false}, d.toggles||{});
+  function sw(k,title,sub){ return '<div class="gst-tog"><button type="button" class="gst-sw'+(tog[k]?' on':'')+'" data-gst-tog="'+k+'" onclick="gstFlipTog(this)"><span></span></button><div><strong>'+title+'</strong><small>'+sub+'</small></div></div>'; }
+  $('content').innerHTML='<div class="ob-wrap">'+
+    '<div class="gst-panel"><h3>GST API connection</h3><p class="sub">Connect a third-party GST provider. Partner onboarding Verify uses this config to auto-fetch taxpayer data.</p><div class="gst-rule"></div>'+
+    '<div class="grid-fixed">'+
+      field('API Provider','<select class="inp" id="gstProvider" onchange="gstProviderChanged()"><option value="custom"'+(d.provider!=='sandbox'?' selected':'')+'>Custom provider</option><option value="sandbox"'+(d.provider==='sandbox'?' selected':'')+'>Sandbox / test provider</option></select>')+
+      field('Environment','<div class="gst-segbar"><button type="button" class="gst-seg'+(d.environment!=='Production'?' on':'')+'" data-gst-env="Sandbox" onclick="gstSetEnv(this)">Sandbox</button><button type="button" class="gst-seg'+(d.environment==='Production'?' on':'')+'" data-gst-env="Production" onclick="gstSetEnv(this)">Production</button></div>')+
+      field('Base URL','<input class="inp" id="gstBaseUrl" value="'+esc(d.baseUrl||'')+'" placeholder="https://api.example.com">')+
+      field('GSTIN lookup path','<input class="inp" id="gstLookupPath" value="'+esc(d.lookupPath||'')+'" placeholder="/v1/gstin/{gstin}">')+
+      field('Query param for GSTIN','<input class="inp" id="gstQueryParam" value="'+esc(d.queryParam||'gstin')+'">')+
+      field('Auth type','<select class="inp" id="gstAuthType"><option value="apiKey"'+(d.authType==='apiKey'?' selected':'')+'>API key</option><option value="bearer"'+(d.authType==='bearer'?' selected':'')+'>Bearer token</option><option value="none"'+(d.authType==='none'?' selected':'')+'>No authentication</option></select>')+
+    '</div>'+
+    '<div class="grid3" style="margin-top:12px">'+
+      field('API Key / Token','<input class="inp" id="gstApiKey" type="password" value="'+esc(d.apiKey||'')+'" placeholder="Enter API key or token"><div class="fhint">Keep the secret on the ERP server in production.</div>')+
+      field('ERP proxy endpoint (optional)','<input class="inp" id="gstProxyEndpoint" value="'+esc(d.proxyEndpoint||'')+'" placeholder="https://your-erp.example/api/gst/verify">')+
+      field('Request timeout (seconds)','<input class="inp" id="gstTimeout" type="number" min="1" max="180" value="'+(d.timeout||30)+'">')+
+    '</div><div class="gst-lock">≡ƒöÆ Never send GST provider credentials from the browser in production. Use the ERP server-side proxy.</div></div>'+
+    '<div class="gst-panel"><h3>Auto-fetch behaviour</h3><p class="sub">What happens when a user enters a GSTIN on Partner onboarding.</p>'+
+    '<div class="grid-fixed">'+sw('enabled','Enable GST auto-fetch','Turn partner lookup on')+sw('proxy','Server-side proxy','Keep API key on server and avoid CORS')+sw('demo','Demo mode','Sample data without credentials')+sw('autofill','Auto-fill partner form','Name, address, PAN and GST data')+sw('typing','Validate GSTIN while typing','Auto-lookup at 15th character')+sw('autocreate','Auto-create empty party','Create a party if lookup fails')+'</div></div>'+
+    '<div class="gst-panel"><h3>Connection status</h3>'+
+    '<div class="gst-status"><span class="gst-pill" id="gstStatusBadge">Ready</span><span id="gstLastChecked">Last checked ΓÇö never</span><span id="gstStatusMsg" style="margin-left:auto;font-size:11px"></span></div>'+
+    '<div style="height:14px"></div><h3>Try a GSTIN lookup</h3><p class="sub">Fetch a profile and preview how it maps into Partner onboarding.</p>'+
+    '<div class="grid2"><div>'+field('GSTIN','<input class="inp ob-gstin" id="gstLookup" maxlength="15" value="27AABCO1234M1ZG" placeholder="27ABCDE1234F1Z5" oninput="gstLookupTyped()"><div class="gst-val" id="gstLookupValidation"></div>')+'</div><div style="display:flex;align-items:end;padding-bottom:18px"><button class="btn btn-primary" id="gstFetchBtn" onclick="gstFetchPreview()">Fetch &amp; preview</button></div></div>'+
+    '<div class="gst-preview" id="gstPreview"><div class="gst-preview-h"><strong>Normalized GST profile</strong><span class="gst-pill" id="gstPreviewStatus">Active</span></div><div class="gst-preview-b"><div class="gst-col"><h4>Mapped fields</h4><dl id="gstMapped" class="gst-kv"></dl></div><div class="gst-col"><h4>Raw provider response</h4><pre id="gstRaw" class="gst-raw"></pre></div></div></div>'+
+    '<div class="ob-tip" style="margin-top:14px"><strong>How this works</strong> ΓÇö Partner onboarding reads this configuration when Verify is clicked. The GSTIN is validated locally, then legal name, trade name, PAN, state, city, district, address and PIN are mapped. Demo mode generates a local sample so you can preview without credentials.</div>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn btn-ghost" onclick="gstSettingsTest()">Test connection</button><button class="btn btn-primary" onclick="gstSettingsSave()">Save settings</button><button class="btn btn-ghost" onclick="go(\'partneronboarding\')">ΓåÉ Partner onboarding</button></div>'+
     '</div></div>';
-  gstRefreshStatus(d.lastChecked || '');
+  gstRefreshStatus(d.lastChecked||'');
 }
-function gstCollect() {
-  const tog = {};
-  qsa('[data-gst-tog]').forEach(function (b) { tog[b.getAttribute('data-gst-tog')] = b.classList.contains('on'); });
-  const envBtn = qs('.gst-seg.on[data-gst-env]');
+function gstCollect(){
+  const tog={};
+  qsa('[data-gst-tog]').forEach(function(b){ tog[b.getAttribute('data-gst-tog')]=b.classList.contains('on'); });
+  const envBtn=qs('.gst-seg.on[data-gst-env]');
   return {
-    provider: (($('gstProvider') || {}).value) || 'custom',
-    environment: envBtn ? envBtn.getAttribute('data-gst-env') : 'Production',
-    baseUrl: (($('gstBaseUrl') || {}).value || '').trim(),
-    lookupPath: (($('gstLookupPath') || {}).value || '').trim(),
-    queryParam: (($('gstQueryParam') || {}).value || 'gstin').trim(),
-    authType: (($('gstAuthType') || {}).value) || 'apiKey',
-    apiKey: (($('gstApiKey') || {}).value) || '',
-    proxyEndpoint: (($('gstProxyEndpoint') || {}).value || '').trim(),
-    timeout: Math.max(1, Math.min(180, Number(($('gstTimeout') || {}).value) || 30)),
-    businessType: 'Supplier',
-    toggles: tog,
-    lastChecked: (gstSettingsRead().lastChecked) || ''
+    provider:(($('gstProvider')||{}).value)||'custom',
+    environment: envBtn?envBtn.getAttribute('data-gst-env'):'Production',
+    baseUrl:(($('gstBaseUrl')||{}).value||'').trim(),
+    lookupPath:(($('gstLookupPath')||{}).value||'').trim(),
+    queryParam:(($('gstQueryParam')||{}).value||'gstin').trim(),
+    authType:(($('gstAuthType')||{}).value)||'apiKey',
+    apiKey:(($('gstApiKey')||{}).value)||'',
+    proxyEndpoint:(($('gstProxyEndpoint')||{}).value||'').trim(),
+    timeout:Math.max(1,Math.min(180, Number(($('gstTimeout')||{}).value)||30)),
+    businessType:'Supplier',
+    toggles:tog,
+    lastChecked:(gstSettingsRead().lastChecked)||''
   };
 }
-function gstFlipTog(btn) { btn.classList.toggle('on'); gstRefreshStatus(); }
-function gstSetEnv(btn) { qsa('[data-gst-env]').forEach(function (b) { b.classList.toggle('on', b === btn); }); }
-function gstProviderChanged() {
-  const def = gstSettingsDefaults(($('gstProvider') || {}).value);
-  if ($('gstBaseUrl')) $('gstBaseUrl').value = def.baseUrl;
-  if ($('gstLookupPath')) $('gstLookupPath').value = def.lookupPath;
-  if ($('gstQueryParam')) $('gstQueryParam').value = def.queryParam;
-  if ($('gstAuthType')) $('gstAuthType').value = def.authType;
+function gstFlipTog(btn){ btn.classList.toggle('on'); gstRefreshStatus(); }
+function gstSetEnv(btn){ qsa('[data-gst-env]').forEach(function(b){ b.classList.toggle('on',b===btn); }); }
+function gstProviderChanged(){
+  const def=gstSettingsDefaults(($('gstProvider')||{}).value);
+  if($('gstBaseUrl')) $('gstBaseUrl').value=def.baseUrl;
+  if($('gstLookupPath')) $('gstLookupPath').value=def.lookupPath;
+  if($('gstQueryParam')) $('gstQueryParam').value=def.queryParam;
+  if($('gstAuthType')) $('gstAuthType').value=def.authType;
 }
-function gstRefreshStatus(last) {
-  const d = gstCollect();
-  const demo = !!(d.toggles && d.toggles.demo);
-  if ($('gstLastChecked')) $('gstLastChecked').textContent = last ? 'Last checked ' + new Date(last).toLocaleString() : 'Last checked — never';
-  if ($('gstStatusBadge')) { $('gstStatusBadge').textContent = demo ? 'Connected' : 'Ready'; $('gstStatusBadge').style.background = demo ? '#cdfee1' : '#fff2c2'; $('gstStatusBadge').style.color = demo ? '#0c5132' : '#8a6116'; }
-  const live = gstHasLiveApi(d);
-  if ($('gstStatusMsg')) $('gstStatusMsg').textContent = live ? (d.proxyEndpoint ? 'Live API via server proxy' : 'Live third-party API — auto-connect after Save') : 'Add Base URL + API key from any GST provider (no extra files)';
-  if ($('gstStatusBadge') && live) { $('gstStatusBadge').textContent = (gstSettingsRead().connectionOk ? 'Connected' : 'Ready'); $('gstStatusBadge').style.background = gstSettingsRead().connectionOk ? '#cdfee1' : '#fff2c2'; $('gstStatusBadge').style.color = gstSettingsRead().connectionOk ? '#0c5132' : '#8a6116'; }
+function gstRefreshStatus(last){
+  const d=gstCollect();
+  const demo=!!(d.toggles&&d.toggles.demo);
+  if($('gstLastChecked')) $('gstLastChecked').textContent=last?'Last checked '+new Date(last).toLocaleString():'Last checked ΓÇö never';
+  if($('gstStatusBadge')){ $('gstStatusBadge').textContent=demo?'Connected':'Ready'; $('gstStatusBadge').style.background=demo?'#cdfee1':'#fff2c2'; $('gstStatusBadge').style.color=demo?'#0c5132':'#8a6116'; }
+  const live=gstHasLiveApi(d);
+  if($('gstStatusMsg')) $('gstStatusMsg').textContent=live?(d.proxyEndpoint?'Live API via server proxy':'Live third-party API ΓÇö auto-connect after Save'):'Add Base URL + API key from any GST provider (no extra files)';
+  if($('gstStatusBadge') && live){ $('gstStatusBadge').textContent=(gstSettingsRead().connectionOk?'Connected':'Ready'); $('gstStatusBadge').style.background=gstSettingsRead().connectionOk?'#cdfee1':'#fff2c2'; $('gstStatusBadge').style.color=gstSettingsRead().connectionOk?'#0c5132':'#8a6116'; }
 }
-function gstSettingsSave() {
-  const d = gstCollect();
-  if (gstHasLiveApi(d)) {
-    d.toggles = d.toggles || {};
-    d.toggles.enabled = true;
-    d.toggles.demo = false;
+function gstSettingsSave(){
+  const d=gstCollect();
+  if(gstHasLiveApi(d)){
+    d.toggles=d.toggles||{};
+    d.toggles.enabled=true;
+    d.toggles.demo=false;
   }
   gstSettingsWrite(d);
-  toast('GST API settings saved' + (gstHasLiveApi(d) ? ' — connecting to provider…' : ''), 'green');
-  gstRefreshStatus(d.lastChecked || '');
-  if (gstHasLiveApi(d)) gstSettingsTest();
+  toast('GST API settings saved'+(gstHasLiveApi(d)?' ΓÇö connecting to providerΓÇª':''),'green');
+  gstRefreshStatus(d.lastChecked||'');
+  if(gstHasLiveApi(d)) gstSettingsTest();
 }
-async function gstSettingsTest() {
-  const d = gstCollect();
+async function gstSettingsTest(){
+  const d=gstCollect();
   gstSettingsWrite(d);
-  if (!gstHasLiveApi(d)) {
-    const now = new Date().toISOString(); d.lastChecked = now; d.connectionOk = false; gstSettingsWrite(d); gstRefreshStatus(now);
-    toast('Add Base URL (or proxy) + API key from your GST provider, then Test connection', 'red');
+  if(!gstHasLiveApi(d)){
+    const now=new Date().toISOString(); d.lastChecked=now; d.connectionOk=false; gstSettingsWrite(d); gstRefreshStatus(now);
+    toast('Add Base URL (or proxy) + API key from your GST provider, then Test connection','red');
     return;
   }
-  const sample = (($('gstLookup') || {}).value || '27AABCO1234M1ZG').trim().toUpperCase();
-  toast('Testing third-party GST API…', 'green');
-  try {
-    const res = await gstFetchProfile(gstinValid(sample) ? sample : '27AABCO1234M1ZG');
-    const now = new Date().toISOString();
-    const saved = gstCollect(); saved.lastChecked = now; saved.connectionOk = res.mode !== 'demo';
-    if (saved.toggles) saved.toggles.demo = false;
+  const sample=(($('gstLookup')||{}).value||'27AABCO1234M1ZG').trim().toUpperCase();
+  toast('Testing third-party GST APIΓÇª','green');
+  try{
+    const res=await gstFetchProfile(gstinValid(sample)?sample:'27AABCO1234M1ZG');
+    const now=new Date().toISOString();
+    const saved=gstCollect(); saved.lastChecked=now; saved.connectionOk=res.mode!=='demo';
+    if(saved.toggles) saved.toggles.demo=false;
     gstSettingsWrite(saved); gstRefreshStatus(now);
-    if (res.mode === 'demo') toast('Still in demo — enter Base URL and API key', 'red');
-    else toast('Connected to third-party GST API — auto-fetch is on', 'green');
-  } catch (e) {
-    const now = new Date().toISOString();
-    const saved = gstCollect(); saved.lastChecked = now; saved.connectionOk = false; gstSettingsWrite(saved); gstRefreshStatus(now);
-    const msg = String(e.message || e);
-    if (/Failed to fetch|NetworkError|CORS|abort/i.test(msg)) {
-      toast('Provider blocked the browser (CORS). Use ERP proxy endpoint, or a provider that allows browser calls. No extra files needed.', 'red');
-    } else toast('Connection failed: ' + msg, 'red');
+    if(res.mode==='demo') toast('Still in demo ΓÇö enter Base URL and API key','red');
+    else toast('Connected to third-party GST API ΓÇö auto-fetch is on','green');
+  }catch(e){
+    const now=new Date().toISOString();
+    const saved=gstCollect(); saved.lastChecked=now; saved.connectionOk=false; gstSettingsWrite(saved); gstRefreshStatus(now);
+    const msg=String(e.message||e);
+    if(/Failed to fetch|NetworkError|CORS|abort/i.test(msg)){
+      toast('Provider blocked the browser (CORS). Use ERP proxy endpoint, or a provider that allows browser calls. No extra files needed.','red');
+    } else toast('Connection failed: '+msg,'red');
   }
 }
-function gstLookupTyped() {
-  const el = $('gstLookup'); if (!el) return;
-  el.value = String(el.value || '').toUpperCase().replace(/\s/g, '');
-  const g = el.value, v = $('gstLookupValidation');
-  if (!v) return;
-  if (g.length === 15) { const ok = gstinValid(g); v.textContent = ok ? 'GSTIN format and checksum are valid.' : 'Invalid GSTIN format or checksum.'; v.className = 'gst-val ' + (ok ? 'ok' : 'bad'); }
-  else { v.textContent = g ? 'Enter 15 characters to validate.' : ''; v.className = 'gst-val warn'; }
+function gstLookupTyped(){
+  const el=$('gstLookup'); if(!el) return;
+  el.value=String(el.value||'').toUpperCase().replace(/\s/g,'');
+  const g=el.value, v=$('gstLookupValidation');
+  if(!v) return;
+  if(g.length===15){ const ok=gstinValid(g); v.textContent=ok?'GSTIN format and checksum are valid.':'Invalid GSTIN format or checksum.'; v.className='gst-val '+(ok?'ok':'bad'); }
+  else { v.textContent=g?'Enter 15 characters to validate.':''; v.className='gst-val warn'; }
 }
-async function gstFetchPreview() {
-  const el = $('gstLookup'); const g = String((el && el.value) || '').trim().toUpperCase();
-  if (el) el.value = g;
-  if (!gstinValid(g)) { if ($('gstLookupValidation')) { $('gstLookupValidation').textContent = 'Invalid GSTIN format or checksum.'; $('gstLookupValidation').className = 'gst-val bad'; } return; }
-  const b = $('gstFetchBtn'); if (b) { b.disabled = true; b.textContent = 'Fetching…'; }
-  try {
-    const res = await gstFetchProfile(g);
-    const p = res.profile || {};
-    if ($('gstPreview')) $('gstPreview').classList.add('show');
-    if ($('gstPreviewStatus')) $('gstPreviewStatus').textContent = p.status || 'Received';
-    const rows = [['GSTIN', p.gstin || g], ['PAN', p.pan], ['Legal name', p.legalName], ['Trade name', p.tradeName], ['State', (p.state || '') + (p.stateCode ? ' (' + p.stateCode + ')' : '')], ['City', p.city], ['District', p.district], ['PIN code', p.pincode], ['Address', p.principalAddress]];
-    if ($('gstMapped')) $('gstMapped').innerHTML = rows.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1] || '—') + '</dd>'; }).join('');
-    if ($('gstRaw')) $('gstRaw').textContent = JSON.stringify(res.raw, null, 2);
-    const now = new Date().toISOString(); const saved = gstCollect(); saved.lastChecked = now; gstSettingsWrite(saved); gstRefreshStatus(now);
-    toast(res.mode === 'demo' ? 'Demo GST profile preview ready' : 'GST profile fetched', 'green');
-  } catch (e) {
-    if ($('gstLookupValidation')) { $('gstLookupValidation').textContent = 'Lookup failed: ' + (e.message || e); $('gstLookupValidation').className = 'gst-val bad'; }
-    toast(e.message || 'GST lookup failed', 'red');
-  } finally { if (b) { b.disabled = false; b.textContent = 'Fetch & preview'; } }
+async function gstFetchPreview(){
+  const el=$('gstLookup'); const g=String((el&&el.value)||'').trim().toUpperCase();
+  if(el) el.value=g;
+  if(!gstinValid(g)){ if($('gstLookupValidation')){ $('gstLookupValidation').textContent='Invalid GSTIN format or checksum.'; $('gstLookupValidation').className='gst-val bad'; } return; }
+  const b=$('gstFetchBtn'); if(b){ b.disabled=true; b.textContent='FetchingΓÇª'; }
+  try{
+    const res=await gstFetchProfile(g);
+    const p=res.profile||{};
+    if($('gstPreview')) $('gstPreview').classList.add('show');
+    if($('gstPreviewStatus')) $('gstPreviewStatus').textContent=p.status||'Received';
+    const rows=[['GSTIN',p.gstin||g],['PAN',p.pan],['Legal name',p.legalName],['Trade name',p.tradeName],['State',(p.state||'')+(p.stateCode?' ('+p.stateCode+')':'')],['City',p.city],['District',p.district],['PIN code',p.pincode],['Address',p.principalAddress]];
+    if($('gstMapped')) $('gstMapped').innerHTML=rows.map(function(x){return '<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1]||'ΓÇö')+'</dd>';}).join('');
+    if($('gstRaw')) $('gstRaw').textContent=JSON.stringify(res.raw,null,2);
+    const now=new Date().toISOString(); const saved=gstCollect(); saved.lastChecked=now; gstSettingsWrite(saved); gstRefreshStatus(now);
+    toast(res.mode==='demo'?'Demo GST profile preview ready':'GST profile fetched','green');
+  }catch(e){
+    if($('gstLookupValidation')){ $('gstLookupValidation').textContent='Lookup failed: '+(e.message||e); $('gstLookupValidation').className='gst-val bad'; }
+    toast(e.message||'GST lookup failed','red');
+  }finally{ if(b){ b.disabled=false; b.textContent='Fetch & preview'; } }
 }
 
 
 
 /* Expose Partner Onboarding & GST functions to window */
-(function () {
+(function() {
   const fns = {
     obNewPartner, obEditPartner, obDeletePartner, obBackList, obUpdateSummary,
     obVerifyGstin, obToggleBrand, obAddReg, obAddBrand, obAddContact,
