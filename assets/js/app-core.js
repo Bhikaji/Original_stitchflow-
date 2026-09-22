@@ -3126,9 +3126,9 @@ function renderDashboard() {
       '<button class="btn btn-primary" onclick="loadDemo()">' + ic('sparkle',16) + 'Load demo data</button>' +
       '<button class="btn btn-ghost" onclick="openForm(\'po\')">' + ic('plus',16) + 'Create PO</button></div></div></div>';
 
-  $('sidefoot').innerHTML = '<span class="dot"></span>Saved to database<div class="sf-sub">Updated ' + new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) + '</div>';
-
   $('content').innerHTML =
+  $('content').innerHTML =
+      $('sidefoot').innerHTML = '<span class="dot"></span>Saved to database<div class="sf-sub">Updated ' + new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) + '</div>';
     '<div class="stats">' +
       statCard('order','Open PO value', fmtINR(poTotal), poOpen.length + ' of ' + db.po.length + ' POs still open', '', "go('po')") +
       statCard('box','Fabric in stock', fmtInventoryNum(stock.m) + '<small> (Meter)</small>', (stock.issuedM > 0 ? fmtInventoryNum(stock.issuedM) + ' m issued · ' : '') + '₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
@@ -14466,60 +14466,18 @@ async function gstFetchProfile(gstin){
   return { profile: normalizeGstProviderResponse(raw,gstin), raw:raw, mode:'live' };
 }
 
-obEditId=null;
-function partnersDb(){
-  if(!db.masters) db.masters={};
-  if(!db.masters.parties) db.masters.parties=[];
-  
-  if(db.partners && db.partners.length > 0) {
-    db.partners.forEach(function(legacy) {
-      const idx = db.masters.parties.findIndex(function(p) { return p.partnerId === legacy.id || p.id === legacy.id; });
-      if(idx >= 0) {
-         db.masters.parties[idx] = Object.assign({}, db.masters.parties[idx], legacy, { id: db.masters.parties[idx].id });
-      }
-    });
-    delete db.partners;
-  }
-
-  db.masters.parties.forEach(function(p){
-    if(!p.displayName) p.displayName = p.legalName || p.shortName || '';
-    if(!p.shortName) p.shortName = p.legalName || '';
-    if(!p.roles || !p.roles.length) {
-      p.roles = [];
-      const bt = p.businessTypes || (p.businessType ? [p.businessType] : []);
-      if(bt.indexOf('Supplier')>-1) p.roles.push('VENDOR');
-      if(bt.indexOf('Customer')>-1) p.roles.push('BUYER');
-      if(!p.roles.length) p.roles.push('VENDOR');
-    }
-    if(!p.registrations || !p.registrations.length) {
-      if(p.gstNo) {
-        p.registrations = [{
-          gstin: p.gstNo,
-          legalName: p.legalName,
-          tradeName: p.shortName,
-          pan: p.pan,
-          principalAddress: p.address,
-          city: p.city,
-          district: p.district,
-          state: p.state,
-          pincode: p.pin
-        }];
-      } else {
-        p.registrations = [];
-      }
-    }
-  });
-
-  return db.masters.parties;
-}
+var obEditId = (typeof obEditId !== 'undefined') ? obEditId : null;
+var obListState = (typeof obListState !== 'undefined') ? obListState : { q:'', page:1, size:25 };
+function partnersDb(){ if(!db.partners) db.partners=[]; return db.partners; }
 function nextPartnerCode(){
-  const n=(partnersDb().length||0)+1;
-  return 'PRT-'+String(n).padStart(4,'0');
+  const used={};
+  partnersDb().forEach(function(x){ used[String(x.code||'').trim().toUpperCase()]=true; });
+  let n=1, code='';
+  do { code='PRT-'+String(n++).padStart(4,'0'); } while (used[code]);
+  return code;
 }
 function obField(root,f){ const el=qs('[data-ob="'+f+'"]',root||document); return el?(el.type==='checkbox'?el.checked:el.value):''; }
 function obSet(root,f,v){ const el=qs('[data-ob="'+f+'"]',root||document); if(!el)return; if(el.type==='checkbox') el.checked=!!v; else el.value=v==null?'':v; }
-<<<<<<< Updated upstream
-=======
 function obSearch(value){
   const input=value && value.nodeType ? value : null;
   const text=input ? input.value : String(value||'');
@@ -14560,9 +14518,9 @@ function obDuplicateExists(displayName, registrations, currentId){
 function obPartnerUsed(partner){
   return (partner && partner.registrations||[]).some(function(r){return obRegUsed(r.gstin, partner.id);});
 }
->>>>>>> Stashed changes
 
 function renderPartnerOnboarding(){
+  if(!obListState) obListState={q:'',page:1,size:25};
   const list=partnersDb();
   if(obEditId==='new' || (obEditId && list.some(function(x){return x.id===obEditId;}))){
     renderPartnerForm(obEditId==='new'?null:list.find(function(x){return x.id===obEditId;}));
@@ -14570,35 +14528,47 @@ function renderPartnerOnboarding(){
   }
   $('tb-title').textContent='Partner onboarding';
   $('tb-sub').textContent='Onboard buyer and vendor accounts with GSTIN auto-fetch';
-  const rows=list.slice().reverse().map(function(p){
-    const roles=(p.roles||[]).join(', ')||'—';
+  const canAddPartner = typeof userCan !== 'function' || userCan('partneronboarding', 'create');
+  if($('tb-actions')) $('tb-actions').innerHTML = canAddPartner ? '<button class="btn btn-primary" onclick="obNewPartner()">' + ic('plus',16) + 'New partner</button>' : '';
+  const query=String(obListState.q||'').trim().toLowerCase();
+  const filtered=list.slice().reverse().filter(function(p){
+    if(!query) return true;
+    return [p.code,p.displayName,p.shortName].concat((p.registrations||[]).map(function(r){return r.gstin||'';})).join(' ').toLowerCase().indexOf(query)>-1;
+  });
+  const total=filtered.length, pages=Math.max(1,Math.ceil(total/(obListState.size||25)));
+  obListState.page=Math.min(Math.max(1,obListState.page||1),pages);
+  const visible=filtered.slice((obListState.page-1)*obListState.size,obListState.page*obListState.size);
+  const rows=visible.map(function(p){
+    const used=obPartnerUsed(p);
+    const roles=(p.roles||[]).map(function(r){
+      if(r==='JOB_WORKER'||r==='SUPPLIER') return 'Supplier';
+      if(r==='VENDOR') return 'Vendor';
+      if(r==='BUYER') return 'Buyer';
+      return r;
+    }).join(', ')||'—';
     const gst=((p.registrations||[])[0]||{}).gstin||'—';
     return '<tr><td><b>'+esc(p.code||'')+'</b></td><td>'+esc(p.displayName||'')+'</td><td>'+esc(roles)+'</td><td>'+esc(gst)+'</td><td>'+esc(p.status||'Draft')+'</td>'+
       '<td class="actions-cell no-print" onclick="event.stopPropagation()">'+
         '<button class="btn-icon" title="Edit" onclick="obEditPartner(\''+p.id+'\')">'+ic('pencil',15)+'</button>'+
-        '<button class="btn-icon danger" title="Delete" onclick="obDeletePartner(\''+p.id+'\')">'+ic('trash',15)+'</button>'+
+        '<button class="btn-icon danger" title="'+(used?'Cannot delete — partner is used in transactions':'Delete')+'" '+(used?'disabled':'onclick="obDeletePartner(\''+p.id+'\')"')+'>'+ic('trash',15)+'</button>'+ 
       '</td></tr>';
-  }).join('') || '<tr><td colspan="6"><div class="empty"><h3>No partners yet</h3><p>Create a partner and verify GSTIN to auto-fetch legal name, trade name and address.</p></div></td></tr>';
-  $('content').innerHTML='<div class="ob-wrap"><div class="ob-notice"><div>ⓘ</div><div><strong>GST auto-fetch</strong> Enter a 15-character GSTIN and click Verify (or type all 15 digits). Data is pulled from the provider configured in <a href="#" onclick="go(\'gstapi\');return false">GST API connection</a>.</div></div><div class="panel list-panel"><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+  }).join('') || ('<tr><td colspan="6"><div class="empty"><h3>No partners found</h3><p>Create a partner or change the search text.</p>' + (canAddPartner ? '<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="obNewPartner()">' + ic('plus',14) + 'New partner</button></div>' : '') + '</div></td></tr>');
+  const pg={page:obListState.page,pages:pages,size:obListState.size,total:total,from:total?(obListState.page-1)*obListState.size+1:0,to:Math.min(obListState.page*obListState.size,total)};
+  $('content').innerHTML='<div class="ob-wrap"><div class="panel list-panel"><div class="mtools ob-filter-tools"><div class="search msearch">'+ic('search',16)+'<input class="inp" placeholder="Search partner, GSTIN or code" value="'+esc(obListState.q)+'" oninput="obSearch(this)"></div><span class="rowcount" id="ob-count">'+filtered.length+' of '+list.length+'</span><button class="btn btn-ghost btn-sm" id="ob-clear-filters" onclick="obClearFilters()"'+(obListState.q?'':' disabled')+'>Clear filters</button></div><div class="table-wrap"><table><thead><tr><th>Partner code</th><th>Account name</th><th>Roles</th><th>GSTIN</th><th>Status</th><th class="num no-print">Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+pagerBar(pg,'ob','partners')+'</div></div>';
 }
 
 function obDeletePartner(id){
   const rec=partnersDb().find(function(x){return x.id===id;});
   if(!rec) return;
+  if(obPartnerUsed(rec)) return toast('Cannot delete — this partner is used in transactions','red');
   const goDel=function(){
-    fetch('api/modules/partneronboarding.php?id=' + encodeURIComponent(id), { method: 'DELETE' })
-    .then(res => res.json())
-    .then(res => {
-      if(!res.ok) throw new Error(res.error || 'Server error');
-      if(db.masters && db.masters.parties) {
-        db.masters.parties = db.masters.parties.filter(function(x){return x.id!==id;});
-      }
-      toast((rec.code||rec.displayName||'Partner')+' deleted','green');
-      obEditId=null; renderPartnerOnboarding();
-    })
-    .catch(err => {
-      toast(err.message, 'red');
-    });
+    db.partners=partnersDb().filter(function(x){return x.id!==id;});
+    if(db.masters&&db.masters.parties){
+      db.masters.parties=db.masters.parties.filter(function(x){return x.partnerId!==id;});
+    }
+    saveDB();
+    toast((rec.code||rec.displayName||'Partner')+' deleted','green');
+    obEditId=null; render();
   };
   if(typeof confirmDelete==='function'){
     confirmDelete({kind:'partner', name:rec.displayName||rec.code||'this partner', confirmText:'Delete permanently'}, goDel);
@@ -14610,24 +14580,26 @@ function obBackList(){ obEditId=null; render(); }
 
 function obRegHtml(r,i){
   r=r||{};
+  const locked=obRegUsed(r.gstin, obEditId && obEditId!=='new' ? obEditId : '');
+  const disabled=locked?' disabled':'';
   return '<div class="ob-repeat" data-ob-reg>'+
     '<div class="ob-repeat-h"><div><b>GST registration</b> <span class="ob-badge">GSTIN '+(i+1)+'</span></div>'+
-    '<button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-reg]\').remove();obUpdateSummary()">×</button></div>'+
+    (locked?'<span class="ob-badge">Used</span>':'<button type="button" class="btn-icon danger" onclick="this.closest(\'[data-ob-reg]\').remove();obUpdateSummary()">×</button>')+'</div>'+ 
     '<div class="grid-fixed">'+
-      field('GSTIN *','<div class="ob-inline"><input class="inp ob-gstin" data-ob="gstin" maxlength="15" value="'+esc(r.gstin||'')+'" placeholder="27ABCDE1234F1Z5" oninput="obGstinTyped(this)"><button type="button" class="btn btn-ghost btn-sm" onclick="obVerifyGstin(this)">Verify</button></div><div class="ob-ver" data-ob-ver></div>')+
+      field('GSTIN *','<div class="ob-inline"><input class="inp ob-gstin" data-ob="gstin" maxlength="15" value="'+esc(r.gstin||'')+'" placeholder="27ABCDE1234F1Z5" oninput="obGstinTyped(this)"'+disabled+'><button type="button" class="btn btn-ghost btn-sm" onclick="obVerifyGstin(this)"'+disabled+'>Verify</button></div><div class="ob-ver" data-ob-ver></div>')+
       field('PAN','<input class="inp" data-ob="pan" maxlength="10" value="'+esc(r.pan||'')+'" placeholder="Auto from GSTIN" disabled title="Auto-filled from GSTIN">')+
-      field('State / GST state code *','<input class="inp" data-ob="state" value="'+esc(r.state||'')+'" placeholder="Maharashtra / 27">')+
-      field('GST legal name *','<input class="inp" data-ob="legalName" value="'+esc(r.legalName||'')+'" placeholder="Fetched from GST provider">')+
-      field('Trade name *','<input class="inp" data-ob="tradeName" value="'+esc(r.tradeName||'')+'" placeholder="Brand / trade name">')+
+      field('State / GST state code *','<input class="inp" data-ob="state" value="'+esc(r.state||'')+'" placeholder="Maharashtra / 27"'+disabled+'>')+
+      field('GST legal name *','<input class="inp" data-ob="legalName" value="'+esc(r.legalName||'')+'" placeholder="Fetched from GST provider"'+disabled+'>')+
+      field('Trade name *','<input class="inp" data-ob="tradeName" value="'+esc(r.tradeName||'')+'" placeholder="Brand / trade name"'+disabled+'>')+
     '</div>'+
     '<div class="grid-fixed" style="margin-top:8px">'+
-      field('City *','<input class="inp" data-ob="city" value="'+esc(r.city||'')+'">')+
-      field('District *','<input class="inp" data-ob="district" value="'+esc(r.district||'')+'">')+
-      field('State *','<input class="inp" data-ob="placeState" value="'+esc(r.placeState||'')+'">')+
-      field('PIN code *','<input class="inp" data-ob="pincode" maxlength="6" value="'+esc(r.pincode||'')+'">')+
+      field('City *','<input class="inp" data-ob="city" value="'+esc(r.city||'')+'"'+disabled+'>')+
+      field('District','<input class="inp" data-ob="district" value="'+esc(r.district||'')+'"'+disabled+'>')+
+      field('State *','<input class="inp" data-ob="placeState" value="'+esc(r.placeState||'')+'"'+disabled+'>')+
+      field('PIN code *','<input class="inp" data-ob="pincode" maxlength="6" value="'+esc(r.pincode||'')+'"'+disabled+'>')+
     '</div>'+
     '<div class="ob-mini">Principal place of business</div>'+
-    '<div class="grid-fixed">'+field('Full GST address *','<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address">'+esc(r.principalAddress||'')+'</textarea>')+'</div></div>';
+    '<div class="grid-fixed wide-last">'+field('Full GST address','<textarea class="inp" data-ob="principalAddress" rows="2" placeholder="Full GST principal address"'+disabled+'>'+esc(r.principalAddress||'')+'</textarea>')+'</div></div>';
 }
 function obToggleBrand(btn){
   const box=btn.closest('[data-ob-brand]'); if(!box) return;
@@ -14670,11 +14642,14 @@ function renderPartnerForm(rec){
   const contacts=rec.contacts&&rec.contacts.length?rec.contacts:[{}];
   $('content').innerHTML='<div class="ob-wrap"><div>'+
     '<div class="ob-card"><div class="ob-head"><div><div class="ob-title"><span class="ob-num">01</span><h3 style="margin:0">Partner account</h3></div><p class="ob-help">One commercial account even if the partner has several brands or GSTINs.</p></div></div>'+
-    '<div class="grid-fixed">'+field('Account / group name *','<input class="inp" id="ob-name" value="'+esc(rec.displayName||'')+'" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()">')+field('Short name *','<input class="inp" id="ob-short" value="'+esc(rec.shortName||'')+'" placeholder="e.g. ABC Retail">')+
-    '<div class="field" id="ob-biztype" style="max-width:none"><label class="lbl">Business Type *</label><div class="ob-check">'+
-      [['BUYER','Buyer'],['VENDOR','Vendor'],['JOB_WORKER','Job worker']].map(function(r){return '<label><input type="checkbox" data-ob-role="'+r[0]+'"'+(roles.indexOf(r[0])>-1?' checked':'')+' onchange="obUpdateSummary()"> '+r[1]+'</label>';}).join('')+
+    '<div class="grid-fixed ob-account-grid" style="display:flex;flex-wrap:wrap;gap:0 18px;align-items:flex-start">'+field('Account / group name *','<input class="inp" id="ob-name" value="'+esc(rec.displayName||'')+'" placeholder="e.g. ABC Retail Group" oninput="obUpdateSummary()"'+(rec.id?' disabled title="Group name cannot be changed after saving"':'')+'>','ob-account-field')+field('Short name *','<input class="inp" id="ob-short" value="'+esc(rec.shortName||'')+'" placeholder="e.g. ABC Retail">','ob-account-field')+
+    '<div class="field" id="ob-biztype" style="max-width:none;min-width:max-content;flex-shrink:0"><label class="lbl">Business Type *</label><div class="ob-check" style="display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap">'+
+      [['BUYER','Buyer'],['VENDOR','Vendor'],['SUPPLIER','Supplier']].map(function(r){
+        const checked = roles.indexOf(r[0])>-1 || (r[0]==='SUPPLIER' && roles.indexOf('JOB_WORKER')>-1);
+        return '<label style="white-space:nowrap;flex-shrink:0"><input type="checkbox" data-ob-role="'+r[0]+'"'+(checked?' checked':'')+' onchange="obUpdateSummary()"> '+r[1]+'</label>';
+      }).join('')+
     '</div></div>'+
-    '<div class="field" id="ob-pstatus"><label class="lbl">Vendor / Buyer Status *</label>'+
+    '<div class="field" id="ob-pstatus" style="flex-shrink:0"><label class="lbl">Vendor / Buyer Status *</label>'+
       '<input type="hidden" id="ob-status" value="'+esc((rec.status==='Inactive'||rec.status==='INACTIVE')?'Inactive':'Active')+'">'+
       '<button type="button" class="gst-sw'+((rec.status==='Inactive'||rec.status==='INACTIVE')?'':' on')+'" title="Active / Inactive" onclick="obTogglePartnerStatus(this)"><span></span></button>'+
       '<div class="fhint" id="ob-status-lbl">'+((rec.status==='Inactive'||rec.status==='INACTIVE')?'Inactive':'Active')+'</div></div></div>'+
@@ -14744,7 +14719,7 @@ async function obVerifyGstin(btn){
     toast(e.message||'GST lookup failed','red');
   }
 }
-obTypeTimer=null;
+var obTypeTimer = (typeof obTypeTimer !== 'undefined') ? obTypeTimer : null;
 function obPanFromGstin(gstin){
   gstin=String(gstin||'').toUpperCase().replace(/\s/g,'');
   return gstin.length>=12 ? gstin.slice(2,12) : '';
@@ -14799,10 +14774,8 @@ function obSubmitPartner(){
     ['legalName','GST legal name is required'],
     ['tradeName','Trade name is required'],
     ['city','City is required'],
-    ['district','District is required'],
     ['placeState','State is required'],
     ['pincode','PIN code is required'],
-    ['principalAddress','Full GST address is required']
   ];
   for(let i=0;i<cards.length;i++){
     const card=cards[i], n=i+1;
@@ -14817,9 +14790,6 @@ function obSubmitPartner(){
     }
   }
   const registrations=obCardData('[data-ob-reg]');
-<<<<<<< Updated upstream
-  
-=======
   const currentId=(obEditId && obEditId!=='new') ? obEditId : '';
 
   if(obDuplicateExists(displayName,registrations,currentId)) return toast('Duplicate group name — partner was not saved','red');
@@ -14845,50 +14815,30 @@ function obSyncToPartyMaster(rec){
   const legal=g.legalName||rec.displayName;
   const trade=g.tradeName||rec.displayName||rec.shortName;
   const short=g.tradeName||rec.shortName||rec.displayName;
->>>>>>> Stashed changes
   const types=[];
-  if(roles.indexOf('VENDOR')>-1||roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
-  if(roles.indexOf('BUYER')>-1||roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
+  if(rec.roles.indexOf('VENDOR')>-1||rec.roles.indexOf('SUPPLIER')>-1||rec.roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
+  if(rec.roles.indexOf('BUYER')>-1||rec.roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
   if(!types.length) types.push('Supplier');
-  
-  const g=(registrations||[])[0]||{};
-  const legal=g.legalName||displayName;
-  const short=shortName||g.tradeName||displayName;
-
-  const rec={
-    id: (obEditId && obEditId!=='new') ? obEditId : uid(),
-    code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
-    displayName:displayName, shortName:short, roles:roles, status:(($('ob-status')||{}).value==='Inactive'?'Inactive':'Active'),
-    registrations:registrations, brands:obCardData('[data-ob-brand]'), contacts:obCardData('[data-ob-contact]'),
-    updatedAt:Date.now(),
-    legalName:legal, gstNo:g.gstin||'', pan:g.pan||'', address:g.principalAddress||'', city:g.city||'', district:g.district||'', state:g.placeState||g.state||'', pin:g.pincode||'', businessType:types
-  };
-  
-  const btn = window.event ? window.event.target : null;
-  if(btn) btn.disabled = true;
-
-  fetch('api/modules/partneronboarding.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(rec)
-  })
-  .then(res => res.json())
-  .then(res => {
-    if(btn) btn.disabled = false;
-    if(!res.ok) throw new Error(res.error || 'Server error');
-    
-    const arr=partnersDb();
-    const ix=arr.findIndex(function(x){return x.id===rec.id;});
-    if(ix>=0) arr[ix]=Object.assign({},arr[ix],res.record || rec);
-    else { if(!rec.createdAt) rec.createdAt=Date.now(); arr.push(res.record || rec); }
-    
-    toast(rec.code+' saved — GST data stored on the partner','green');
-    obEditId=null; renderPartnerOnboarding();
-  })
-  .catch(err => {
-    if(btn) btn.disabled = false;
-    toast(err.message, 'red');
+  let p=db.masters.parties.find(function(x){return x.partnerId===rec.id || String(x.gstNo||'').toUpperCase()===String(g.gstin||'').toUpperCase();});
+  const billTos = (rec.registrations || []).map(function(r, i){
+    const tName = String(r.tradeName || r.legalName || rec.displayName || ('Trade ' + (i + 1))).trim();
+    return {
+      name: tName,
+      tradeName: tName,
+      legalName: String(r.legalName || '').trim(),
+      gstNo: String(r.gstin || '').trim(),
+      city: String(r.city || '').trim(),
+      district: String(r.district || '').trim(),
+      state: String(r.placeState || r.state || '').trim(),
+      pin: String(r.pincode || '').trim(),
+      address: String(r.principalAddress || '').trim(),
+      gstType: String(r.gstType || '').trim(),
+      active: true
+    };
   });
+  const data={ partnerId:rec.id, legalName:legal, tradeName:trade, shortName:short, registrations:rec.registrations, billTos:billTos, gstNo:g.gstin||'', pan:g.pan||'', address:g.principalAddress||'', city:g.city||'', district:g.district||'', state:g.placeState||g.state||'', pin:g.pincode||'', businessType:types, status:'Active' };
+  if(p) Object.assign(p,data);
+  else db.masters.parties.push(Object.assign({ id:uid(), code:rec.code }, data));
 }
 
 function renderGstApi(){
