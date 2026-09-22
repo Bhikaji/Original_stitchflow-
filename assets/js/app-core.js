@@ -3126,9 +3126,9 @@ function renderDashboard() {
       '<button class="btn btn-primary" onclick="loadDemo()">' + ic('sparkle',16) + 'Load demo data</button>' +
       '<button class="btn btn-ghost" onclick="openForm(\'po\')">' + ic('plus',16) + 'Create PO</button></div></div></div>';
 
+  $('sidefoot').innerHTML = '<span class="dot"></span>Saved to database<div class="sf-sub">Updated ' + new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) + '</div>';
+
   $('content').innerHTML =
-  $('content').innerHTML =
-      $('sidefoot').innerHTML = '<span class="dot"></span>Saved to database<div class="sf-sub">Updated ' + new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) + '</div>';
     '<div class="stats">' +
       statCard('order','Open PO value', fmtINR(poTotal), poOpen.length + ' of ' + db.po.length + ' POs still open', '', "go('po')") +
       statCard('box','Fabric in stock', fmtInventoryNum(stock.m) + '<small> (Meter)</small>', (stock.issuedM > 0 ? fmtInventoryNum(stock.issuedM) + ' m issued · ' : '') + '₹' + fmtInventoryNum(fabricValuation()) + ' value', 'green', "openReportType('fabric_inout_summary')") +
@@ -3137,6 +3137,8 @@ function renderDashboard() {
       statCard('check','FG received', fmtNum(fgRecv) + '<small> pcs</small>', fgStyles + ' styles across job works', 'green', "go('jobwork')") +
       statCard('cash','Sales', fmtINR(saleAmt), '', '', "go('sale')") +
     '</div>' +
+    '<div class="panel" style="margin-bottom:16px"><div class="panel-head"><h3>Production Flow</h3></div><div class="flow">' + flow + '</div></div>' +
+    '<h3>Recent Activity</h3>' + rh +
     '<div id="dash-fabric-summary-widget"></div>' +
     '<div class="dash-trims-inventory-row"><div id="dash-trims-summary-widget"></div><div id="dash-inventory-widget"></div></div>' +
     '<div id="dash-wip-widget"></div>' +
