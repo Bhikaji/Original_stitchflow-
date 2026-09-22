@@ -97,7 +97,7 @@ async function gstFetchProfile(gstin){
   return { profile: normalizeGstProviderResponse(raw,gstin), raw:raw, mode:'live' };
 }
 
-let obEditId=null;
+obEditId=null;
 function partnersDb(){ if(!db.masters) db.masters={}; if(!db.masters.parties) db.masters.parties=[]; return db.masters.parties; }
 function nextPartnerCode(){
   const n=(partnersDb().length||0)+1;
@@ -288,7 +288,7 @@ async function obVerifyGstin(btn){
     toast(e.message||'GST lookup failed','red');
   }
 }
-let obTypeTimer=null;
+obTypeTimer=null;
 function obPanFromGstin(gstin){
   gstin=String(gstin||'').toUpperCase().replace(/\s/g,'');
   return gstin.length>=12 ? gstin.slice(2,12) : '';
