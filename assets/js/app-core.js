@@ -14512,7 +14512,7 @@ function obDuplicateExists(displayName, registrations, currentId){
   return partnersDb().some(function(p){
     if (currentId && p.id===currentId) return false;
     if (nameKey && String(p.displayName||'').trim().toLowerCase()===nameKey) return true;
-    return (p.registrations||[]).some(function(r){return gstKeys.indexOf(String(r.gstin||'').trim().toUpperCase())>-1;});
+    return false;
   });
 }
 function obPartnerUsed(partner){
@@ -14794,10 +14794,10 @@ function obSubmitPartner(){
   const seenGst={};
   for(let i=0;i<registrations.length;i++){
     const gst=String(registrations[i].gstin||'').trim().toUpperCase();
-    if(gst && seenGst[gst]) return obNeed(obRegField(cards[i],'gstin'),'GSTIN is duplicated in this partner');
+    // if(gst && seenGst[gst]) return obNeed(obRegField(cards[i],'gstin'),'GSTIN is duplicated in this partner');
     if(gst) seenGst[gst]=true;
   }
-  if(obDuplicateExists(displayName,registrations,currentId)) return toast('Duplicate group name or GSTIN — partner was not saved','red');
+  if(obDuplicateExists(displayName,registrations,currentId)) return toast('Duplicate group name — partner was not saved','red');
   const rec={
     id: currentId || uid(),
     code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
