@@ -14518,49 +14518,6 @@ function nextPartnerCode(){
 }
 function obField(root,f){ const el=qs('[data-ob="'+f+'"]',root||document); return el?(el.type==='checkbox'?el.checked:el.value):''; }
 function obSet(root,f,v){ const el=qs('[data-ob="'+f+'"]',root||document); if(!el)return; if(el.type==='checkbox') el.checked=!!v; else el.value=v==null?'':v; }
-<<<<<<< Updated upstream
-=======
-function obSearch(value){
-  const input=value && value.nodeType ? value : null;
-  const text=input ? input.value : String(value||'');
-  const caret=input && typeof input.selectionStart==='number' ? input.selectionStart : text.length;
-  obListState.q=text; obListState.page=1; renderPartnerOnboarding();
-  setTimeout(function(){
-    const next=qs('.ob-filter-tools input');
-    if(!next)return;
-    next.focus();
-    try{next.setSelectionRange(caret,caret);}catch(e){}
-  },0);
-}
-function obClearFilters(){ obListState.q=''; obListState.page=1; renderPartnerOnboarding(); }
-function obRegUsed(gstin, partnerId){
-  const key=String(gstin||'').trim().toUpperCase(); if(!key) return false;
-  const parties=(db.masters.parties||[]).filter(function(p){return String(p.gstNo||'').trim().toUpperCase()===key;});
-  if(parties.some(function(p){return p.partnerId!==partnerId;})) return true;
-  const names={};
-  parties.forEach(function(p){[p.name,p.legalName,p.tradeName,p.shortName].forEach(function(v){const n=String(v||'').trim().toLowerCase();if(n)names[n]=true;});});
-  if(!Object.keys(names).length) return false;
-  const used=function(v){return !!names[String(v||'').trim().toLowerCase()];};
-  return (db.po||[]).some(function(r){return used(r.supplier)||used(r.supplierTrade)||used(r.shipTo)||used(r.buyer);}) ||
-    (db.inward||[]).some(function(r){return used(r.supplier)||used(r.supplierTrade);}) ||
-    (db.jobwork||[]).some(function(r){return used(r.vendor);}) ||
-    (db.sample||[]).some(function(r){return used(r.vendor);}) ||
-    (db.sale||[]).some(function(r){return used(r.customer)||used(r.party);}) ||
-    (db.purchasereturn||[]).some(function(r){return used(r.supplier)||used(r.party);});
-}
-function obDuplicateExists(displayName, registrations, currentId){
-  const nameKey=String(displayName||'').trim().toLowerCase();
-  const gstKeys=(registrations||[]).map(function(r){return String(r.gstin||'').trim().toUpperCase();}).filter(Boolean);
-  return partnersDb().some(function(p){
-    if (currentId && p.id===currentId) return false;
-    if (nameKey && String(p.displayName||'').trim().toLowerCase()===nameKey) return true;
-    return false;
-  });
-}
-function obPartnerUsed(partner){
-  return (partner && partner.registrations||[]).some(function(r){return obRegUsed(r.gstin, partner.id);});
-}
->>>>>>> Stashed changes
 
 function renderPartnerOnboarding(){
   const list=partnersDb();
@@ -14817,35 +14774,7 @@ function obSubmitPartner(){
     }
   }
   const registrations=obCardData('[data-ob-reg]');
-<<<<<<< Updated upstream
   
-=======
-  const currentId=(obEditId && obEditId!=='new') ? obEditId : '';
-
-  if(obDuplicateExists(displayName,registrations,currentId)) return toast('Duplicate group name — partner was not saved','red');
-  const rec={
-    id: currentId || uid(),
-    code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
-    displayName:displayName, shortName:shortName, roles:roles, status:(($('ob-status')||{}).value==='Inactive'?'Inactive':'Active'),
-    registrations:registrations, brands:obCardData('[data-ob-brand]'), contacts:obCardData('[data-ob-contact]'),
-    updatedAt:Date.now()
-  };
-  const arr=partnersDb();
-  const ix=arr.findIndex(function(x){return x.id===rec.id;});
-  if(ix>=0) arr[ix]=Object.assign({},arr[ix],rec);
-  else { rec.createdAt=Date.now(); arr.push(rec); }
-  obSyncToPartyMaster(rec);
-  saveDB();
-  toast(rec.code+' saved — GST data stored on the partner','green');
-  obEditId=null; render();
-}
-function obSyncToPartyMaster(rec){
-  if(!db.masters) db.masters={}; if(!db.masters.parties) db.masters.parties=[];
-  const g=(rec.registrations||[])[0]||{};
-  const legal=g.legalName||rec.displayName;
-  const trade=g.tradeName||rec.displayName||rec.shortName;
-  const short=g.tradeName||rec.shortName||rec.displayName;
->>>>>>> Stashed changes
   const types=[];
   if(roles.indexOf('VENDOR')>-1||roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
   if(roles.indexOf('BUYER')>-1||roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
