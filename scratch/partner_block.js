@@ -98,51 +98,7 @@ async function gstFetchProfile(gstin){
 }
 
 obEditId=null;
-function partnersDb(){
-  if(!db.masters) db.masters={};
-  if(!db.masters.parties) db.masters.parties=[];
-  
-  if(db.partners && db.partners.length > 0) {
-    db.partners.forEach(function(legacy) {
-      const idx = db.masters.parties.findIndex(function(p) { return p.partnerId === legacy.id || p.id === legacy.id; });
-      if(idx >= 0) {
-         db.masters.parties[idx] = Object.assign({}, db.masters.parties[idx], legacy, { id: db.masters.parties[idx].id });
-      }
-    });
-    delete db.partners;
-  }
-
-  db.masters.parties.forEach(function(p){
-    if(!p.displayName) p.displayName = p.legalName || p.shortName || '';
-    if(!p.shortName) p.shortName = p.legalName || '';
-    if(!p.roles || !p.roles.length) {
-      p.roles = [];
-      const bt = p.businessTypes || (p.businessType ? [p.businessType] : []);
-      if(bt.indexOf('Supplier')>-1) p.roles.push('VENDOR');
-      if(bt.indexOf('Customer')>-1) p.roles.push('BUYER');
-      if(!p.roles.length) p.roles.push('VENDOR');
-    }
-    if(!p.registrations || !p.registrations.length) {
-      if(p.gstNo) {
-        p.registrations = [{
-          gstin: p.gstNo,
-          legalName: p.legalName,
-          tradeName: p.shortName,
-          pan: p.pan,
-          principalAddress: p.address,
-          city: p.city,
-          district: p.district,
-          state: p.state,
-          pincode: p.pin
-        }];
-      } else {
-        p.registrations = [];
-      }
-    }
-  });
-
-  return db.masters.parties;
-}
+function partnersDb(){ if(!db.masters) db.masters={}; if(!db.masters.parties) db.masters.parties=[]; return db.masters.parties; }
 function nextPartnerCode(){
   const n=(partnersDb().length||0)+1;
   return 'PRT-'+String(n).padStart(4,'0');
