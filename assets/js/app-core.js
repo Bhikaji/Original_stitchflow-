@@ -4700,7 +4700,7 @@ function savePurchaseReturn(id) {
     items, status: prev ? (prev.status || 'Draft') : 'Draft'
   };
   if (id) Object.assign(prev, data);
-  else { data.id = uid(); data.no = nextNo('purchasereturn', 'PR'); data.createdAt = Date.now(); db.purchasereturn.push(data); }
+  else { data.id = uid(); data.no = nextNo('purchasereturn', 'PUR'); data.createdAt = Date.now(); db.purchasereturn.push(data); }
   saveDB(); pageView = null; toast('Purchase Return saved — ' + (prev ? prev.no : data.no), 'green'); render();
 }
 
@@ -15070,7 +15070,9 @@ function obSubmitPartner(){
   // Duplicate validation removed as requested
   const rec={
     id: currentId || uid(),
-    code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
+    code: currentId
+      ? (((partnersDb().find(function(x){return x.id===currentId;}) || {}).code) || nextPartnerCode())
+      : ((($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value),
     displayName:displayName, shortName:shortName, roles:roles, status:(($('ob-status')||{}).value==='Inactive'?'Inactive':'Active'),
     registrations:registrations, brands:obCardData('[data-ob-brand]'), contacts:obCardData('[data-ob-contact]'),
     updatedAt:Date.now()
