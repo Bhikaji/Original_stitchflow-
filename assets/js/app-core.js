@@ -4034,6 +4034,25 @@ function partyTradeOptions(name) {
   return partyTradeRecords(name).map(function (r) { return { v: r.name, l: r.label }; });
 }
 /* Supplier GST registrations available as PO Ship To destinations */
+function allShipToOptions() {
+  const all = [];
+  (db.masters.parties || []).forEach(function(pty) {
+    if (pty.status === 'Inactive') return;
+    const nm = pty.shortName || pty.legalName;
+    if (!nm) return;
+    const records = partyTradeRecords(nm, true);
+    records.filter(function(r) { return !!r.gstNo; }).forEach(function(r) {
+      all.push({ v: r.name + ' · ' + r.gstNo, l: r.label });
+    });
+  });
+  const seen = {};
+  return all.filter(function(o) {
+    if (seen[o.l]) return false;
+    seen[o.l] = true;
+    return true;
+  }).sort(function(a, b) { return String(a.l).localeCompare(String(b.l)); });
+}
+
 function supplierShipToOptions(name) {
   return partyTradeRecords(name, true).filter(function (r) { return !!r.gstNo; }).map(function (r) {
     return { v: r.name + ' · ' + r.gstNo, l: r.label };
@@ -7501,7 +7520,7 @@ function formPO(rec) {
     field('PO Date *', '<input class="inp" type="text" data-date autocomplete="off" disabled id="f-date" value="' + esc(r.date || today()) + '" title="Purchase orders are always dated today">') +
     field('Supplier *', cbox('po-supplier', { opts: supplierPartyOptions(), value: r.supplier || '', f: 'supplier', placeholder: 'Type to search…', free: true, onSet: v => onPoSupplierChange(v) })) +
     field('Supplier Trade Name *', cbox('po-trade', { opts: partyTradeOptions(r.supplier), value: r.supplierTrade || '', f: 'supplierTrade', placeholder: 'Select trade / branch', free: true, onSet: v => onPoTradeChange(v) })) +
-    field('Ship To *', cbox('po-shipto', { opts: supplierShipToOptions(r.supplier), value: r.shipTo || '', f: 'shipTo', placeholder: 'Select supplier GSTIN…', free: true })) +
+    field('Ship To *', cbox('po-shipto', { opts: allShipToOptions(), value: r.shipTo || '', f: 'shipTo', placeholder: 'Select supplier GSTIN…', free: true })) +
     field('GST Type', '<input class="inp" id="f-gsttype" value="' + esc(r.gstType || '') + '" placeholder="Auto after Supplier Trade Name" disabled title="Auto-filled from Supplier Trade Name"><div class="fhint" id="f-gsttype-hint">Select Supplier Trade Name to determine GST Type</div>') +
     field('Buyer *', cbox('po-buyer', { opts: buyerPartyOptions(), value: r.buyer || '', f: 'buyer', placeholder: 'Type to search…', free: true, onSet: v => onPoBuyerChange(v) })) +
     field('Style (Internal ID) *', mcbox('po-styles', {
@@ -7578,21 +7597,7 @@ function onPoSupplierChange(supplier) {
     if (inp) inp.value = '';
     renderCboxList('po-trade');
   }
-  const shipTo = CBOX['po-shipto'];
-  if (shipTo) {
-    shipTo.opts = supplierShipToOptions(supplier).map(normalizeOpt);
-    if (!shipTo.opts.some(function (o) { return o.v === shipTo.val; })) {
-      shipTo.val = ''; shipTo.display = null;
-      const inp = qs('[data-cb-input="po-shipto"]');
-      if (inp) inp.value = '';
-    } else {
-      const selected = shipTo.opts.find(function (o) { return o.v === shipTo.val; });
-      shipTo.display = selected.l;
-      const inp = qs('[data-cb-input="po-shipto"]');
-      if (inp) inp.value = selected.l;
-    }
-    renderCboxList('po-shipto');
-  }
+
   applyPoGstType(supplier);
   onPoTradeChange('');
 }
