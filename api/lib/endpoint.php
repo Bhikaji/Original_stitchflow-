@@ -452,7 +452,7 @@ function sf_record_master_endpoint(string $key): void {
             $id = s($doc['id'] ?? '');
             $isNew = true;
             foreach ((array)$db['masters'][$key] as $i => $ex) {
-                if (is_array($ex) && $id !== '' && s($ex['id'] ?? '') === $id) {
+                if (is_array($ex) && $id !== '' && (s($ex['id'] ?? '') === $id || s($ex['code'] ?? '') === $id)) {
                     $db['masters'][$key][$i] = array_merge($ex, $doc);
                     $doc = $db['masters'][$key][$i];
                     $isNew = false;

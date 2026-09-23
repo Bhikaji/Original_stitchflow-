@@ -15064,10 +15064,10 @@ function obSubmitPartner(){
   const seenGst={};
   for(let i=0;i<registrations.length;i++){
     const gst=String(registrations[i].gstin||'').trim().toUpperCase();
-    if(gst && seenGst[gst]) return obNeed(obRegField(cards[i],'gstin'),'GSTIN is duplicated in this partner');
     if(gst) seenGst[gst]=true;
   }
-  if(obDuplicateExists(displayName,registrations,currentId)) return toast('Duplicate group name or GSTIN — partner was not saved','red');
+  
+  // Duplicate validation removed as requested
   const rec={
     id: currentId || uid(),
     code: (($('ob-code')||{}).value==='AUTO-GENERATED' || !$('ob-code')) ? nextPartnerCode() : $('ob-code').value,
