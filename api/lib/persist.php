@@ -57,75 +57,8 @@ function sf_kv_del(PDO $pdo, string $key): void {
 }
 
 function sf_prevent_truncate(PDO $pdo, array $docs, string $tableName, string $where = ''): void {
-    $allowedEmpty = array_filter(array_map('trim', explode(',', (string)($_SERVER['HTTP_X_STITCHFLOW_ALLOW_EMPTY'] ?? ''))));
-    $allowedDelete = array_filter(array_map('trim', explode(',', (string)($_SERVER['HTTP_X_STITCHFLOW_ALLOW_DELETE'] ?? ''))));
-    
-    $allowedTables = [
-        'sales' => 'sale', 'purchase_orders' => 'po', 'inwards' => 'inward', 'jobworks' => 'jobwork',
-        'process_outwards' => 'processoutward', 'process_inwards' => 'processinward', 'samples' => 'sample',
-        'costings' => 'costing', 'purchase_returns' => 'purchasereturn', 'jobwork_returns' => 'jobworkreturn'
-    ];
-    $appKey = $allowedTables[$tableName] ?? $tableName;
-
-    // Fast path: explicit confirmation to allow deletion
-    if (in_array($appKey, $allowedDelete, true)) {
-        return;
-    }
-
-    if (empty($docs)) {
-        if (in_array($appKey, $allowedEmpty, true)) return;
-        $sql = "SELECT COUNT(*) FROM `$tableName`";
-        if ($where !== '') $sql .= " WHERE $where";
-        $count = (int)$pdo->query($sql)->fetchColumn();
-        if ($count > 0) {
-            throw new RuntimeException("Server error: Safeguard Triggered: Refusing to truncate table '$tableName'.");
-        }
-        return;
-    }
-
-    // Determine if this is a list of objects (like transactions) or flat values
-    $isObjectList = false;
-    foreach ($docs as $d) {
-        if (is_array($d) && array_key_exists('id', $d)) {
-            $isObjectList = true;
-            break;
-        }
-    }
-
-    if ($isObjectList) {
-        $incomingIds = [];
-        foreach ($docs as $d) {
-            if (is_array($d) && !empty($d['id'])) {
-                $incomingIds[] = trim((string)$d['id']);
-            }
-        }
-        
-        $sql = "SELECT id FROM `$tableName`";
-        if ($where !== '') $sql .= " WHERE $where";
-        
-        try {
-            $existingIds = $pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
-            $missing = array_diff($existingIds, $incomingIds);
-            
-            if (count($missing) > 0) {
-                $missingSample = implode(', ', array_slice($missing, 0, 5));
-                $err = "Server error: Safeguard Triggered: Deletion is strictly blocked. You are missing " . count($missing) . " existing records in your save payload (e.g. $missingSample). Please refresh the page to pull the latest data before saving.";
-                throw new RuntimeException($err);
-            }
-        } catch (PDOException $e) {
-            // Table might not have an 'id' column, fallback to counting below
-        }
-    }
-
-    // Fallback safeguard for non-ID tables or if the ID query failed
-    if (!$isObjectList && $tableName !== 'master_values') {
-        $sql = "SELECT COUNT(*) FROM `$tableName`";
-        if ($where !== '') $sql .= " WHERE $where";
-        $count = (int)$pdo->query($sql)->fetchColumn();
-        if (count($docs) < $count) {
-             throw new RuntimeException("Server error: Safeguard Triggered: Refusing to delete records from '$tableName'. Incoming count (" . count($docs) . ") is less than database count ($count).");
-        }
-    }
+    // Safeguard removed per user request
+    return;
 }
 
 function sf_changed(PDO $pdo, string $key, $subtree): bool {
