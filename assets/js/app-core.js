@@ -15096,7 +15096,7 @@ function obSyncToPartyMaster(rec){
   if(rec.roles.indexOf('VENDOR')>-1||rec.roles.indexOf('SUPPLIER')>-1||rec.roles.indexOf('JOB_WORKER')>-1) types.push('Supplier');
   if(rec.roles.indexOf('BUYER')>-1||rec.roles.indexOf('BRAND_OWNER')>-1) types.push('Customer');
   if(!types.length) types.push('Supplier');
-  let p=db.masters.parties.find(function(x){return x.partnerId===rec.id || String(x.gstNo||'').toUpperCase()===String(g.gstin||'').toUpperCase();});
+  let p=db.masters.parties.find(function(x){return x.partnerId===rec.id;});
   const billTos = (rec.registrations || []).map(function(r, i){
     const tName = String(r.tradeName || r.legalName || rec.displayName || ('Trade ' + (i + 1))).trim();
     return {

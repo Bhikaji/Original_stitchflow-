@@ -1,1 +1,8 @@
-<?php require 'api/bootstrap.php'; require 'api/lib/assemble.php'; $db = assemble_db(); $counts = []; foreach($db as $k=>$v) $counts[$k] = is_array($v)?count($v):'not_array'; echo json_encode($counts);
+<?php
+require_once __DIR__ . '/../api/bootstrap.php';
+$pdo = sf_pdo();
+$tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+foreach ($tables as $t) {
+    $count = $pdo->query("SELECT COUNT(*) FROM `$t`")->fetchColumn();
+    echo "$t: $count\n";
+}

@@ -1,0 +1,1 @@
+<?php require_once "../api/bootstrap.php"; echo sf_config()["db"]["name"];
