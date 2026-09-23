@@ -3,14 +3,14 @@ require_once __DIR__ . '/../api/bootstrap.php';
 
 echo "=== 1. Testing Page HTTP Responses ===\n";
 $pages = [
-    'http://localhost/stitchflow/' => 'Dashboard',
-    'http://localhost/stitchflow/index.php?page=po' => 'PO',
-    'http://localhost/stitchflow/pages/po.php' => 'Purchase Orders',
-    'http://localhost/stitchflow/pages/materialinward.php' => 'Material Inward',
-    'http://localhost/stitchflow/pages/jobwork.php' => 'Job Work',
-    'http://localhost/stitchflow/pages/sale.php' => 'Sale',
-    'http://localhost/stitchflow/pages/costing.php' => 'Costing',
-    'http://localhost/stitchflow/pages/masters.php' => 'Masters',
+    'https://kend2c.kenerp.com/' => 'Dashboard',
+    'https://kend2c.kenerp.com/index.php?page=po' => 'PO',
+    'https://kend2c.kenerp.com/pages/po.php' => 'Purchase Orders',
+    'https://kend2c.kenerp.com/pages/materialinward.php' => 'Material Inward',
+    'https://kend2c.kenerp.com/pages/jobwork.php' => 'Job Work',
+    'https://kend2c.kenerp.com/pages/sale.php' => 'Sale',
+    'https://kend2c.kenerp.com/pages/costing.php' => 'Costing',
+    'https://kend2c.kenerp.com/pages/masters.php' => 'Masters',
 ];
 
 foreach ($pages as $url => $expect) {
@@ -27,7 +27,7 @@ foreach ($pages as $url => $expect) {
 echo "\n=== 2. Testing API Data Persistence & Foreign Keys ===\n";
 // Fetch current data
 $ctx = stream_context_create(['http' => ['timeout' => 10]]);
-$dataJson = file_get_contents('http://localhost/stitchflow/api/data.php', false, $ctx);
+$dataJson = file_get_contents('https://kend2c.kenerp.com/api/data.php', false, $ctx);
 $data = json_decode($dataJson, true);
 
 if (!isset($data['db'])) {
@@ -93,7 +93,7 @@ $options = [
     ]
 ];
 $context  = stream_context_create($options);
-$result = file_get_contents('http://localhost/stitchflow/api/data.php', false, $context);
+$result = file_get_contents('https://kend2c.kenerp.com/api/data.php', false, $context);
 $saveRes = json_decode($result, true);
 
 if (!isset($saveRes['ok']) || !$saveRes['ok']) {
@@ -132,7 +132,7 @@ if ($savedItems && $savedItems[0]['item_id'] === $itemId) {
 }
 
 // Verify GET api/data.php returns the new PO with foreign keys
-$freshDataJson = file_get_contents('http://localhost/stitchflow/api/data.php', false, $ctx);
+$freshDataJson = file_get_contents('https://kend2c.kenerp.com/api/data.php', false, $ctx);
 $freshData = json_decode($freshDataJson, true);
 $freshPo = null;
 foreach ($freshData['db']['po'] as $p) {

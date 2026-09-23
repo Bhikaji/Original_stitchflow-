@@ -24,6 +24,11 @@ try {
     $pdo->exec("USE `{$c['name']}`");
     out("Database `{$c['name']}` ready.");
 
+    $st = $pdo->query("SHOW TABLES LIKE 'users'");
+    if ($st && $st->fetch()) {
+        throw new RuntimeException("Database already initialized. Refusing to import schema.sql to prevent data loss.");
+    }
+
     $sql = file_get_contents(__DIR__ . '/schema.sql');
     if ($sql === false) throw new RuntimeException('schema.sql not found');
 

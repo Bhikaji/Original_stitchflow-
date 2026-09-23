@@ -49,6 +49,10 @@
     xhr.open('POST', API, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     try { xhr.setRequestHeader('X-StitchFlow-User', actorHeader()); } catch (e) {}
+    try {
+      var allowEmpty = window.__SF_ALLOW_EMPTY_TABLES;
+      if (Array.isArray(allowEmpty) && allowEmpty.length) xhr.setRequestHeader('X-StitchFlow-Allow-Empty', allowEmpty.join(','));
+    } catch (e) {}
     xhr.onload = function () {
       inflight = false;
       if (xhr.status < 200 || xhr.status >= 300) {
@@ -57,6 +61,7 @@
         try { toast('⚠️ Server: ' + m, 'red'); } catch (e) {}
       } else {
         clearLegacyBrowserData();
+        try { window.__SF_ALLOW_EMPTY_TABLES = []; } catch (e) {}
         try { toast('Database saved successfully', 'green'); } catch (e) {}
       }
       if (queued) { queued = false; pushNow(); }

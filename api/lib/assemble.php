@@ -41,6 +41,11 @@ function assemble_db(): array {
     $db['auditTrail']     = assemble_audit($pdo);
     $db['customReports']  = assemble_custom_reports($pdo);
     $db['users']          = assemble_users($pdo);
+    $saleImports = $pdo->prepare('SELECT v FROM kv_store WHERE k = ?');
+    $saleImports->execute(['saleImports']);
+    $saleImportsJson = $saleImports->fetchColumn();
+    $db['saleImports'] = ($saleImportsJson !== false && is_array(json_decode((string)$saleImportsJson, true)))
+        ? json_decode((string)$saleImportsJson, true) : [];
 
     /* ---- masters ---- */
     $db['masters'] = assemble_masters($pdo);
@@ -89,6 +94,12 @@ function assemble_masters(PDO $pdo): array {
     foreach ($pdo->query('SELECT warehouse, address FROM warehouse_addresses') as $r)
         $wh[$r['warehouse']] = fstr($r['address']);
     $m['warehouseAddr'] = (object)$wh;
+
+    $sellerProgramMap = $pdo->prepare('SELECT v FROM kv_store WHERE k = ?');
+    $sellerProgramMap->execute(['master:sellerProgramMap']);
+    $sellerProgramMapJson = $sellerProgramMap->fetchColumn();
+    $m['sellerProgramMap'] = (object)(($sellerProgramMapJson !== false && is_array(json_decode((string)$sellerProgramMapJson, true)))
+        ? json_decode((string)$sellerProgramMapJson, true) : []);
 
     /* styles */
     $m['styles'] = [];

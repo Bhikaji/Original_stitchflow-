@@ -14,7 +14,7 @@ require_once __DIR__ . '/../bootstrap.php';
 const SF_LIST_MASTERS = [
     'suppliers','customers','colours','fabrics','sizes','categories','classifications',
     'materialTypes','qualities','firms','addresses','boms','raisedForList','countries',
-    'states','districts','talukas','partyStatuses','businessTypes','gstTypes',
+    'states','sellerPrograms','districts','talukas','partyStatuses','businessTypes','gstTypes',
     'paymentTermsList','freightChargesList','transportModes','warehouses','gstRates',
     'uoms','qcResults','returnTypes','washTypes','processTypes',
 ];
@@ -24,10 +24,10 @@ const SF_MODULE_KEYS = ['po','inward','jobwork','processoutward','processinward'
 
 const SF_TOPLEVEL_KNOWN = ['seq','po','inward','jobwork','processoutward','processinward',
     'sample','sale','costing','purchasereturn','jobworkreturn','auditTrail','customReports',
-    'users','masters','gstApiSettings'];
+    'users','masters','saleImports','gstApiSettings'];
 
 const SF_MASTER_META_KEYS = ['masterIds','masterIdSeq','masterStatus','parentMap',
-    'warehouseAddr','companyDetails','loginSettings','menuSettings','parties','items','styles'];
+    'warehouseAddr','sellerProgramMap','companyDetails','loginSettings','menuSettings','parties','items','styles'];
 
 /* scalar list value encoding — non-scalar master entries survive round trips */
 function sf_mv_encode($v): string {
@@ -57,15 +57,73 @@ function sf_kv_del(PDO $pdo, string $key): void {
 }
 
 function sf_prevent_truncate(PDO $pdo, array $docs, string $tableName, string $where = ''): void {
+    $allowedEmpty = array_filter(array_map('trim', explode(',', (string)($_SERVER['HTTP_X_STITCHFLOW_ALLOW_EMPTY'] ?? ''))));
+    $allowedDelete = array_filter(array_map('trim', explode(',', (string)($_SERVER['HTTP_X_STITCHFLOW_ALLOW_DELETE'] ?? ''))));
+    
+    $allowedTables = [
+        'sales' => 'sale', 'purchase_orders' => 'po', 'inwards' => 'inward', 'jobworks' => 'jobwork',
+        'process_outwards' => 'processoutward', 'process_inwards' => 'processinward', 'samples' => 'sample',
+        'costings' => 'costing', 'purchase_returns' => 'purchasereturn', 'jobwork_returns' => 'jobworkreturn'
+    ];
+    $appKey = $allowedTables[$tableName] ?? $tableName;
+
+    // Fast path: explicit confirmation to allow deletion
+    if (in_array($appKey, $allowedDelete, true)) {
+        return;
+    }
+
     if (empty($docs)) {
-        // Allow if the table is already empty (e.g. fresh installation)
+        if (in_array($appKey, $allowedEmpty, true)) return;
         $sql = "SELECT COUNT(*) FROM `$tableName`";
-        if ($where !== '') {
-            $sql .= " WHERE $where";
-        }
+        if ($where !== '') $sql .= " WHERE $where";
         $count = (int)$pdo->query($sql)->fetchColumn();
         if ($count > 0) {
             throw new RuntimeException("Server error: Safeguard Triggered: Refusing to truncate table '$tableName'.");
+        }
+        return;
+    }
+
+    // Determine if this is a list of objects (like transactions) or flat values
+    $isObjectList = false;
+    foreach ($docs as $d) {
+        if (is_array($d) && array_key_exists('id', $d)) {
+            $isObjectList = true;
+            break;
+        }
+    }
+
+    if ($isObjectList) {
+        $incomingIds = [];
+        foreach ($docs as $d) {
+            if (is_array($d) && !empty($d['id'])) {
+                $incomingIds[] = trim((string)$d['id']);
+            }
+        }
+        
+        $sql = "SELECT id FROM `$tableName`";
+        if ($where !== '') $sql .= " WHERE $where";
+        
+        try {
+            $existingIds = $pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
+            $missing = array_diff($existingIds, $incomingIds);
+            
+            if (count($missing) > 0) {
+                $missingSample = implode(', ', array_slice($missing, 0, 5));
+                $err = "Server error: Safeguard Triggered: Deletion is strictly blocked. You are missing " . count($missing) . " existing records in your save payload (e.g. $missingSample). Please refresh the page to pull the latest data before saving.";
+                throw new RuntimeException($err);
+            }
+        } catch (PDOException $e) {
+            // Table might not have an 'id' column, fallback to counting below
+        }
+    }
+
+    // Fallback safeguard for non-ID tables or if the ID query failed
+    if (!$isObjectList && $tableName !== 'master_values') {
+        $sql = "SELECT COUNT(*) FROM `$tableName`";
+        if ($where !== '') $sql .= " WHERE $where";
+        $count = (int)$pdo->query($sql)->fetchColumn();
+        if (count($docs) < $count) {
+             throw new RuntimeException("Server error: Safeguard Triggered: Refusing to delete records from '$tableName'. Incoming count (" . count($docs) . ") is less than database count ($count).");
         }
     }
 }
@@ -179,6 +237,7 @@ function persist_db(array $db, string $actor): array {
         $mSub['_status'] = $masters['masterStatus']  ?? [];
         $mSub['_parent'] = $masters['parentMap']     ?? [];
         $mSub['_whaddr'] = $masters['warehouseAddr'] ?? [];
+        $mSub['_sellerProgramMap'] = $masters['sellerProgramMap'] ?? [];
         if (sf_changed($pdo, 'listmasters', $mSub)) {
             persist_list_masters($pdo, $masters, $actor);
             $written[] = 'masters';
@@ -262,6 +321,13 @@ function persist_db(array $db, string $actor): array {
             }
         }
 
+        /* marketplace import history is part of Sale, but has no normalized
+           relational table; keep it as an explicit server-side JSON document */
+        if (array_key_exists('saleImports', $db) && sf_changed($pdo, 'saleImports', $db['saleImports'])) {
+            sf_kv_set($pdo, 'saleImports', json_encode(is_array($db['saleImports']) ? $db['saleImports'] : [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            $written[] = 'saleImports';
+        }
+
         /* ---- audit trail ---- */
         if (array_key_exists('auditTrail', $db) && sf_changed($pdo, 'auditTrail', $db['auditTrail'])) {
             persist_audit($pdo, is_array($db['auditTrail']) ? $db['auditTrail'] : []);
@@ -303,6 +369,7 @@ function persist_list_masters(PDO $pdo, array $masters, string $actor): void {
     $parents = is_array($masters['parentMap']     ?? null) ? $masters['parentMap']     : [];
     $idSeq   = is_array($masters['masterIdSeq']   ?? null) ? $masters['masterIdSeq']   : [];
     $whAddr  = is_array($masters['warehouseAddr'] ?? null) ? $masters['warehouseAddr'] : [];
+    $sellerProgramMap = is_array($masters['sellerProgramMap'] ?? null) ? $masters['sellerProgramMap'] : [];
     /* these masters are simple string lists, stored in kv pairs */
     $flat = [];
     foreach (SF_LIST_MASTERS as $k) {
@@ -342,6 +409,8 @@ function persist_list_masters(PDO $pdo, array $masters, string $actor): void {
     $pdo->exec('DELETE FROM warehouse_addresses');
     $insWh = $pdo->prepare('INSERT INTO warehouse_addresses (warehouse, address) VALUES (?,?)');
     foreach ($whAddr as $wh => $addr) if (s($wh) !== '') $insWh->execute([s($wh), (string)$addr]);
+
+    sf_kv_set($pdo, 'master:sellerProgramMap', json_encode($sellerProgramMap, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
 function persist_styles(PDO $pdo, array $styles, string $actor): void {
@@ -882,18 +951,18 @@ function persist_sales(PDO $pdo, array $docs, string $actor): void {
         $id = sf_uid($x, $seen, 'sl');
         $p = $prev[s($x['id'] ?? '')] ?? null;
         $ins->execute([
-            $id, s($x['no'] ?? ''), nd($x['date'] ?? ''), nz($x['customer'] ?? ''),
+            $id, s($x['no'] ?? ''), nd($x['date'] ?? ''), mb_substr(nz($x['customer'] ?? '') ?? '', 0, 190),
             sf_resolve_party_id($pdo, $x['customer'] ?? null, $x['customer_id'] ?? null),
-            nz($x['channel'] ?? ''),
+            mb_substr(nz($x['channel'] ?? '') ?? '', 0, 120),
             nz($x['payStatus'] ?? ''), sf_resolve_mval_id($pdo, 'paymentTermsList', $x['payStatus'] ?? null, $x['pay_terms_id'] ?? null),
             nz($x['payMode'] ?? ''), sf_resolve_mval_id($pdo, 'transportModes', $x['payMode'] ?? null, $x['transport_mode_id'] ?? null),
-            nz($x['invoiceNo'] ?? ''), nz($x['notes'] ?? ''),
+            mb_substr(nz($x['invoiceNo'] ?? '') ?? '', 0, 120), nz($x['notes'] ?? ''),
             s($x['status'] ?? 'Open') ?: 'Open', ni($x['createdAt'] ?? null), extra_json($x, $known),
             $p['created_by'] ?? $actor, $actor, $p['created_at'] ?? null,
         ]);
         foreach (array_values(is_array($x['items'] ?? null) ? $x['items'] : []) as $i => $it) {
             if (!is_array($it)) continue;
-            $insItem->execute([$id, $i, nz($it['desc'] ?? ''), sf_resolve_item_id($pdo, $it['desc'] ?? null, $it['item_id'] ?? null),
+            $insItem->execute([$id, $i, mb_substr(nz($it['desc'] ?? '') ?? '', 0, 190), sf_resolve_item_id($pdo, $it['desc'] ?? null, $it['item_id'] ?? null),
                                sf_resolve_mval_id($pdo, 'colours', $it['color'] ?? null, $it['color_id'] ?? null),
                                sf_resolve_mval_id($pdo, 'uoms', $it['unit'] ?? null, $it['unit_id'] ?? null),
                                pf($it['qty'] ?? 0), pf($it['rate'] ?? 0),

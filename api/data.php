@@ -17,14 +17,29 @@ try {
     }
 
     if ($method === 'POST') {
-        $db = sf_read_json_body();
+        $raw = file_get_contents('php://input');
+        file_put_contents(__DIR__ . '/../scratch/post_debug.log', date('Y-m-d H:i:s') . " POST received. Length: " . strlen($raw) . "\n", FILE_APPEND);
+        if ($raw === false || $raw === '') {
+            file_put_contents(__DIR__ . '/../scratch/post_debug.log', date('Y-m-d H:i:s') . " Error: Empty request body\n", FILE_APPEND);
+        }
+        $db = json_decode($raw, true);
         if (!isset($db['masters']) || !is_array($db['masters'])) {
+            file_put_contents(__DIR__ . '/../scratch/post_debug.log', date('Y-m-d H:i:s') . " Error: Missing masters\n", FILE_APPEND);
             sf_fail('Payload does not look like a StitchFlow database (missing masters)', 400);
         }
         $err = sf_validate_db($db);
-        if ($err !== null) sf_fail($err, 422);
-        $written = persist_db($db, sf_actor());
-        sf_json_out(['ok' => true, 'written' => $written]);
+        if ($err !== null) {
+            file_put_contents(__DIR__ . '/../scratch/post_debug.log', date('Y-m-d H:i:s') . " Validation Error: $err\n", FILE_APPEND);
+            sf_fail($err, 422);
+        }
+        try {
+            $written = persist_db($db, sf_actor());
+            file_put_contents(__DIR__ . '/../scratch/post_debug.log', date('Y-m-d H:i:s') . " Success! Written: " . implode(',', $written) . "\n", FILE_APPEND);
+            sf_json_out(['ok' => true, 'written' => $written]);
+        } catch (Exception $e) {
+            file_put_contents(__DIR__ . '/../scratch/post_debug.log', date('Y-m-d H:i:s') . " Persist Exception: " . $e->getMessage() . "\n", FILE_APPEND);
+            throw $e;
+        }
     }
 
     sf_fail('Method not allowed', 405);

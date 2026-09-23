@@ -1,0 +1,7 @@
+<style id="jwr-align">
+
+.jwr-items-table th.num,.jwr-items-table td.num{text-align:left!important}
+.jwr-items-table td .inp,
+.jwr-items-table td .inp.num,
+.jwr-items-table td .cbox{width:100%!important;max-width:100%!important;box-sizing:border-box}
+</style>

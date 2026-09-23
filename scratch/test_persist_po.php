@@ -32,7 +32,7 @@ $newPo = [
 $db['processoutward'][] = $newPo;
 
 // POST to api/data.php
-$ch = curl_init('http://localhost/stitchflow/api/data.php');
+$ch = curl_init('https://kend2c.kenerp.com/api/data.php');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['db' => $db]));

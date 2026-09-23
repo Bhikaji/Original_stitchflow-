@@ -5089,6 +5089,46 @@ function partyTradeByName(partyName, tradeName) {
   });
   return hit || null;
 }
+/* Each supplier GST registration is a distinct Ship To option, even when
+   registrations share the same trade name. */
+function supplierShipToOptions(name) {
+  const pty = partyByName(name);
+  if (!pty) return [];
+  const partner = (db.partners || []).find(function (p) {
+    return (pty.partnerId && p.id === pty.partnerId) ||
+      (pty.gstNo && (p.registrations || []).some(function (r) { return String(r.gstin || '').toUpperCase() === String(pty.gstNo).toUpperCase(); })) ||
+      (String(pty.legalName || '').toLowerCase() === String(p.legalName || '').toLowerCase()) ||
+      (String(pty.shortName || '').toLowerCase() === String(p.shortName || '').toLowerCase());
+  });
+  const records = [];
+  [partner && partner.registrations, pty.billTos, pty.registrations].forEach(function (list) {
+    if (!Array.isArray(list)) return;
+    list.forEach(function (r) {
+      const gst = String((r && (r.gstin || r.gstNo)) || '').trim().toUpperCase();
+      if (!gst || records.some(function (x) { return x.gst === gst; })) return;
+      const trade = String((r && (r.tradeName || r.name || r.legalName)) || pty.tradeName || pty.shortName || pty.legalName || '').trim();
+      if (!trade) return;
+      const place = [r.city, r.placeState || r.state].filter(Boolean).join(', ');
+      records.push({ gst: gst, trade: trade, address: r.principalAddress || r.address || pty.address || '', city: r.city || pty.city || '', state: r.placeState || r.state || pty.state || '', pin: r.pincode || r.pin || pty.pin || '', label: trade + (place ? ' - ' + place : '') + ' - ' + gst });
+    });
+  });
+  return records.map(function (r) { return { v: r.trade + ' | ' + r.gst, l: r.label }; });
+}
+function supplierShipToRecord(supplier, shipTo) {
+  const match = String(shipTo || '').match(/([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z])$/i);
+  if (!match) return null;
+  const pty = partyByName(supplier);
+  if (!pty) return null;
+  const partner = (db.partners || []).find(function (p) {
+    return (pty.partnerId && p.id === pty.partnerId) ||
+      (pty.gstNo && (p.registrations || []).some(function (r) { return String(r.gstin || '').toUpperCase() === String(pty.gstNo).toUpperCase(); })) ||
+      (String(pty.legalName || '').toLowerCase() === String(p.legalName || '').toLowerCase()) ||
+      (String(pty.shortName || '').toLowerCase() === String(p.shortName || '').toLowerCase());
+  });
+  const records = (partner && partner.registrations || []).concat(pty.billTos || [], pty.registrations || []);
+  const r = records.find(function (x) { return String(x.gstin || x.gstNo || '').toUpperCase() === match[1].toUpperCase(); });
+  return r || null;
+}
 /* items limited to a classification (all items when none picked) */
 /* Helper to stem common singular/plural suffixes */
 function stemWord(w) {
@@ -5909,6 +5949,7 @@ function printPO(id) {
   const party = partyByName(r.supplier);
   const trade = partyTradeByName(r.supplier, r.supplierTrade);
   const shipParty = partyByName(r.shipTo);
+  const shipTrade = supplierShipToRecord(r.supplier, r.shipTo);
   const firmTrade = null;
 
   const line = function (lbl, val) {
@@ -5967,11 +6008,12 @@ function printPO(id) {
     : (party ? [party.address,party.city,party.state,party.pin].filter(Boolean).join(', ') : '');
   const supplierGst = trade ? trade.gstNo : (party ? party.gstNo : '');
   const supplierState = trade ? trade.state : (party ? party.state : '');
-  const shipName = shipParty ? (shipParty.legalName || shipParty.shortName) : (r.shipTo || PRINT_CO.name);
-  const shipAddr = shipParty ? [shipParty.address,shipParty.city,shipParty.state,shipParty.pin].filter(Boolean).join(', ')
-    : PRINT_CO.works.replace(/^Works:\s*/i, '');
-  const shipGst = shipParty ? shipParty.gstNo : PRINT_CO.gstNo;
-  const shipState = shipParty ? shipParty.state : PRINT_CO.state;
+  const shipName = shipTrade ? (shipTrade.tradeName || shipTrade.name || shipTrade.legalName) : (shipParty ? (shipParty.legalName || shipParty.shortName) : (r.shipTo || PRINT_CO.name));
+  const shipAddr = shipTrade ? [shipTrade.principalAddress || shipTrade.address, shipTrade.city, shipTrade.placeState || shipTrade.state, shipTrade.pincode || shipTrade.pin].filter(Boolean).join(', ')
+    : (shipParty ? [shipParty.address,shipParty.city,shipParty.state,shipParty.pin].filter(Boolean).join(', ')
+    : PRINT_CO.works.replace(/^Works:\s*/i, ''));
+  const shipGst = shipTrade ? (shipTrade.gstin || shipTrade.gstNo) : (shipParty ? shipParty.gstNo : PRINT_CO.gstNo);
+  const shipState = shipTrade ? (shipTrade.placeState || shipTrade.state) : (shipParty ? shipParty.state : PRINT_CO.state);
 
   const doc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Purchase Order ' + esc(r.no) + ' | ' + esc(PRINT_CO.name) + '</title><style>' +
     ':root{--ink:#172033;--muted:#667085;--line:#cfd6df;--soft:#f4f7fa;--brand:#173f67;--brand2:#eaf1f8}' +
@@ -6043,11 +6085,13 @@ function printInward(id) {
 
   const coWorks = (PRINT_CO.works || '').replace(/^Works:\s*/i, '');
   const shipParty = po ? partyByName(po.shipTo) : null;
-  const shipName = shipParty ? (shipParty.legalName || shipParty.shortName) : (r.warehouse ? (PRINT_CO.name + ' — ' + r.warehouse) : (po && po.shipTo ? po.shipTo : PRINT_CO.name));
-  const shipAddr = shipParty ? [shipParty.address, shipParty.city, shipParty.state, shipParty.pin].filter(Boolean).join(', ')
-    : (coWorks || PRINT_CO.reg);
-  const shipGst = shipParty ? (shipParty.gstNo || PRINT_CO.gstNo) : PRINT_CO.gstNo;
-  const shipState = shipParty ? (shipParty.state || PRINT_CO.state) : PRINT_CO.state;
+  const shipTrade = po ? supplierShipToRecord(po.supplier, po.shipTo) : null;
+  const shipName = shipTrade ? (shipTrade.tradeName || shipTrade.name || shipTrade.legalName) : (shipParty ? (shipParty.legalName || shipParty.shortName) : (r.warehouse ? (PRINT_CO.name + ' — ' + r.warehouse) : (po && po.shipTo ? po.shipTo : PRINT_CO.name)));
+  const shipAddr = shipTrade ? [shipTrade.principalAddress || shipTrade.address, shipTrade.city, shipTrade.placeState || shipTrade.state, shipTrade.pincode || shipTrade.pin].filter(Boolean).join(', ')
+    : (shipParty ? [shipParty.address, shipParty.city, shipParty.state, shipParty.pin].filter(Boolean).join(', ')
+    : (coWorks || PRINT_CO.reg));
+  const shipGst = shipTrade ? (shipTrade.gstin || shipTrade.gstNo || PRINT_CO.gstNo) : (shipParty ? (shipParty.gstNo || PRINT_CO.gstNo) : PRINT_CO.gstNo);
+  const shipState = shipTrade ? (shipTrade.placeState || shipTrade.state || PRINT_CO.state) : (shipParty ? (shipParty.state || PRINT_CO.state) : PRINT_CO.state);
 
   const isInterState = supplierState && PRINT_CO.state && supplierState.toLowerCase().trim() !== PRINT_CO.state.toLowerCase().trim();
 
@@ -8354,7 +8398,7 @@ function formPO(rec) {
     field('PO Date *', '<input class="inp" type="text" data-date autocomplete="off" disabled id="f-date" value="' + esc(r.date || today()) + '" title="Purchase orders are always dated today">') +
     field('Supplier *', cbox('po-supplier', { opts: db.masters.suppliers, value: r.supplier || '', f:'supplier', placeholder:'Type to search…', addMaster:'suppliers', addText:'Suppliers', free:true, onSet: v => onPoSupplierChange(v) })) +
     field('Supplier Trade Name *', cbox('po-trade', { opts: partyTradeOptions(r.supplier), value: r.supplierTrade || '', f:'supplierTrade', placeholder:'Select trade / branch', free:true, onSet: v => onPoTradeChange(v) })) +
-    field('Ship To *', cbox('po-shipto', { opts: partyOptions(), value: r.shipTo || '', f:'shipTo', placeholder:'Select party…', free:true })) +
+    field('Ship To *', cbox('po-shipto', { opts: supplierShipToOptions(r.supplier), value: r.shipTo || '', f:'shipTo', placeholder:'Select supplier GSTIN…', free:true })) +
     field('GST Type', '<input class="inp" id="f-gsttype" value="' + esc(r.gstType || '') + '" placeholder="Auto after Supplier Trade Name" disabled title="Auto-filled from Supplier Trade Name"><div class="fhint" id="f-gsttype-hint">Select Supplier Trade Name to determine GST Type</div>') +
     field('Buyer *', cbox('po-buyer', { opts: (typeof buyerPartyOptions === 'function' ? buyerPartyOptions() : db.masters.customers), value: r.buyer || '', f:'buyer', placeholder:'Type to search…', addMaster:'customers', addText:'Customers', free:true, onSet: v => onPoBuyerChange(v) })) +
     field('Style (Internal ID) *', mcbox('po-styles', { opts: styleOpts(r.buyer),
@@ -8428,6 +8472,21 @@ function onPoSupplierChange(supplier) {
     const inp = qs('[data-cb-input="po-trade"]');
     if (inp) inp.value = '';
     renderCboxList('po-trade');
+  }
+  const shipTo = CBOX['po-shipto'];
+  if (shipTo) {
+    shipTo.opts = supplierShipToOptions(supplier).map(normalizeOpt);
+    if (!shipTo.opts.some(function (o) { return o.v === shipTo.val; })) {
+      shipTo.val = ''; shipTo.display = null;
+      const inp = qs('[data-cb-input="po-shipto"]');
+      if (inp) inp.value = '';
+    } else {
+      const selected = shipTo.opts.find(function (o) { return o.v === shipTo.val; });
+      shipTo.display = selected.l;
+      const inp = qs('[data-cb-input="po-shipto"]');
+      if (inp) inp.value = selected.l;
+    }
+    renderCboxList('po-shipto');
   }
   applyPoGstType(supplier);
   onPoTradeChange('');
