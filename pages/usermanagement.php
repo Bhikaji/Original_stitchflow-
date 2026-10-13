@@ -5,6 +5,10 @@ $pageHeading = 'User Management';
 $pageSub = 'Users, roles and module-level access control';
 $basePath = isset($basePath) ? $basePath : '../';
 require_once __DIR__ . '/../includes/header.php';
+if ($currentUser && ($currentUser['role'] ?? '') !== 'Admin') {
+    header('Location: ' . $basePath . 'index.php?page=dashboard&access_denied=1');
+    exit;
+}
 require_once __DIR__ . '/../includes/sidebar.php';
 ?>
 <main class="main">

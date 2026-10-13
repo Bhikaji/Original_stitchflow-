@@ -1,0 +1,2 @@
+# Defense-in-depth: Deny all web access to documentation directory
+Require all denied

@@ -5,6 +5,10 @@ $pageHeading = 'GST API connection';
 $pageSub = 'Configure third-party GST provider and auto-fetch taxpayer data';
 $basePath = isset($basePath) ? $basePath : '../';
 require_once __DIR__ . '/../includes/header.php';
+if ($currentUser && ($currentUser['role'] ?? '') !== 'Admin') {
+    header('Location: ' . $basePath . 'index.php?page=dashboard&access_denied=1');
+    exit;
+}
 require_once __DIR__ . '/../includes/sidebar.php';
 ?>
 <main class="main">

@@ -5,6 +5,9 @@
 declare(strict_types=1);
 require_once __DIR__ . '/../lib/endpoint.php';
 
+sf_require_auth();
+sf_require_perm('modules', 'reports', 'view');
+
 $report = s($_GET['report'] ?? 'stock');
 $db = sf_load_db();
 $rows = [];

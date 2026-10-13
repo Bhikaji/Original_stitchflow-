@@ -27,11 +27,13 @@ jobs:
             echo "Updating application..."
             git reset --hard origin/main
 
-            echo "Cleaning old files..."
-            git clean -fd
+            echo "Cleaning old files safely..."
+            git clean -fd -e .env -e uploads/ -e storage/ -e backups/
 
             echo "Running database schema migration..."
-            php migrate.php
+            if [ -f api/migrations/002_harden_erp_schema.php ]; then
+              php api/migrations/002_harden_erp_schema.php
+            fi
 
             echo "Deployment completed."
 

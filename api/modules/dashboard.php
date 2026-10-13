@@ -3,6 +3,9 @@
 declare(strict_types=1);
 require_once __DIR__ . '/../lib/endpoint.php';
 
+sf_require_auth();
+sf_require_perm('modules', 'dashboard', 'view');
+
 $db = sf_load_db();
 $cnt = fn($k) => count(array_filter((array)($db[$k] ?? []), 'is_array'));
 $byStatus = function ($k) use ($db) {

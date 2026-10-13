@@ -5,6 +5,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/../lib/endpoint.php';
 
+sf_require_auth();
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $db = sf_load_db();
 $users = array_values(array_filter((array)($db['users'] ?? []), 'is_array'));
@@ -12,16 +13,29 @@ $users = array_values(array_filter((array)($db['users'] ?? []), 'is_array'));
 if ($method === 'GET') {
     $id = s($_GET['id'] ?? '');
     if ($id !== '') {
-        foreach ($users as $u) if (s($u['id'] ?? '') === $id || lc($u['username'] ?? '') === lc($id)) sf_json_out(['ok' => true, 'record' => $u]);
+        foreach ($users as $u) {
+            if (s($u['id'] ?? '') === $id || lc($u['username'] ?? '') === lc($id)) {
+                unset($u['pin']);
+                sf_json_out(['ok' => true, 'record' => $u]);
+            }
+        }
         sf_fail('User not found', 404);
     }
-    sf_json_out(['ok' => true, 'module' => 'usermanagement'] + sf_listing($users, $_GET));
+    $sanitized = array_map(function ($u) {
+        unset($u['pin']);
+        return $u;
+    }, $users);
+    sf_json_out(['ok' => true, 'module' => 'usermanagement'] + sf_listing($sanitized, $_GET));
 }
 
 if ($method === 'POST' || $method === 'PUT') {
+    sf_require_role(['Admin']);
     $doc = sf_read_json_body();
-    if (isset($doc['pin']) && s($doc['pin']) !== '' && strncmp(s($doc['pin']), 'sha256:', 7) !== 0) {
-        $doc['pin'] = 'sha256:' . hash('sha256', s($doc['pin']));   // hashPin() equivalent
+    if (isset($doc['pin']) && s($doc['pin']) !== '') {
+        $rawPin = s($doc['pin']);
+        if (strpos($rawPin, '$2y$') !== 0 && strpos($rawPin, '$argon2id$') !== 0) {
+            $doc['pin'] = password_hash($rawPin, PASSWORD_DEFAULT);
+        }
     }
     $id = s($doc['id'] ?? '');
     $isNew = true;
@@ -48,6 +62,7 @@ if ($method === 'POST' || $method === 'PUT') {
 }
 
 if ($method === 'DELETE') {
+    sf_require_role(['Admin']);
     $id = s($_GET['id'] ?? '');
     if ($id === '') sf_fail('id is required', 400);
     if ($id === 'USR-0001') sf_fail('The root System Administrator cannot be deleted', 422);

@@ -1,5 +1,6 @@
 <?php
-/* CLI-only database backup. Configure the two-hour schedule in cPanel Cron Jobs. */
+/* CLI-only database backup with local disk retention & optional Google Drive upload.
+   Configure cron schedule in cPanel or Task Scheduler. */
 declare(strict_types=1);
 
 if (PHP_SAPI !== 'cli') {
@@ -15,28 +16,49 @@ $googleClientSecret = getenv('STITCHFLOW_GOOGLE_CLIENT_SECRET') ?: '';
 $googleRefreshToken = getenv('STITCHFLOW_GOOGLE_REFRESH_TOKEN') ?: '';
 $driveFolderId = getenv('STITCHFLOW_DRIVE_FOLDER_ID') ?: '1COCYE739q8-5GUpf0J8HwT757Q5ZJSs0';
 $recipient = getenv('STITCHFLOW_BACKUP_EMAIL') ?: '';
-$backupDir = getenv('STITCHFLOW_BACKUP_DIR') ?: sys_get_temp_dir();
-$mysqldump = getenv('STITCHFLOW_MYSQLDUMP') ?: '/usr/bin/mysqldump';
 
-if ($driveFolderId === '' || (($googleClientId === '' || $googleClientSecret === '' || $googleRefreshToken === '') && $driveCredentialsFile === '')) {
-    fwrite(STDERR, "Google Drive backup is not configured. Set OAuth credentials or STITCHFLOW_DRIVE_SERVICE_ACCOUNT_FILE, plus STITCHFLOW_DRIVE_FOLDER_ID.\n");
-    exit(1);
+$backupDir = getenv('STITCHFLOW_BACKUP_DIR') ?: (__DIR__ . DIRECTORY_SEPARATOR . 'backups');
+$mysqldump = getenv('STITCHFLOW_MYSQLDUMP') ?: (
+    is_file('C:\\xampp2\\mysql\\bin\\mysqldump.exe') ? 'C:\\xampp2\\mysql\\bin\\mysqldump.exe' : (
+        is_file('/usr/bin/mysqldump') ? '/usr/bin/mysqldump' : 'mysqldump'
+    )
+);
+
+if (!is_dir($backupDir)) {
+    if (!mkdir($backupDir, 0700, true) && !is_dir($backupDir)) {
+        fwrite(STDERR, "Backup directory could not be created: {$backupDir}\n");
+        exit(1);
+    }
 }
-if (!is_dir($backupDir) && !mkdir($backupDir, 0700, true) && !is_dir($backupDir)) {
-    fwrite(STDERR, "Backup directory could not be created.\n");
-    exit(1);
+
+// SEC-16: Ensure backups directory is protected against direct web HTTP requests
+$htaccessPath = rtrim($backupDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.htaccess';
+if (!is_file($htaccessPath)) {
+    file_put_contents($htaccessPath, "<IfModule authz_core_module>\n    Require all denied\n</IfModule>\n<IfModule !authz_core_module>\n    Deny from all\n</IfModule>\n");
 }
 
 $stamp = gmdate('Y-m-d_H-i-s');
 $sqlPath = rtrim($backupDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'stitchflow_' . $stamp . '.sql';
 $zipPath = $sqlPath . '.gz';
+
+// SEC-09 Hardening: Avoid passing password in command-line arguments to prevent process-table exposure
+$tempCnf = tempnam($backupDir, 'sf_mycnf_');
+if ($tempCnf === false) {
+    fwrite(STDERR, "Unable to create secure temporary database config file.\n");
+    exit(1);
+}
+@chmod($tempCnf, 0600);
+$cnfContent = "[client]\n"
+    . "host=" . addcslashes((string)$db['host'], "\n\r\"") . "\n"
+    . "port=" . (int)$db['port'] . "\n"
+    . "user=" . addcslashes((string)$db['user'], "\n\r\"") . "\n"
+    . "password=" . addcslashes((string)$db['pass'], "\n\r\"") . "\n";
+file_put_contents($tempCnf, $cnfContent);
+
 $command = implode(' ', [
     escapeshellarg($mysqldump),
+    '--defaults-extra-file=' . escapeshellarg($tempCnf),
     '--single-transaction --quick --routines --triggers --hex-blob',
-    '--host=' . escapeshellarg((string) $db['host']),
-    '--port=' . escapeshellarg((string) $db['port']),
-    '--user=' . escapeshellarg((string) $db['user']),
-    '--password=' . escapeshellarg((string) $db['pass']),
     escapeshellarg((string) $db['name']),
     '>', escapeshellarg($sqlPath), '2>&1',
 ]);
@@ -44,6 +66,7 @@ $command = implode(' ', [
 $output = [];
 $status = 0;
 exec($command, $output, $status);
+@unlink($tempCnf);
 if ($status !== 0 || !is_file($sqlPath) || filesize($sqlPath) === 0) {
     @unlink($sqlPath);
     fwrite(STDERR, "Database export failed: " . implode(' ', $output) . "\n");
@@ -67,13 +90,54 @@ fclose($input);
 gzclose($outputFile);
 @unlink($sqlPath);
 
+$uploadPath = $zipPath;
+$uploadMime = 'application/gzip';
+$encryptionKey = getenv('STITCHFLOW_BACKUP_ENCRYPTION_KEY') ?: '';
+if ($encryptionKey !== '') {
+    $encPath = $zipPath . '.enc';
+    $iv = random_bytes(16);
+    $plaintext = file_get_contents($zipPath);
+    if ($plaintext !== false) {
+        $ciphertext = openssl_encrypt($plaintext, 'aes-256-cbc', hash('sha256', $encryptionKey, true), OPENSSL_RAW_DATA, $iv);
+        if ($ciphertext !== false) {
+            file_put_contents($encPath, $iv . $ciphertext);
+            $uploadPath = $encPath;
+            $uploadMime = 'application/octet-stream';
+            echo "Backup encrypted with AES-256-CBC at rest: {$encPath} (" . round(filesize($encPath) / 1024, 1) . " KB)\n";
+        }
+    }
+}
+
+echo "Local database backup created successfully: {$zipPath} (" . round(filesize($zipPath) / 1024, 1) . " KB)\n";
+
+// DB-03 Retention: Prune local copies, keeping the latest 14 backups
+$files = glob(rtrim($backupDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'stitchflow_*.sql.gz*') ?: [];
+rsort($files, SORT_STRING);
+$pruned = 0;
+foreach (array_slice($files, 14) as $oldFile) {
+    if (@unlink($oldFile)) $pruned++;
+}
+if ($pruned > 0) {
+    echo "Retention policy: Pruned {$pruned} older local backup(s).\n";
+}
+
+// Google Drive cloud upload (if configured)
+$hasOAuth = ($googleClientId !== '' && $googleClientSecret !== '' && $googleRefreshToken !== '');
+$hasServiceAccount = ($driveCredentialsFile !== '' && is_file($driveCredentialsFile));
+
+if (!$hasOAuth && !$hasServiceAccount) {
+    echo "Cloud backup skipped: Google Drive credentials not configured. Local backup is safely retained.\n";
+    exit(0);
+}
+
 $tokenRequest = [
     'grant_type' => 'refresh_token',
     'client_id' => $googleClientId,
     'client_secret' => $googleClientSecret,
     'refresh_token' => $googleRefreshToken,
 ];
-if ($googleClientId === '' || $googleClientSecret === '' || $googleRefreshToken === '') {
+
+if (!$hasOAuth && $hasServiceAccount) {
     $credentials = json_decode((string) @file_get_contents($driveCredentialsFile), true);
     if (!is_array($credentials) || empty($credentials['client_email']) || empty($credentials['private_key'])) {
         fwrite(STDERR, "Google Drive service-account credentials could not be read.\n");
@@ -101,6 +165,7 @@ if ($googleClientId === '' || $googleClientSecret === '' || $googleRefreshToken 
         'assertion' => $signingInput . '.' . $base64Url($signature),
     ];
 }
+
 $tokenCurl = curl_init('https://oauth2.googleapis.com/token');
 curl_setopt_array($tokenCurl, [
     CURLOPT_POST => true,
@@ -120,17 +185,17 @@ if (!is_array($tokenResponse) || empty($tokenResponse['access_token'])) {
 }
 
 $metadata = json_encode([
-    'name' => basename($zipPath),
+    'name' => basename($uploadPath),
     'parents' => [$driveFolderId],
     'description' => 'Automated StitchFlow database backup generated at ' . $stamp . ' UTC.',
 ], JSON_THROW_ON_ERROR);
 $boundary = '=_stitchflow_drive_' . bin2hex(random_bytes(12));
-$fileData = (string) @file_get_contents($zipPath);
+$fileData = (string) @file_get_contents($uploadPath);
 $multipartBody = '--' . $boundary . "\r\n"
     . "Content-Type: application/json; charset=UTF-8\r\n\r\n"
     . $metadata . "\r\n"
     . '--' . $boundary . "\r\n"
-    . "Content-Type: application/gzip\r\n\r\n"
+    . "Content-Type: " . $uploadMime . "\r\n\r\n"
     . $fileData . "\r\n"
     . '--' . $boundary . "--\r\n";
 $ch = curl_init('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink');
@@ -166,8 +231,3 @@ if ($recipient !== '') {
     $sent = mail($recipient, $subject, "Backup uploaded to Google Drive: " . ($driveFile['name'] ?? basename($zipPath)) . "\r\n");
     if (!$sent) fwrite(STDERR, "Drive upload succeeded, but email notification failed.\n");
 }
-
-// Keep only the latest seven local copies after the Drive upload succeeds.
-$files = glob(rtrim($backupDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'stitchflow_*.sql.gz') ?: [];
-rsort($files, SORT_STRING);
-foreach (array_slice($files, 7) as $oldFile) @unlink($oldFile);

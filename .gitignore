@@ -1,0 +1,23 @@
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Backups & database dumps
+backups/
+*.sql.gz
+*.sql
+
+# User uploads (keep .htaccess and index.html)
+uploads/*
+!uploads/.htaccess
+!uploads/index.html
+
+# Storage (throttles & sessions)
+storage/*
+!storage/.htaccess
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -23,10 +23,21 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
-/* ---- CORS (harmless same-origin; allows testing from other origins) */
-header('Access-Control-Allow-Origin: *');
+sf_require_auth();
+
+/* ---- CORS: Same-origin by default, strictly no wildcard origins ---- */
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin !== '') {
+    $host = parse_url($origin, PHP_URL_HOST);
+    $serverHost = parse_url('http://' . ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_HOST);
+    if ($host && $serverHost && strcasecmp((string)$host, (string)$serverHost) === 0) {
+        header('Access-Control-Allow-Origin: ' . htmlspecialchars($origin, ENT_QUOTES));
+        header('Access-Control-Allow-Credentials: true');
+        header('Vary: Origin');
+    }
+}
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token, X-Requested-With');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
 /* ---- GSTIN validation: format + mod-36 checksum (gstinValid() port) */
@@ -142,13 +153,26 @@ if (trim($cfg['baseUrl']) === '') {
     sf_fail('No GST provider configured on the server — set Base URL + API key on the GST API connection screen and click Save settings (they are stored in MySQL and used by this proxy).', 422);
 }
 
-/* Call the third-party GST provider from the server (no CORS, key hidden) */
+/* Call the third-party GST provider from the server (with SSRF protection) */
 $url = gst_build_url($cfg, $gstin);
+$parsedUrl = parse_url($url);
+if (empty($parsedUrl['scheme']) || !in_array(strtolower($parsedUrl['scheme']), ['https', 'http'], true)) {
+    sf_fail('Invalid GST provider URL scheme — HTTPS required.', 400);
+}
+$targetHost = strtolower($parsedUrl['host'] ?? '');
+if ($targetHost === '' || in_array($targetHost, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)) {
+    sf_fail('Invalid GST provider host — localhost and loopback targets prohibited.', 400);
+}
+$targetIp = gethostbyname($targetHost);
+if (filter_var($targetIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+    sf_fail('Invalid GST provider host — private and reserved IP ranges prohibited.', 400);
+}
+
 $ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_MAXREDIRS      => 3,
+    CURLOPT_FOLLOWLOCATION => false, // Prevent redirect-based SSRF
+    CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS | CURLPROTO_HTTP,
     CURLOPT_CONNECTTIMEOUT => min(15, $cfg['timeout']),
     CURLOPT_TIMEOUT        => $cfg['timeout'],
     CURLOPT_HTTPHEADER     => gst_auth_headers($cfg),

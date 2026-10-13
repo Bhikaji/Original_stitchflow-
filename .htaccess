@@ -1,12 +1,162 @@
-# Deny direct web access to internal files
-<FilesMatch "^(config\.php|db\.sql)$">
-  Require all denied
+# =====================================================================
+# StitchFlow ERP — Apache Security & Access Hardening (Final)
+# Requires Apache 2.4+ with: mod_rewrite, mod_headers, mod_authz_core
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# 0. INSTALLER SWITCH
+#    To run setup.php / check_db.php once: set the variable below to 1,
+#    open the page, then set it back to 0 (or delete those files).
+# ---------------------------------------------------------------------
+SetEnv STITCHFLOW_INSTALLER 0
+
+# ---------------------------------------------------------------------
+# 1. Basic server behaviour
+# ---------------------------------------------------------------------
+Options -Indexes -MultiViews
+ServerSignature Off
+DirectoryIndex index.php
+
+# Max request body (data.php POSTs the whole db as JSON; raise on 413 errors)
+LimitRequestBody 52428800
+
+# ---------------------------------------------------------------------
+# 2. Block hidden files, VCS, backups, configs, dumps, docs
+# ---------------------------------------------------------------------
+<FilesMatch "^\.">
+    Require all denied
 </FilesMatch>
 
-# Deny listing of includes directory contents directly (they're include-only)
+<FilesMatch "\.(sql|log|yml|yaml|env|md|ini|sh|bak|backup|old|orig|save|swp|tmp|dist|lock|inc|tpl|twig)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "~$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(composer\.(json|lock)|package(-lock)?\.json|yarn\.lock|Makefile|Dockerfile|docker-compose\.ya?ml|phpunit\.xml.*|web\.config|LICENSE|README.*)$">
+    Require all denied
+</FilesMatch>
+
+# Known internal scripts and database files
+<FilesMatch "^(config\.php|db\.sql|schema\.sql|data_only\.sql|backup_database\.php|migrate.*\.php|extract_.*\.php|profile_load\.php)$">
+    Require all denied
+</FilesMatch>
+
+# Installer scripts: blocked unless the installer switch is on
+<FilesMatch "^(setup|check_db)\.php$">
+    <RequireAny>
+        Require expr "%{ENV:STITCHFLOW_INSTALLER} == '1'"
+    </RequireAny>
+</FilesMatch>
+
+# ---------------------------------------------------------------------
+# 3. Rewrite rules (allowlist for PHP + directory blocking)
+# ---------------------------------------------------------------------
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteRule ^includes/ - [F,L]
+    RewriteEngine On
+
+    # Block dangerous HTTP methods (REST verbs GET/POST/PUT/PATCH/DELETE/OPTIONS/HEAD stay allowed)
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK|CONNECT) [NC]
+    RewriteRule .* - [F,L]
+
+    # Internal / development directories
+    RewriteRule ^(includes|scratch|docs|tests?|vendor|node_modules|backups?|logs?|\.git|\.github)(/|$) - [F,L]
+
+    # api/lib and api/bootstrap.php are include-only, never called directly
+    RewriteRule ^api/lib(/|$) - [F,L]
+    RewriteRule ^api/bootstrap\.php$ - [F,L]
+
+    # Allowlist: only index.php (plus the installer scripts when the switch is on)
+    RewriteCond %{ENV:STITCHFLOW_INSTALLER} !^1$
+    RewriteRule ^(?!index\.php$)[^/]+\.php$ - [F,L]
+
+    RewriteCond %{ENV:STITCHFLOW_INSTALLER} =1
+    RewriteRule ^(?!index\.php$|setup\.php$|check_db\.php$)[^/]+\.php$ - [F,L]
+
+    # No PHP execution inside static/asset/app folders
+    RewriteRule ^(app|assets|uploads|files|public)/.*\.(php|phtml|php[0-9]|phar)$ - [F,L]
+
+    # Block common scanner probes and encoded traversal attempts
+    RewriteCond %{QUERY_STRING} (\.\./|\.\.%2f|%2e%2e|%00|<script|base64_decode\(|union(\s|%20)+select) [NC]
+    RewriteRule .* - [F,L]
+
+    # ---- OPTIONAL: force HTTPS in production (uncomment) ----
+    # RewriteCond %{HTTPS} !=on
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
 
-Options -Indexes
+# ---------------------------------------------------------------------
+# 4. Security headers
+# ---------------------------------------------------------------------
+<IfModule mod_headers.c>
+    # Hide PHP version
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    Header always set Cross-Origin-Resource-Policy "same-origin"
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+
+    # Legacy XSS auditor is deprecated; "0" is the modern recommendation
+    Header always set X-XSS-Protection "0"
+
+    # HSTS only when the request is actually HTTPS (safe for localhost testing)
+    # Behind a reverse proxy use: "expr=%{HTTP:X-Forwarded-Proto} == 'https'"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+
+    # Content Security Policy
+    # 'unsafe-inline' / 'unsafe-eval' stay because app.html is a single-file app with inline scripts.
+    # To test safely first, rename the header to Content-Security-Policy-Report-Only.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';"
+
+    # API responses must never be cached (they contain business data)
+    <If "%{REQUEST_URI} =~ m#/api/#">
+        Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header always set Pragma "no-cache"
+        Header always set Expires "0"
+    </If>
+</IfModule>
+
+# ---------------------------------------------------------------------
+# 5. PHP runtime hardening (only when PHP runs as an Apache module;
+#    for PHP-FPM/CGI put these in php.ini or .user.ini instead)
+# ---------------------------------------------------------------------
+<IfModule mod_php.c>
+    php_flag  expose_php off
+    php_flag  display_errors off
+    php_flag  log_errors on
+    php_flag  session.cookie_httponly on
+    php_flag  session.use_strict_mode on
+    php_value session.cookie_samesite "Strict"
+    # php_flag session.cookie_secure on    # uncomment once you are on HTTPS
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag  expose_php off
+    php_flag  display_errors off
+    php_flag  log_errors on
+    php_flag  session.cookie_httponly on
+    php_flag  session.use_strict_mode on
+    php_value session.cookie_samesite "Strict"
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag  expose_php off
+    php_flag  display_errors off
+    php_flag  log_errors on
+    php_flag  session.cookie_httponly on
+    php_flag  session.use_strict_mode on
+    php_value session.cookie_samesite "Strict"
+</IfModule>
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php81” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php81 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit

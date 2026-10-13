@@ -1,13 +1,32 @@
 <?php
+require_once dirname(__DIR__) . '/api/bootstrap.php';
+sf_session_start();
+
 $basePath = isset($basePath) ? $basePath : (strpos($_SERVER['REQUEST_URI'] ?? '', '/pages/') !== false ? '../' : './');
+$currentUser = sf_current_user();
+$csrfToken = sf_csrf_token();
+
+// If accessed directly via /pages/*.php instead of index.php front controller, redirect
+if (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/pages/') !== false) {
+    $targetModule = !empty($module) ? $module : 'dashboard';
+    header('Location: ' . $basePath . 'index.php?page=' . urlencode($targetModule));
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
 <title><?= htmlspecialchars($pageTitle ?? 'KEND2C — Garment Manufacturing ERP') ?></title>
 <link rel="stylesheet" href="<?= $basePath ?>assets/css/app.css?v=<?= @filemtime(dirname(__DIR__) . '/assets/css/app.css') ?>">
+<script>
+window.__SF_CSRF__ = <?= json_encode($csrfToken) ?>;
+<?php if ($currentUser): ?>
+window.__AUTH_USER__ = <?= json_encode($currentUser, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+<?php endif; ?>
+</script>
 </head>
 <body>
 <div class="globalbar">

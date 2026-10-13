@@ -7,7 +7,8 @@
 declare(strict_types=1);
 
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 ini_set('memory_limit', '1024M');
 
 function sf_config(): array {
@@ -17,6 +18,10 @@ function sf_config(): array {
 }
 
 function sf_ensure_schema(PDO $pdo): void {
+    // Restrict automatic DDL migrations to CLI execution only to protect live database
+    if (PHP_SAPI !== 'cli') {
+        return;
+    }
     static $checked = false;
     if ($checked) return;
     $checked = true;
@@ -51,10 +56,172 @@ function sf_pdo(): PDO {
     return $pdo;
 }
 
+function sf_session_start(): void {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        return;
+    }
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+    $cookieParams = [
+        'lifetime' => 0,
+        'path'     => '/',
+        'domain'   => '',
+        'secure'   => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ];
+    session_set_cookie_params($cookieParams);
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    session_name('SF_SESSID');
+    @session_start();
+
+    // 30-minute server-side session inactivity timeout (SEC-TIMEOUT)
+    if (isset($_SESSION['sf_user'])) {
+        $now = time();
+        $idleLimit = 1800; // 30 minutes
+        if (isset($_SESSION['sf_last_activity']) && ($now - $_SESSION['sf_last_activity'] > $idleLimit)) {
+            $_SESSION = [];
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
+            @session_destroy();
+            @session_start();
+        } else {
+            $_SESSION['sf_last_activity'] = $now;
+        }
+    }
+}
+
+function sf_current_user(): ?array {
+    sf_session_start();
+    return $_SESSION['sf_user'] ?? null;
+}
+
+function sf_require_auth(): array {
+    $user = sf_current_user();
+    if ($user === null) {
+        $isApi = (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false)
+            || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)
+            || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        if ($isApi) {
+            sf_fail('Authentication required. Please sign in.', 401);
+        }
+        $base = (strpos($_SERVER['REQUEST_URI'] ?? '', '/pages/') !== false) ? '../' : './';
+        header('Location: ' . $base . 'index.php?auth_required=1');
+        exit;
+    }
+    return $user;
+}
+
+function sf_require_role($roles): array {
+    $user = sf_require_auth();
+    $roles = (array)$roles;
+    $userRole = (string)($user['role'] ?? '');
+    if (!in_array($userRole, $roles, true)) {
+        sf_fail('Access denied: insufficient permissions.', 403);
+    }
+    return $user;
+}
+
+function sf_user_can(string $scope, string $key, string $action = 'view'): bool {
+    $user = sf_current_user();
+    if ($user === null) return false;
+    $role = (string)($user['role'] ?? '');
+    if ($role === 'Admin') return true;
+    if ($key === 'usermanagement' || $key === 'users') return false;
+
+    $accessLevel = (string)($user['accessLevel'] ?? 'Detailed');
+    if ($accessLevel === 'Read Only' && !in_array($action, ['view', 'export'], true)) {
+        return false;
+    }
+
+    $perms = (array)($user['permissions'] ?? []);
+    $scopePerms = (array)($perms[$scope] ?? []);
+    $alias = ($key === 'items') ? 'itemmaster' : (($key === 'itemmaster') ? 'items' : null);
+    $itemPerm = (array)($scopePerms[$key] ?? ($alias ? ($scopePerms[$alias] ?? []) : []));
+    if (!empty($itemPerm)) {
+        if (!empty($itemPerm[$action])) return true;
+        if ($action === 'export' && !empty($itemPerm['view'])) return true;
+        return false;
+    }
+
+    if ($scope === 'modules') {
+        $mods = (array)($user['modules'] ?? []);
+        if (in_array('*', $mods, true) || in_array($key, $mods, true) || ($alias && in_array($alias, $mods, true))) {
+            return true;
+        }
+        $roleDefaults = [
+            'Store'      => ['dashboard', 'po', 'inward', 'jobwork', 'processoutward', 'processinward', 'sample', 'styles', 'itemmaster', 'items', 'parties', 'reports'],
+            'Production' => ['dashboard', 'jobwork', 'processoutward', 'processinward', 'sample', 'styles', 'itemmaster', 'items', 'parties', 'reports'],
+            'Accounts'   => ['dashboard', 'po', 'inward', 'sale', 'salenumbers', 'saledashboard', 'costing', 'styles', 'itemmaster', 'items', 'parties', 'purchasereturn', 'reports'],
+        ];
+        $def = $roleDefaults[$role] ?? [];
+        if (in_array($key, $def, true) || ($alias && in_array($alias, $def, true))) {
+            return true;
+        }
+    }
+
+    if ($scope === 'masters') {
+        $mPerms = (array)($perms['masters'] ?? []);
+        $targetPerm = !empty($mPerms[$key]) ? $mPerms[$key] : ($alias && !empty($mPerms[$alias]) ? $mPerms[$alias] : null);
+        if ($targetPerm !== null) {
+            return !empty($targetPerm[$action]);
+        }
+        $mods = (array)($user['modules'] ?? []);
+        if (in_array('*', $mods, true) || in_array('masters', $mods, true)) {
+            return true;
+        }
+        $roleDefaults = [
+            'Store'      => true,
+            'Production' => true,
+            'Accounts'   => true,
+        ];
+        if (!empty($roleDefaults[$role])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function sf_require_perm(string $scope, string $key, string $action = 'view'): array {
+    $user = sf_require_auth();
+    if (!sf_user_can($scope, $key, $action)) {
+        sf_fail("Access denied: You do not have permission to {$action} {$key}.", 403);
+    }
+    return $user;
+}
+
+function sf_csrf_token(): string {
+    sf_session_start();
+    if (empty($_SESSION['sf_csrf'])) {
+        $_SESSION['sf_csrf'] = bin2hex(random_bytes(32));
+    }
+    return (string)$_SESSION['sf_csrf'];
+}
+
+function sf_verify_csrf(): bool {
+    sf_session_start();
+    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_POST['csrf_token'] ?? null;
+    if (!is_string($token) || empty($_SESSION['sf_csrf'])) {
+        return false;
+    }
+    return hash_equals($_SESSION['sf_csrf'], $token);
+}
+
 function sf_json_out($data, int $code = 200): void {
     http_response_code($code);
     header('Content-Type: application/json; charset=utf-8');
-    header('Cache-Control: no-store');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
@@ -100,9 +267,15 @@ function merge_extra(array $doc, $extraJson): array {
     return $doc;
 }
 
-/* current audit user (sent by the sync layer with each save) */
+/* current audit user (strictly derived from authenticated session) */
 function sf_actor(): string {
-    $h = $_SERVER['HTTP_X_STITCHFLOW_USER'] ?? '';
-    $u = is_string($h) ? trim($h) : '';
-    return $u !== '' ? mb_substr($u, 0, 120) : 'StitchFlow User';
+    $u = sf_current_user();
+    if ($u !== null) {
+        if (!empty($u['name'])) return mb_substr((string)$u['name'], 0, 120);
+        if (!empty($u['username'])) return mb_substr((string)$u['username'], 0, 120);
+    }
+    if (PHP_SAPI === 'cli') {
+        return 'CLI System';
+    }
+    return 'Authenticated User';
 }

@@ -58,8 +58,95 @@ function assemble_db(): array {
     foreach ($pdo->query("SELECT k, v FROM kv_store WHERE k LIKE 'toplevel:%'") as $r) {
         $key = substr($r['k'], strlen('toplevel:'));
         $val = json_decode((string)$r['v'], true);
+        if ($key === 'partners' && is_array($val)) {
+            foreach ($val as &$p) {
+                if (isset($p['registrations']) && is_array($p['registrations'])) {
+                    foreach ($p['registrations'] as $rIdx => &$rItem) {
+                        if (!is_array($rItem)) continue;
+                        if (empty($rItem['uniqueKey'])) {
+                            $rItem['uniqueKey'] = !empty($rItem['key']) ? $rItem['key'] : ('GSTIN ' . ($rIdx + 1));
+                        }
+                        if (empty($rItem['key'])) {
+                            $rItem['key'] = $rItem['uniqueKey'];
+                        }
+                    }
+                    unset($rItem);
+                }
+            }
+            unset($p);
+        }
         if (!array_key_exists($key, $db)) $db[$key] = $val;
     }
+
+    /* ---- server revision timestamp for optimistic concurrency & live sync ---- */
+    $rev = sf_kv_get($pdo, 'db_revision');
+    if (!$rev) {
+        $rev = (string)(int)round(microtime(true) * 1000);
+        sf_kv_set($pdo, 'db_revision', $rev);
+    }
+    $db['_revision'] = (int)$rev;
+
+    /* ---- role-based filtering for non-admin users (SEC-05) ---- */
+    if (PHP_SAPI !== 'cli') {
+        $u = sf_current_user();
+        if ($u !== null && ($u['role'] ?? '') !== 'Admin') {
+            $txModules = [
+                'po'             => 'po',
+                'inward'         => 'inward',
+                'jobwork'        => 'jobwork',
+                'processoutward' => 'processoutward',
+                'processinward'  => 'processinward',
+                'sample'         => 'sample',
+                'sale'           => 'sale',
+                'costing'        => 'costing',
+                'purchasereturn' => 'purchasereturn',
+                'jobworkreturn'  => 'jobworkreturn',
+            ];
+            foreach ($txModules as $dbKey => $modName) {
+                if (!sf_user_can('modules', $modName, 'view')) {
+                    $db[$dbKey] = [];
+                }
+            }
+            if (!sf_user_can('modules', 'sale', 'view')) {
+                $db['saleImports'] = [];
+            }
+            if (!sf_user_can('modules', 'reports', 'view')) {
+                $db['customReports'] = [];
+            }
+            // Non-admin users cannot view the full audit trail of all users
+            $db['auditTrail'] = [];
+
+            // Protect other users' accounts and credentials: only send current user's profile
+            $db['users'] = [
+                [
+                    'id'          => (string)($u['id'] ?? 'USR-0001'),
+                    'name'        => (string)($u['name'] ?? $u['username'] ?? ''),
+                    'username'    => (string)($u['username'] ?? ''),
+                    'role'        => (string)($u['role'] ?? 'Custom'),
+                    'status'      => 'Active',
+                    'accessLevel' => (string)($u['accessLevel'] ?? 'Detailed'),
+                    'modules'     => (array)($u['modules'] ?? []),
+                    'permissions' => (array)($u['permissions'] ?? []),
+                ]
+            ];
+
+            // Never expose third-party API credentials to non-admin users
+            unset($db['gstApiSettings']);
+
+            // Mask banking details in companyDetails for non-admin / non-accounts users
+            if (isset($db['masters']['companyDetails']) && is_array($db['masters']['companyDetails'])) {
+                if (($u['role'] ?? '') !== 'Accounts') {
+                    if (!empty($db['masters']['companyDetails']['bankAccount'])) {
+                        $rawAcct = (string)$db['masters']['companyDetails']['bankAccount'];
+                        $db['masters']['companyDetails']['bankAccount'] = strlen($rawAcct) > 4
+                            ? str_repeat('*', strlen($rawAcct) - 4) . substr($rawAcct, -4)
+                            : '****';
+                    }
+                }
+            }
+        }
+    }
+
     return $db;
 }
 
@@ -169,12 +256,21 @@ function assemble_masters(PDO $pdo): array {
     $bills = [];
     foreach ($pdo->query('SELECT * FROM party_bill_tos ORDER BY party_id, sort_order, id') as $r) {
         $b = [
+            'id' => (string)$r['id'],
             'name' => fstr($r['name']), 'gstNo' => fstr($r['gst_no']), 'pan' => fstr($r['pan']),
             'gstType' => fstr($r['gst_type']), 'country' => fstr($r['country']), 'state' => fstr($r['state']),
             'district' => fstr($r['district']), 'taluka' => fstr($r['taluka']), 'city' => fstr($r['city']),
             'address' => fstr($r['address']), 'pin' => fstr($r['pin']),
         ];
-        $bills[$r['party_id']][] = merge_extra($b, $r['extra_json']);
+        $merged = merge_extra($b, $r['extra_json']);
+        $idx = count($bills[$r['party_id']] ?? []);
+        if (empty($merged['uniqueKey'])) {
+            $merged['uniqueKey'] = !empty($merged['key']) ? $merged['key'] : ('GSTIN ' . ($idx + 1));
+        }
+        if (empty($merged['key'])) {
+            $merged['key'] = $merged['uniqueKey'];
+        }
+        $bills[$r['party_id']][] = $merged;
     }
     $m['parties'] = [];
     foreach ($pdo->query('SELECT * FROM parties ORDER BY row_seq') as $r) {
@@ -246,11 +342,13 @@ function assemble_masters(PDO $pdo): array {
 function assemble_gst_settings(PDO $pdo) {
     $g = $pdo->query('SELECT * FROM gst_api_settings WHERE id = 1')->fetch();
     if (!$g) return null;
+    $rawKey = fstr($g['api_key']);
+    $maskedKey = $rawKey !== '' ? '••••••••' : '';
     $doc = [
         'provider' => fstr($g['provider']), 'environment' => fstr($g['environment']),
         'baseUrl' => fstr($g['base_url']), 'lookupPath' => fstr($g['lookup_path']),
         'queryParam' => fstr($g['query_param']), 'authType' => fstr($g['auth_type']),
-        'apiKey' => fstr($g['api_key']), 'proxyEndpoint' => fstr($g['proxy_endpoint']),
+        'apiKey' => $maskedKey, 'proxyEndpoint' => fstr($g['proxy_endpoint']),
         'timeout' => $g['timeout_secs'] === null ? 30 : (int)$g['timeout_secs'],
         'businessType' => fstr($g['business_type']), 'lastChecked' => fstr($g['last_checked']),
         'toggles' => [
@@ -277,7 +375,7 @@ function assemble_users(PDO $pdo): array {
     foreach ($pdo->query('SELECT * FROM users ORDER BY row_seq') as $r) {
         $doc = [
             'id' => $r['id'], 'name' => fstr($r['name']), 'username' => fstr($r['username']),
-            'pin' => fstr($r['pin_hash']), 'role' => fstr($r['role']), 'status' => fstr($r['status']),
+            'pin' => '', 'role' => fstr($r['role']), 'status' => fstr($r['status']),
         ];
         if ($r['access_level'] !== null) $doc['accessLevel'] = $r['access_level'];
         $doc['modules'] = $mods[$r['id']] ?? [];
@@ -303,56 +401,310 @@ function sf_children(PDO $pdo, string $sql): array {
     return $out;
 }
 
-function assemble_pos(PDO $pdo): array {
-    $styles = sf_children($pdo, 'SELECT po_id AS __pid, style FROM purchase_order_styles ORDER BY po_id, sort_order');
-    $items  = sf_children($pdo, 'SELECT po_id AS __pid, t.* FROM purchase_order_items t ORDER BY po_id, sort_order');
-    $boms   = sf_children($pdo, 'SELECT po_id AS __pid, row_json FROM purchase_order_bom ORDER BY po_id, sort_order');
+function assemble_pos(PDO $pdo): array
+{
+    $styles = sf_children(
+        $pdo,
+        'SELECT po_id AS __pid, style
+         FROM purchase_order_styles
+         ORDER BY po_id, sort_order'
+    );
+
+    $items = sf_children(
+        $pdo,
+        'SELECT po_id AS __pid, t.*
+         FROM purchase_order_items t
+         ORDER BY po_id, sort_order'
+    );
+
+    $boms = sf_children(
+        $pdo,
+        'SELECT po_id AS __pid, row_json
+         FROM purchase_order_bom
+         ORDER BY po_id, sort_order'
+    );
+
+    /*
+     * Build a lookup of raw registrations from parties.extra_json.registrations.
+     *
+     * purchase_orders.ship_to may contain:
+     * - registration id
+     * - registration key
+     * - registration uniqueKey
+     * - GSTIN
+     * - legal name
+     * - trade name
+     *
+     * No formatting happens here. The raw registration object is passed
+     * through so the front end can extract/format what it needs.
+     */
+    $registrationMap = [];
+
+    foreach (
+        $pdo->query(
+            'SELECT legal_name, short_name, extra_json
+             FROM parties'
+        ) as $party
+    ) {
+        $extra = json_decode(
+            (string)($party['extra_json'] ?? ''),
+            true
+        );
+
+        if (!is_array($extra)) {
+            continue;
+        }
+
+        $registrations = $extra['registrations'] ?? [];
+
+        if (!is_array($registrations)) {
+            continue;
+        }
+
+        foreach ($registrations as $registration) {
+            if (!is_array($registration)) {
+                continue;
+            }
+
+            $legalName = trim((string)(
+                $registration['legalName']
+                ?? $party['legal_name']
+                ?? ''
+            ));
+
+            $tradeName = trim((string)(
+                $registration['tradeName']
+                ?? $extra['tradeName']
+                ?? $party['short_name']
+                ?? ''
+            ));
+
+            $lookupValues = [
+                $registration['id'] ?? '',
+                $registration['key'] ?? '',
+                $registration['uniqueKey'] ?? '',
+                $registration['gstin'] ?? '',
+                $registration['gstNo'] ?? '',
+                $registration['legalName'] ?? '',
+                $registration['tradeName'] ?? '',
+                $legalName,
+                $tradeName,
+            ];
+
+            foreach ($lookupValues as $lookupValue) {
+                $lookupValue = mb_strtolower(
+                    trim((string)$lookupValue)
+                );
+
+                if ($lookupValue !== '') {
+                    // Raw registration, untouched.
+                    $registrationMap[$lookupValue] = $registration;
+                }
+            }
+        }
+    }
+
     $out = [];
-    foreach ($pdo->query('SELECT * FROM purchase_orders ORDER BY row_seq') as $r) {
+
+    foreach (
+        $pdo->query(
+            'SELECT *
+             FROM purchase_orders
+             ORDER BY row_seq'
+        ) as $r
+    ) {
         $id = $r['id'];
+
+        /*
+         * shipTo stays as the raw stored value.
+         * The matching registration (if any) is attached as-is.
+         */
+        $storedShipTo = fstr($r['ship_to']);
+        $shipToKey = mb_strtolower(trim($storedShipTo));
+
+        $shipToRegistration = $registrationMap[$shipToKey] ?? null;
+
         $doc = [
-            'id' => $id, 'no' => fstr($r['po_no']), 'firm' => fstr($r['firm']), 'date' => fstr($r['po_date']),
-            'supplier' => fstr($r['supplier']), 'supplier_id' => fstr($r['supplier_id'] ?? null),
-            'billTo' => fstr($r['bill_to']), 'shipTo' => fstr($r['ship_to']),
-            'gstType' => fstr($r['gst_type']), 'supplierTrade' => fstr($r['supplier_trade']),
+            'id' => $id,
+            'no' => fstr($r['po_no']),
+            'firm' => fstr($r['firm']),
+            'date' => fstr($r['po_date']),
+
+            'supplier' => fstr($r['supplier']),
+            'supplier_id' => fstr(
+                $r['supplier_id'] ?? null
+            ),
+
+            'billTo' => fstr($r['bill_to']),
+            'shipTo' => $storedShipTo,
+            'shipToRegistration' => $shipToRegistration,
+
+            'gstType' => fstr($r['gst_type']),
+            'supplierTrade' => fstr(
+                $r['supplier_trade']
+            ),
             'poType' => fstr($r['po_type']),
-            'buyer' => fstr($r['buyer']), 'buyer_id' => fstr($r['buyer_id'] ?? null),
-            'styles' => array_map(function ($x) { return $x['style']; }, $styles[$id] ?? []),
-            'bom' => array_map(function ($x) { return json_decode((string)$x['row_json'], true); }, $boms[$id] ?? []),
+
+            'buyer' => fstr($r['buyer']),
+            'buyer_id' => fstr(
+                $r['buyer_id'] ?? null
+            ),
+
+            'styles' => array_map(
+                function ($x) {
+                    return $x['style'];
+                },
+                $styles[$id] ?? []
+            ),
+
+            'bom' => array_map(
+                function ($x) {
+                    return json_decode(
+                        (string)$x['row_json'],
+                        true
+                    );
+                },
+                $boms[$id] ?? []
+            ),
+
             'bomType' => fstr($r['bom_type']),
-            'classification' => fstr($r['classification']), 'classification_id' => fstr($r['classification_id'] ?? null),
-            'category' => fstr($r['category']), 'category_id' => fstr($r['category_id'] ?? null),
-            'items' => array_map(function ($it) {
-                $doc = [
-                    'classification' => fstr($it['classification']), 'classification_id' => fstr($it['classification_id'] ?? null),
-                    'name' => fstr($it['name']), 'item_id' => fstr($it['item_id'] ?? null),
-                    'specs' => fstr($it['specs']),
-                    'color' => fstr($it['color']), 'color_id' => fstr($it['color_id'] ?? null),
-                    'qty' => fnum($it['qty']),
-                    'unit' => fstr($it['unit']), 'unit_id' => fstr($it['unit_id'] ?? null),
-                    'rate' => fnum($it['rate']),
-                    'cgstPct' => fnum($it['cgst_pct']), 'sgstPct' => fnum($it['sgst_pct']),
-                    'igstPct' => fnum($it['igst_pct']), 'camt' => fnum($it['cgst_amt']),
-                    'samt' => fnum($it['sgst_amt']), 'iamt' => fnum($it['igst_amt']),
-                    'discount' => fnum($it['discount']), 'amount' => fnum($it['amount']),
-                    'totalAmount' => fnum($it['total_amount']),
-                ];
-                return merge_extra($doc, $it['extra_json']);
-            }, $items[$id] ?? []),
-            'status' => fstr($r['status']), 'deliveryAddress' => fstr($r['delivery_address']),
-            'deliveryDate' => fstr($r['delivery_date']), 'closeDate' => fstr($r['close_date']),
-            'raisedFor' => fstr($r['raised_for']), 'raised_for_id' => fstr($r['raised_for_id'] ?? null),
-            'qtnNo' => fstr($r['qtn_no']), 'qtnDate' => fstr($r['qtn_date']),
-            'payTerms' => fstr($r['pay_terms']), 'pay_terms_id' => fstr($r['pay_terms_id'] ?? null),
-            'freightCharges' => fstr($r['freight_charges']),
-            'pnf' => fstr($r['pnf']), 'transitInsurance' => fstr($r['transit_insurance']),
-            'transportMode' => fstr($r['transport_mode']), 'transport_mode_id' => fstr($r['transport_mode_id'] ?? null),
+
+            'classification' => fstr(
+                $r['classification']
+            ),
+            'classification_id' => fstr(
+                $r['classification_id'] ?? null
+            ),
+
+            'category' => fstr($r['category']),
+            'category_id' => fstr(
+                $r['category_id'] ?? null
+            ),
+
+            'items' => array_map(
+                function ($it) {
+                    $item = [
+                        'classification' => fstr(
+                            $it['classification']
+                        ),
+                        'classification_id' => fstr(
+                            $it['classification_id'] ?? null
+                        ),
+
+                        'name' => fstr($it['name']),
+                        'item_id' => fstr(
+                            $it['item_id'] ?? null
+                        ),
+
+                        'specs' => fstr($it['specs']),
+                        'color' => fstr($it['color']),
+                        'color_id' => fstr(
+                            $it['color_id'] ?? null
+                        ),
+
+                        'qty' => fnum($it['qty']),
+                        'unit' => fstr($it['unit']),
+                        'unit_id' => fstr(
+                            $it['unit_id'] ?? null
+                        ),
+
+                        'rate' => fnum($it['rate']),
+
+                        'cgstPct' => fnum(
+                            $it['cgst_pct']
+                        ),
+                        'sgstPct' => fnum(
+                            $it['sgst_pct']
+                        ),
+                        'igstPct' => fnum(
+                            $it['igst_pct']
+                        ),
+
+                        'camt' => fnum(
+                            $it['cgst_amt']
+                        ),
+                        'samt' => fnum(
+                            $it['sgst_amt']
+                        ),
+                        'iamt' => fnum(
+                            $it['igst_amt']
+                        ),
+
+                        'discount' => fnum(
+                            $it['discount']
+                        ),
+                        'amount' => fnum(
+                            $it['amount']
+                        ),
+                        'totalAmount' => fnum(
+                            $it['total_amount']
+                        ),
+                    ];
+
+                    return merge_extra(
+                        $item,
+                        $it['extra_json']
+                    );
+                },
+                $items[$id] ?? []
+            ),
+
+            'status' => fstr($r['status']),
+
+            'deliveryAddress' => fstr(
+                $r['delivery_address']
+            ),
+            'deliveryDate' => fstr(
+                $r['delivery_date']
+            ),
+            'closeDate' => fstr(
+                $r['close_date']
+            ),
+
+            'raisedFor' => fstr(
+                $r['raised_for']
+            ),
+            'raised_for_id' => fstr(
+                $r['raised_for_id'] ?? null
+            ),
+
+            'qtnNo' => fstr($r['qtn_no']),
+            'qtnDate' => fstr($r['qtn_date']),
+
+            'payTerms' => fstr($r['pay_terms']),
+            'pay_terms_id' => fstr(
+                $r['pay_terms_id'] ?? null
+            ),
+
+            'freightCharges' => fstr(
+                $r['freight_charges']
+            ),
+            'pnf' => fstr($r['pnf']),
+            'transitInsurance' => fstr(
+                $r['transit_insurance']
+            ),
+
+            'transportMode' => fstr(
+                $r['transport_mode']
+            ),
+            'transport_mode_id' => fstr(
+                $r['transport_mode_id'] ?? null
+            ),
+
             'narration' => fstr($r['narration']),
             'terms' => fstr($r['terms']),
         ];
-        if ($r['created_at_ms'] !== null) $doc['createdAt'] = (int)$r['created_at_ms'];
-        $out[] = merge_extra($doc, $r['extra_json']);
+
+        if ($r['created_at_ms'] !== null) {
+            $doc['createdAt'] = (int)$r['created_at_ms'];
+        }
+
+        $out[] = merge_extra(
+            $doc,
+            $r['extra_json']
+        );
     }
+
     return $out;
 }
 

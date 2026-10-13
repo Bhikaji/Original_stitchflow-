@@ -235,12 +235,14 @@ function sf_master_usage(array $db, string $key, string $value): array {
    MODULE ENDPOINT — full CRUD for one transaction collection
    ===================================================================== */
 function sf_module_endpoint(string $key): void {
+    sf_require_auth();
     try {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $db = sf_load_db();
-        $docs = is_array($db[$key] ?? null) ? array_values(array_filter($db[$key], 'is_array')) : [];
 
         if ($method === 'GET') {
+            sf_require_perm('modules', $key, 'view');
+            $db = sf_load_db();
+            $docs = is_array($db[$key] ?? null) ? array_values(array_filter($db[$key], 'is_array')) : [];
             $id = s($_GET['id'] ?? ''); $no = s($_GET['no'] ?? '');
             if ($id !== '' || $no !== '') {
                 foreach ($docs as $d) {
@@ -254,13 +256,18 @@ function sf_module_endpoint(string $key): void {
         }
 
         if ($method === 'POST' || $method === 'PUT') {
+            if (PHP_SAPI !== 'cli' && !sf_verify_csrf()) {
+                sf_fail('Security validation failed: Invalid or missing CSRF token.', 403);
+            }
             $doc = sf_read_json_body();
             $id = s($doc['id'] ?? '');
             $isNew = true;
+            $db = sf_load_db();
             if ($id !== '') {
-                foreach ($db[$key] as $i => $ex) {
+                foreach ((array)($db[$key] ?? []) as $i => $ex) {
                     if (is_array($ex) && s($ex['id'] ?? '') === $id) {
                         /* edit: merge over the existing record (like Object.assign in the app) */
+                        sf_require_perm('modules', $key, 'edit');
                         $db[$key][$i] = array_merge($ex, $doc);
                         $isNew = false;
                         $doc = $db[$key][$i];
@@ -269,6 +276,7 @@ function sf_module_endpoint(string $key): void {
                 }
             }
             if ($isNew) {
+                sf_require_perm('modules', $key, 'create');
                 if ($id === '') $doc['id'] = sf_uid_new();
                 if (s($doc['no'] ?? '') === '') {
                     if ($key === 'processoutward') $doc['no'] = sf_next_process_outward_no($db, s($doc['processType'] ?? ''));
@@ -284,21 +292,35 @@ function sf_module_endpoint(string $key): void {
         }
 
         if ($method === 'DELETE') {
+            if (PHP_SAPI !== 'cli' && !sf_verify_csrf()) {
+                sf_fail('Security validation failed: Invalid or missing CSRF token.', 403);
+            }
+            sf_require_perm('modules', $key, 'delete');
             $id = s($_GET['id'] ?? '');
             if ($id === '') sf_fail('id is required', 400);
             $found = false;
+            $db = sf_load_db();
             $db[$key] = array_values(array_filter((array)($db[$key] ?? []), function ($d) use ($id, &$found) {
                 if (is_array($d) && s($d['id'] ?? '') === $id) { $found = true; return false; }
                 return true;
             }));
             if (!$found) sf_fail('Record not found', 404);
+            $db['_deleted'] = [$key => [$id]];
             sf_commit_db($db);
             sf_json_out(['ok' => true, 'action' => 'deleted', 'id' => $id]);
         }
 
         sf_fail('Method not allowed', 405);
-    } catch (PDOException $e) { sf_fail('Database error: ' . $e->getMessage(), 500); }
-      catch (Throwable $e) { if ($e instanceof Error) sf_fail('Server error: ' . $e->getMessage(), 500); throw $e; }
+    } catch (PDOException $e) {
+        error_log('StitchFlow Database error: ' . $e->getMessage());
+        sf_fail('A database error occurred. Please contact the administrator.', 500);
+    } catch (Throwable $e) {
+        if ($e instanceof Error) {
+            error_log('StitchFlow Server error: ' . $e->getMessage());
+            sf_fail('An internal server error occurred.', 500);
+        }
+        throw $e;
+    }
 }
 
 /* =====================================================================
@@ -311,6 +333,7 @@ function sf_to_array($v): array {
 }
 
 function sf_list_master_endpoint(string $key): void {
+    sf_require_auth();
     try {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $db = sf_load_db();
@@ -336,6 +359,7 @@ function sf_list_master_endpoint(string $key): void {
         };
 
         if ($method === 'GET') {
+            sf_require_perm('masters', $key, 'view');
             $usage = s($_GET['usage'] ?? '');
             if ($usage !== '') sf_json_out(['ok' => true, 'value' => $usage, 'usedBy' => sf_master_usage($db, $key, $usage)]);
             $rows = array_map($rowFor, $list);
@@ -343,6 +367,9 @@ function sf_list_master_endpoint(string $key): void {
         }
 
         if ($method === 'POST' || $method === 'PUT') {
+            if (PHP_SAPI !== 'cli' && !sf_verify_csrf()) {
+                sf_fail('Security validation failed: Invalid or missing CSRF token.', 403);
+            }
             $body = sf_read_json_body();
             $value = s($body['value'] ?? '');
             if ($value === '') sf_fail('Value is required', 422);
@@ -356,6 +383,11 @@ function sf_list_master_endpoint(string $key): void {
                 sf_fail("“{$value}” already exists in this master — duplicate values are not allowed", 422);
             }
             $isRename = $old !== '' && in_array($lkOld, $lcList, true) && $lkOld !== $lkNew;
+            if ($isRename || in_array($lkNew, $lcList, true)) {
+                sf_require_perm('masters', $key, 'edit');
+            } else {
+                sf_require_perm('masters', $key, 'create');
+            }
             if ($isRename) {
                 foreach ($m[$key] as $i => $v) {
                     if (is_scalar($v) && mb_strtolower(trim((string)$v)) === $lkOld) { $m[$key][$i] = $value; break; }
@@ -402,6 +434,10 @@ function sf_list_master_endpoint(string $key): void {
         }
 
         if ($method === 'DELETE') {
+            if (PHP_SAPI !== 'cli' && !sf_verify_csrf()) {
+                sf_fail('Security validation failed: Invalid or missing CSRF token.', 403);
+            }
+            sf_require_perm('masters', $key, 'delete');
             $value = s($_GET['value'] ?? '');
             if ($value === '') { $body = sf_read_json_body(); $value = s($body['value'] ?? ''); }
             if ($value === '') sf_fail('value is required', 400);
@@ -415,6 +451,7 @@ function sf_list_master_endpoint(string $key): void {
             $usedBy = sf_master_usage($db, $key, $value);   // v5: warn, never block
             unset($m['masterIds'][$key][$lk], $m['masterStatus'][$key][$lk], $m['parentMap'][$key][$value]);
             if ($key === 'warehouses') unset($m['warehouseAddr'][$value]);
+            $db['_deleted'] = ['masters' => [$key => [$value]]];
             sf_commit_db($db);
             sf_json_out(['ok' => true, 'action' => 'deleted', 'value' => $value,
                          'usedBy' => $usedBy,
@@ -422,19 +459,25 @@ function sf_list_master_endpoint(string $key): void {
         }
 
         sf_fail('Method not allowed', 405);
-    } catch (PDOException $e) { sf_fail('Database error: ' . $e->getMessage(), 500); }
+    } catch (PDOException $e) {
+        error_log('StitchFlow Database error: ' . $e->getMessage());
+        sf_fail('A database error occurred. Please contact the administrator.', 500);
+    }
 }
 
 /* =====================================================================
    RECORD-MASTER ENDPOINT — Styles / Items / Parties (id-based CRUD)
    ===================================================================== */
 function sf_record_master_endpoint(string $key): void {
+    sf_require_auth();
     try {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $db = sf_load_db();
-        $rows = array_values(array_filter((array)($db['masters'][$key] ?? []), 'is_array'));
+        $scopeKey = ($key === 'items') ? 'itemmaster' : $key;
 
         if ($method === 'GET') {
+            sf_require_perm('modules', $scopeKey, 'view');
+            $db = sf_load_db();
+            $rows = array_values(array_filter((array)($db['masters'][$key] ?? []), 'is_array'));
             $usage = s($_GET['usage'] ?? '');
             if ($usage !== '') sf_json_out(['ok' => true, 'value' => $usage, 'usedBy' => sf_master_usage($db, $key, $usage)]);
             $id = s($_GET['id'] ?? '');
@@ -448,11 +491,16 @@ function sf_record_master_endpoint(string $key): void {
         }
 
         if ($method === 'POST' || $method === 'PUT') {
+            if (PHP_SAPI !== 'cli' && !sf_verify_csrf()) {
+                sf_fail('Security validation failed: Invalid or missing CSRF token.', 403);
+            }
             $doc = sf_read_json_body();
             $id = s($doc['id'] ?? '');
             $isNew = true;
+            $db = sf_load_db();
             foreach ((array)$db['masters'][$key] as $i => $ex) {
                 if (is_array($ex) && $id !== '' && (s($ex['id'] ?? '') === $id || s($ex['code'] ?? '') === $id)) {
+                    sf_require_perm('modules', $scopeKey, 'edit');
                     $db['masters'][$key][$i] = array_merge($ex, $doc);
                     $doc = $db['masters'][$key][$i];
                     $isNew = false;
@@ -460,6 +508,7 @@ function sf_record_master_endpoint(string $key): void {
                 }
             }
             if ($isNew) {
+                sf_require_perm('modules', $scopeKey, 'create');
                 if ($id === '') $doc['id'] = sf_uid_new();
                 $db['seq'] = (array)($db['seq'] ?? []);
                 if ($key === 'styles' && s($doc['internal'] ?? '') === '') sf_fail('Internal ID is required', 422);
@@ -490,9 +539,14 @@ function sf_record_master_endpoint(string $key): void {
         }
 
         if ($method === 'DELETE') {
+            if (PHP_SAPI !== 'cli' && !sf_verify_csrf()) {
+                sf_fail('Security validation failed: Invalid or missing CSRF token.', 403);
+            }
+            sf_require_perm('modules', $scopeKey, 'delete');
             $id = s($_GET['id'] ?? '');
             if ($id === '') sf_fail('id is required', 400);
             $target = null;
+            $db = sf_load_db();
             $db['masters'][$key] = array_values(array_filter((array)($db['masters'][$key] ?? []), function ($r) use ($id, &$target) {
                 if (is_array($r) && (s($r['id'] ?? '') === $id || s($r['code'] ?? '') === $id)) { $target = $r; return false; }
                 return true;
@@ -500,19 +554,40 @@ function sf_record_master_endpoint(string $key): void {
             if ($target === null) sf_fail('Record not found', 404);
             $nameField = $key === 'styles' ? 'internal' : ($key === 'items' ? 'name' : 'legalName');
             $usedBy = sf_master_usage($db, $key, s($target[$nameField] ?? ''));   // v5: warn, never block
+            $targetId = s($target['id'] ?? $id);
+            $db['_deleted'] = [$key => [$targetId]];
             sf_commit_db($db);
             sf_json_out(['ok' => true, 'action' => 'deleted', 'id' => $id, 'usedBy' => $usedBy,
                          'warning' => $usedBy ? 'Record was in use — dangling references remain (v5 behaviour)' : '']);
         }
 
         sf_fail('Method not allowed', 405);
-    } catch (PDOException $e) { sf_fail('Database error: ' . $e->getMessage(), 500); }
+    } catch (PDOException $e) {
+        error_log('StitchFlow Database error: ' . $e->getMessage());
+        sf_fail('A database error occurred. Please contact the administrator.', 500);
+    }
 }
 
 /* =====================================================================
    SINGLETON ENDPOINT — Company Details / Login Page / Menu / GST API
    ===================================================================== */
 function sf_singleton_endpoint(string $path, string $label): void {
+    $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+    $allowedPublicSingletons = ['loginSettings'];
+    $isPublicGet = in_array($path, $allowedPublicSingletons, true) && $method === 'GET';
+
+    if (!$isPublicGet) {
+        $u = sf_require_auth();
+        if (in_array($method, ['POST', 'PUT', 'DELETE'], true)) {
+            if (PHP_SAPI !== 'cli' && !sf_verify_csrf()) {
+                sf_fail('Security validation failed: Invalid or missing CSRF token.', 403);
+            }
+            sf_require_role(['Admin']);
+        }
+        if ($path === 'gstApiSettings' && $method === 'GET') {
+            sf_require_role(['Admin']);
+        }
+    }
     try {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $db = sf_load_db();
@@ -529,5 +604,8 @@ function sf_singleton_endpoint(string $path, string $label): void {
             sf_json_out(['ok' => true, 'action' => 'saved', 'settings' => $get($db)]);
         }
         sf_fail('Method not allowed', 405);
-    } catch (PDOException $e) { sf_fail('Database error: ' . $e->getMessage(), 500); }
+    } catch (PDOException $e) {
+        error_log('StitchFlow Database error: ' . $e->getMessage());
+        sf_fail('A database error occurred. Please contact the administrator.', 500);
+    }
 }
